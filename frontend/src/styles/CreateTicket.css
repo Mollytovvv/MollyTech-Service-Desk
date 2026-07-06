@@ -1,0 +1,104 @@
+.create-ticket {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  padding: 30px;
+  color: #e5e7eb;
+}
+
+/* TITLE */
+.create-ticket h2 {
+  margin-bottom: 20px;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+/* FORM CARD */
+.create-ticket form {
+  width: 100%;
+  max-width: 480px;
+
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+
+  padding: 20px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  backdrop-filter: blur(12px);
+}
+
+/* INPUTS + TEXTAREA + SELECT */
+.create-ticket input,
+.create-ticket textarea,
+.create-ticket select {
+  width: 100%;
+  padding: 10px 12px;
+
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  background: rgba(30, 41, 59, 0.5);
+  color: #e5e7eb;
+
+  font-size: 13px;
+
+  outline: none;
+  transition: 0.2s ease;
+}
+
+/* TEXTAREA HEIGHT */
+.create-ticket textarea {
+  min-height: 120px;
+  resize: none;
+}
+
+/* FOCUS STATE */
+.create-ticket input:focus,
+.create-ticket textarea:focus,
+.create-ticket select:focus {
+  border-color: rgba(99, 102, 241, 0.6);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.15);
+}
+
+/* PLACEHOLDER */
+.create-ticket input::placeholder,
+.create-ticket textarea::placeholder {
+  color: #94a3b8;
+}
+
+/* BUTTON */
+.create-ticket button {
+  margin-top: 10px;
+
+  padding: 10px 12px;
+  border-radius: 10px;
+
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.2);
+
+  color: #a5b4fc;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  transition: 0.2s ease;
+}
+
+/* BUTTON HOVER */
+.create-ticket button:hover {
+  transform: translateY(-2px);
+  background: rgba(99, 102, 241, 0.3);
+  border-color: rgba(99, 102, 241, 0.6);
+}
+
+/* BUTTON DISABLED */
+.create-ticket button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}

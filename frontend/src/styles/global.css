@@ -1,0 +1,78 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* =========================
+   GLOBAL RESET
+========================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  font-family: "Inter", sans-serif;
+  background: #0b1220;
+  color: #e5e7eb;
+  overflow: hidden; /* prevents unwanted page scroll */
+}
+
+/* Root React div */
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+/* =========================
+   SCROLL FIX SYSTEM
+   (only allow internal scroll areas)
+========================= */
+.scroll {
+  overflow-y: auto;
+  min-height: 0;
+}
+
+/* =========================
+   THEME VARIABLES
+========================= */
+:root {
+  --bg: #0b1220;
+  --sidebar: #0f172a;
+  --card: #111827;
+  --border: #1e293b;
+
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+
+  --primary: #4f46e5;
+  --danger: #ef4444;
+  --hover: #1e293b;
+}
+
+/* =========================
+   BUTTON RESET (clean UI base)
+========================= */
+button {
+  font-family: inherit;
+}
+
+/* =========================
+   NICE SCROLLBAR (optional but pro)
+========================= */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}

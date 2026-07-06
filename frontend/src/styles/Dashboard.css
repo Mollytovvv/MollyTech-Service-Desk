@@ -1,0 +1,428 @@
+:root {
+  --bg: #0b1220;
+  --panel: #0f172a;
+  --panel-2: #111c33;
+  --border: #1e293b;
+
+  --text: #e5e7eb;
+  --muted: #94a3b8;
+
+  --primary: #3b82f6;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+}
+
+/* =========================
+   BASE LAYOUT (WORKSPACE STYLE)
+========================= */
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 2px;
+  background: var(--bg);
+}
+
+/* =========================
+   SUMMARY STRIP (TOP KPI ROW)
+   (now "status summary", not dashboard KPIs)
+========================= */
+.summary-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+/* STATUS CARD */
+.status-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  padding: 14px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.status-label {
+  font-size: 10px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.status-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* =========================
+   MAIN WORKSPACE (PRIMARY + SECONDARY)
+========================= */
+
+.work-area,
+.panel-card,
+.analytics {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  transition: 0.2s ease;
+}
+
+.work-area:hover,
+.panel-card:hover,
+.analytics:hover {
+  border-color: rgba(59,130,246,0.25);
+}
+
+/* =========================
+   MAIN WORKSPACE (PRIMARY + SECONDARY)
+========================= */
+
+.workspace {
+  display: grid;
+  grid-template-columns: 2.4fr 1fr;
+  gap: 14px;
+}
+
+/* LEFT PANEL */
+.work-area {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+
+  padding: 18px;
+  min-height: 420px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* RIGHT PANEL (RECENT USERS) */
+.panel-card {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+
+  padding: 16px;
+  min-height: 420px;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* =========================
+   PANEL HEADER
+========================= */
+.panel-header {
+  margin-bottom: 12px;
+}
+
+.panel-header h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+  color: var(--text);
+  font-weight: 600;
+
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.title-icon {
+  font-size: 16px;
+  color: var(--primary);
+  opacity: 0.9;
+}
+
+.panel-header p {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* =========================
+   STREAM (LEFT SIDE ONLY)
+========================= */
+.stream {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+/* ticket items */
+.stream-item {
+  padding: 14px;
+  border-radius: 10px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 14px;
+  border-radius: 10px;
+
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+
+  transition: 0.2s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stream-item:hover {
+  transform: translateY(-3px);
+  border-color: rgba(59,130,246,0.35);
+}
+
+.stream-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+
+  width: 3px;
+  height: 100%;
+
+  background: var(--primary);
+  opacity: 0.6;
+}
+
+/* left content */
+.stream-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.stream-text h4 {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.stream-text p {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.indicator {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+/* status-based indicators */
+.indicator.pending {
+  background: var(--warning);
+}
+.indicator.closed {
+  background: var(--success);
+}
+.indicator.open {
+  background: var(--primary);
+}
+
+.stream-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.time {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* =========================
+   USER LIST (RIGHT SIDE)
+========================= */
+.user-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 12px;
+  border-radius: 10px;
+
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+
+  transition: 0.2s ease;
+}
+
+.user-item:hover {
+  transform: translateY(-3px);
+  border-color: rgba(59,130,246,0.35);
+}
+
+.user-meta {
+  display: flex;
+  align-items: center;
+}
+
+.user-badge {
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 999px;
+
+  background: rgba(59,130,246,0.1);
+  color: var(--primary);
+  border: 1px solid var(--border);
+}
+
+.user-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.user-avatar {
+  width: 38px;
+  height: 38px;
+
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.15);
+  color: var(--primary);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.user-text h4 {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.user-text p {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* STATISTICS CARDS */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+
+  margin-top: 12px;
+}
+
+.stats-box {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  padding: 14px;
+  text-align: center;
+}
+
+.stats-box h3 {
+  margin: 0;
+  font-size: 18px;
+  color: var(--text);
+}
+
+.stats-box p {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+}
+ 
+/* =========================
+   ANALYTICS
+========================= */
+.analytics {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+
+  padding: 18px;
+  min-height: 260px;
+}
+
+/*GRAPH CHART*/
+
+.chart-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.chart-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.stat-box {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stat-box h4 {
+  margin: 0;
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.stat-box span {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.chart-box {
+  height: 260px; /* 👈 IMPORTANT: give Recharts real space */
+  width: 100%;
+  margin-top: 12px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 12px;
+  color: var(--muted);
+
+  border: 1px dashed rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+
+  box-shadow: 0 0 25px rgba(59, 130, 246, 0.08);
+  transition: 0.3s ease;
+
+  background: linear-gradient(
+    145deg,
+    rgba(15, 23, 42, 0.6),
+    rgba(17, 28, 51, 0.6)
+  );
+
+  overflow: hidden; 
+
+  .chart-box:hover {
+  box-shadow: 0 0 35px rgba(59, 130, 246, 0.15);
+  }
+}
