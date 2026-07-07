@@ -12,7 +12,7 @@ export default function Records() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
 
-  const [unarchiveMode, setUnarchiveMode] = useState(false);
+  const [actionMode, setActionMode] = useState(null);
   const [selectedIds, setSelectedIds] = useState([]);
   const navigate = useNavigate();
   const { showToast } = useToast();
@@ -61,7 +61,7 @@ export default function Records() {
       );
 
       setSelectedIds([]);
-      setUnarchiveMode(false);
+      setActionMode(null);
 
       showToast(
         "success",
@@ -82,6 +82,52 @@ export default function Records() {
         "error",
         err.response?.data?.message || "Failed to restore tickets"
       );
+    }
+  };
+
+  // =========================
+  // DELETE
+  // =========================
+  const handleDelete = async () => {
+    try {
+      await api.delete(
+        "/tickets/delete",
+        {
+          data: {
+            ticketIds: selectedIds,
+          },
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const deletedCount = selectedIds.length;
+
+      setArchivedTickets((prev) =>
+        prev.filter((t) => !selectedIds.includes(t._id))
+      );
+
+      setSelectedIds([]);
+      setActionMode(null);
+
+      showToast(
+        "success",
+        `${deletedCount} archived ticket${
+          deletedCount > 1 ? "s have" : " has"
+        } been deleted`
+      );
+
+    } catch (err) {
+
+      console.log(err.response?.data || err.message);
+
+      showToast(
+        "error",
+        err.response?.data?.message ||
+        "Failed to delete tickets"
+      );
+
     }
   };
 
@@ -164,34 +210,90 @@ export default function Records() {
               <option value="low">Low</option>
             </select>
 
-            <button
-              className={unarchiveMode ? "btn-cancel" : "btn-unarchive"}
-              onClick={() => {
-                setUnarchiveMode(!unarchiveMode);
-                setSelectedIds([]);
-              }}
-            >
-              {unarchiveMode ? "Cancel" : "Unarchive"}
-            </button>
+            {/* DEFAULT BUTTONS */}
+            {actionMode === null && (
+              <>
+                <button
+                  className="btn-unarchive"
+                  onClick={() => {
+                    setActionMode("restore");
+                    setSelectedIds([]);
+                  }}
+                >
+                  Unarchive
+                </button>
 
-            {unarchiveMode && (
-            <button
-              className="btn-confirm"
-              disabled={selectedIds.length === 0}
-              onClick={handleUnarchive}
-            >
-              Restore ({selectedIds.length})
-            </button>
+                <button
+                  className="btn-delete"
+                  onClick={() => {
+                    setActionMode("delete");
+                    setSelectedIds([]);
+                  }}
+                >
+                  Delete
+                </button>
+              </>
             )}
 
-            {unarchiveMode && (
-              <button
-                className="btn-select-all"
-                onClick={handleSelectAll}
-              >
-                {allSelected ? "Deselect All" : "Select All"}
-              </button>
+            {/* RESTORE MODE */}
+            {actionMode === "restore" && (
+              <>
+                <button
+                  className="btn-cancel"
+                  onClick={() => {
+                    setActionMode(null);
+                    setSelectedIds([]);
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="btn-confirm"
+                  disabled={selectedIds.length === 0}
+                  onClick={handleUnarchive}
+                >
+                  Restore ({selectedIds.length})
+                </button>
+
+                <button
+                  className="btn-select-all"
+                  onClick={handleSelectAll}
+                >
+                  {allSelected ? "Deselect All" : "Select All"}
+                </button>
+              </>
             )}
+
+            {/* DELETE MODE */}
+            {actionMode === "delete" && (
+              <>
+                <button
+                  className="btn-cancel"
+                  onClick={() => {
+                    setActionMode(null);
+                    setSelectedIds([]);
+                  }}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="btn-delete-confirm"
+                  disabled={selectedIds.length === 0}
+                  onClick={handleDelete}
+                >
+                  Delete ({selectedIds.length})
+                </button>
+
+                <button
+                  className="btn-select-all"
+                  onClick={handleSelectAll}
+                >
+                  {allSelected ? "Deselect All" : "Select All"}
+                </button>
+              </>
+            )} 
 
           </div>
         </div>
@@ -225,10 +327,10 @@ export default function Records() {
             <tr
               key={t._id}
               onClick={() => {
-                if (!unarchiveMode) return;
+                if (!actionMode) return;
                 toggleSelect(t._id);
               }}
-              className={`${unarchiveMode ? "clickable-row" : ""} ${
+                className={`${actionMode ? "clickable-row" : ""} ${
                 selectedIds.includes(t._id) ? "selected-row" : ""
               }`}
             >
@@ -237,7 +339,7 @@ export default function Records() {
                 <td className="title-cell title-flex">
 
                     {/* CHECKBOX (ONLY WHEN UNARCHIVE MODE IS ON) */}
-                    {unarchiveMode && (
+                    {actionMode && (
                     <input
                       type="checkbox"
                       className="row-checkbox"

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import {
   formatCategory,
@@ -76,23 +76,39 @@ const [search, setSearch] = useState("");
 const [openMenu, setOpenMenu] = useState(null);
 const [confirmAction, setConfirmAction] = useState(null);
 
+const sidebarRef = useRef(null);
+const [showScrollButton, setShowScrollButton] = useState(false);
+
 useEffect(() => {
-  const handleClickOutside = () => {
-    setOpenMenu(null);
+  const sidebar = sidebarRef.current;
+
+  if (!sidebar) return;
+
+  const handleScroll = () => {
+    const distanceFromBottom =
+      sidebar.scrollHeight -
+      sidebar.scrollTop -
+      sidebar.clientHeight;
+
+    setShowScrollButton(distanceFromBottom > 250);
   };
 
-  document.addEventListener(
-    "click",
-    handleClickOutside
-  );
+  sidebar.addEventListener("scroll", handleScroll);
 
-  return () => {
-    document.removeEventListener(
-      "click",
-      handleClickOutside
+  return () =>
+    sidebar.removeEventListener(
+      "scroll",
+      handleScroll
     );
-  };
+
 }, []);
+
+const scrollToBottom = () => {
+  sidebarRef.current?.scrollTo({
+    top: sidebarRef.current.scrollHeight,
+    behavior: "smooth",
+  });
+};
 
 const query = search.toLowerCase();
 
@@ -173,24 +189,29 @@ const filteredConversations = conversations.filter((conversation) => {
 
       </div>
 
-      {loading ? (
-        <p className="muted">
-          Loading conversations...
-        </p>
-      ) : filteredConversations.length === 0 ? (
-        <p className="muted">
-          No conversations found
-        </p>
-      ) : (
-        filteredConversations.map((c) => (
+      <div
+          className="conversation-list"
+          ref={sidebarRef}
+      >
 
-          <div
-            key={c._id}
-            className={`conversation-item ${
-              selectedConversation?._id === c._id ? "active" : ""
-            }`}
-            onClick={() => onSelect(c)}
-          >
+      {loading ? (
+          <p className="muted">
+              Loading conversations...
+          </p>
+      ) : filteredConversations.length === 0 ? (
+          <p className="muted">
+              No conversations found
+          </p>
+      ) : (
+          filteredConversations.map((c) => (
+
+            <div
+              key={c._id}
+              className={`conversation-item ${
+                selectedConversation?._id === c._id ? "active" : ""
+              }`}
+              onClick={() => onSelect(c)}
+            >
 
             {/* ================= TOP ================= */}
 
@@ -342,6 +363,17 @@ const filteredConversations = conversations.filter((conversation) => {
 
           </div>
         ))
+      )}
+
+      </div>
+
+      {showScrollButton && (
+        <button
+          className="conversation-scroll-btn"
+          onClick={scrollToBottom}
+        >
+          <i className="fa-solid fa-arrow-down"></i>
+        </button>
       )}
 
       {confirmAction && (

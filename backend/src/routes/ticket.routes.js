@@ -13,7 +13,8 @@ const {
   getMyAssignedTickets,
   addTicketComment,
   archiveTickets,
-  unarchiveTickets
+  unarchiveTickets,
+  deleteArchivedTickets, // NEW
 } = require("../controllers/ticket.controller");
 
 const authMiddleware = require("../middleware/auth.middleware");
@@ -87,6 +88,12 @@ router.patch(
   unarchiveTickets
 );
 
+router.delete(
+  "/delete",
+  authMiddleware,
+  roleMiddleware("admin"),
+  deleteArchivedTickets
+);
 
 // ===============================
 // GET SINGLE TICKET

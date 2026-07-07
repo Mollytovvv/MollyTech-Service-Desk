@@ -509,7 +509,7 @@ const addTicketComment = async (req, res) => {
 };
 
 // ===============================
-// 📦 BULK ARCHIVE RESOLVED TICKETS
+// ARCHIVE RESOLVED TICKETS
 // ===============================
 const archiveTickets = async (req, res) => {
   try {
@@ -567,6 +567,10 @@ const archiveTickets = async (req, res) => {
   }
 };
 
+  // ===============================
+  // UNARCHIVE TICKETS
+  // ===============================
+
   const unarchiveTickets = async (req, res) => {
     try {
       if (req.user?.role !== "admin") {
@@ -600,6 +604,45 @@ const archiveTickets = async (req, res) => {
     }
   };
 
+  // ===============================
+  // 🗑 BULK DELETE ARCHIVED TICKETS
+  // ===============================
+  const deleteArchivedTickets = async (req, res) => {
+    try {
+
+      if (req.user?.role !== "admin") {
+        return res.status(403).json({
+          message: "Only admin can delete tickets"
+        });
+      }
+
+      const { ticketIds } = req.body;
+
+      if (!ticketIds || !Array.isArray(ticketIds)) {
+        return res.status(400).json({
+          message: "ticketIds array required"
+        });
+      }
+
+      await Ticket.deleteMany({
+        _id: { $in: ticketIds },
+        status: "archived",
+      });
+
+      return res.json({
+        message: "Tickets deleted successfully",
+        deletedCount: ticketIds.length,
+      });
+
+    } catch (err) {
+      console.log("DELETE ERROR:", err);
+
+      return res.status(500).json({
+        message: err.message,
+      });
+    }
+  };
+
 // ===============================
 // 📦 EXPORTS
 // ===============================
@@ -611,6 +654,7 @@ module.exports = {
   assignTicket,
   reopenTicket,
   deleteTicket,
+  deleteArchivedTickets,
   getTicketStats,
   getTicketsByStatus,
   getMyAssignedTickets,
