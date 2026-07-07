@@ -4,6 +4,7 @@ import { useAuth } from "../context/AuthContext";
 import "../styles/Messages.css";
 import ConversationList from "../components/messages/ConversationList";
 import socket from "../socket/socket";
+import { useToast } from "../context/ToastContext";
 import { formatCategory, formatPriority, formatStatus, formatAssignedTo, } from "../utils/formatter";
 
 export default function Messages() {
@@ -22,12 +23,14 @@ export default function Messages() {
   const [isDragging, setIsDragging] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
   const [filter, setFilter] = useState("all");
+  const { showToast } = useToast();
 
   const [typingUsers, setTypingUsers] = useState({});
 
   const chatEndRef = useRef(null);
   const typingTimeout = useRef(null);
   const fileInputRef = useRef(null);
+  
   const BACKEND_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000";
 
@@ -56,9 +59,17 @@ export default function Messages() {
 
     const fetchConversations = async () => {
       try {
-        const res = await api.get("/conversations", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+
+    const url =
+      filter === "archives"
+        ? "/conversations?archived=true"
+        : "/conversations";
+
+    const res = await api.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     console.log("First conversation:", res.data.conversations[0]);
 
@@ -71,7 +82,95 @@ export default function Messages() {
     };
 
     fetchConversations();
-  }, [token]);
+    }, [token, filter]);
+
+  // =========================
+  // ARCHIVE CONVERSATIONS
+  // =========================
+  const handleArchiveConversation = async (conversationId) => {
+
+    try {
+
+      await api.patch(
+        `/conversations/${conversationId}/archive`,
+        {},
+        {
+          headers:{
+            Authorization:`Bearer ${token}`
+          }
+        }
+      );
+
+
+      setConversations((prev)=>
+        prev.filter(
+          (c)=>c._id !== conversationId
+        )
+      );
+
+
+      showToast(
+        "success",
+        "Conversation archived successfully"
+      );
+
+
+    } catch(err){
+
+      console.error(err);
+
+      showToast(
+        "error",
+        "Failed to archive conversation"
+      );
+
+    }
+
+  };
+
+  // =========================
+  // UNARCHIVE CONVERSATIONS
+  // =========================
+  const handleRestoreConversation = async (conversationId)=>{
+
+    try{
+
+      await api.patch(
+        `/conversations/${conversationId}/unarchive`,
+        {},
+        {
+          headers:{
+            Authorization:`Bearer ${token}`
+          }
+        }
+      );
+
+
+      setConversations((prev)=>
+        prev.filter(
+          (c)=>c._id !== conversationId
+        )
+      );
+
+
+      showToast(
+        "success",
+        "Conversation restored successfully"
+      );
+
+
+    }catch(err){
+
+      console.error(err);
+
+      showToast(
+        "error",
+        "Failed to restore conversation"
+      );
+
+    }
+
+  };
 
   // =========================
   // FETCH MESSAGES
@@ -425,12 +524,14 @@ export default function Messages() {
 
       {/* LEFT */}
       <ConversationList
-        conversations={conversations}
-        selectedConversation={selectedConversation}
-        onSelect={setSelectedConversation}
-        loading={loading}
-        filter={filter}
-        setFilter={setFilter}
+          conversations={conversations}
+          selectedConversation={selectedConversation}
+          onSelect={setSelectedConversation}
+          onArchive={handleArchiveConversation}
+          onUnarchive={handleRestoreConversation}
+          loading={loading}
+          filter={filter}
+          setFilter={setFilter}
       />
 
       {/* RIGHT */}

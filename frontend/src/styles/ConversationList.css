@@ -3,14 +3,20 @@
 =========================== */
 
 .messages-sidebar {
-    width: 360px;
-    background: rgba(15,23,42,.96);
-    border-right: 1px solid rgba(255,255,255,.08);
 
-    display: flex;
-    flex-direction: column;
+    width:360px;
 
-    overflow: hidden;
+    background:rgba(15,23,42,.96);
+
+    border-right:
+        1px solid rgba(148,163,184,.12);
+
+    display:flex;
+    flex-direction:column;
+
+    overflow:hidden;
+
+    flex-shrink:0;
 }
 
 /* MESSAGES HEADER TOP */
@@ -77,10 +83,6 @@
    SCROLL
 =========================== */
 
-.messages-sidebar {
-    overflow-y: auto;
-}
-
 .messages-sidebar::-webkit-scrollbar {
     width: 6px;
 }
@@ -118,26 +120,29 @@
 
 .conversation-item:hover {
 
-    transform: translateY(-2px);
+    transform:translateY(-2px);
 
-    background: rgba(255,255,255,.05);
+    background:
+    rgba(6,182,212,.08);
 
-    border-color: rgba(255,255,255,.08);
+    border-color:
+    rgba(34,211,238,.25);
 
-    background: rgba(6,182,212,.10);
-
-    border:1px solid rgba(6,182,212,.25);
+    box-shadow:
+    0 12px 25px rgba(0,0,0,.18);
 }
 
 .conversation-item.active {
 
-    background: rgba(6,182,212,.12);
+    background:
+    rgba(6,182,212,.14);
 
-    border-color: rgba(34,211,238,.35);
+    border-color:
+    rgba(34,211,238,.45);
 
     box-shadow:
         inset 4px 0 0 #22d3ee,
-        0 10px 24px rgba(0,0,0,.30);
+        0 12px 30px rgba(0,0,0,.35);
 }
 
 /* ===========================
@@ -427,6 +432,13 @@
     font-size:14px;
 
     transition:.25s ease;
+
+    outline:none;
+
+    transition:
+    background .25s ease,
+    border .25s ease,
+    box-shadow .25s ease;
 }
 
 .conversation-search input::placeholder {
@@ -521,19 +533,529 @@
 
 .conversation-filters button.active{
 
-    background:linear-gradient(
-        135deg,
-        #06b6d4,
-        #0891b2
-    );
+    background:#06b6d4;
 
     color:white;
 
     box-shadow:
-        0 6px 14px rgba(6,182,212,.30);
+    0 8px 18px rgba(6,182,212,.25);
 }
 
 .conversation-filters button:active{
 
     transform:scale(.97);
+}
+
+.conversation-filters button:nth-child(3).active{
+
+    box-shadow:
+    0 6px 14px rgba(148,163,184,.20);
+
+}
+
+/* 3 DOTS */
+
+.conversation-actions{
+
+    position:relative;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    flex-shrink:0;
+}
+
+/* ==========================
+   CONVERSATION MENU
+========================== */
+
+.conversation-menu{
+
+    position:absolute;
+
+    top:38px;
+    right:0;
+
+    width:110px;
+
+    padding:1px;
+
+    border-radius:12px;
+
+    background:#1e293b;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    box-shadow:
+        0 16px 36px rgba(0,0,0,.35);
+
+    z-index:50;
+
+    animation:menuFade .18s ease;
+}
+
+.conversation-menu-item{
+
+    width:100%;
+
+    display:flex;
+    align-items:center;
+
+    gap:10px;
+
+    padding:8px 10px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:transparent;
+
+    color:#e2e8f0;
+
+    font-size:13px;
+    font-weight:500;
+
+    cursor:pointer;
+
+    transition:.2s ease;
+}
+
+.conversation-menu-item:hover{
+
+    background:rgba(239,68,68,.12);
+
+    color:#f87171;
+}
+
+.conversation-menu-item i{
+
+    width:16px;
+
+    text-align:center;
+}
+
+.conversation-menu-btn{
+
+    width:30px;
+    height:30px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:transparent;
+
+    color:#94a3b8;
+
+    cursor:pointer;
+
+    transition:.2s ease;
+}
+
+.conversation-menu-btn:hover{
+
+    background:rgba(255,255,255,.08);
+
+    color:#f8fafc;
+}
+
+.conversation-menu-wrapper{
+
+    position:relative;
+
+    display:flex;
+
+    align-items:center;
+}
+
+.conversation-confirm-overlay{
+
+    position:fixed;
+    inset:0;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:rgba(0,0,0,.65);
+    backdrop-filter:blur(8px);
+
+    z-index:9999;
+
+}
+
+
+.conversation-confirm-box{
+
+    width:380px;
+
+    padding:28px;
+
+    border-radius:20px;
+
+    background:#1e293b;
+
+    border:1px solid rgba(255,255,255,.08);
+
+    text-align:center;
+
+    box-shadow:
+    0 25px 60px rgba(0,0,0,.45);
+
+}
+
+
+.conversation-confirm-box i{
+
+    font-size:42px;
+
+    color:#22d3ee;
+
+    margin-bottom:16px;
+
+}
+
+
+.conversation-confirm-box h3{
+
+    color:#f8fafc;
+
+    margin-bottom:10px;
+
+}
+
+
+.conversation-confirm-box p{
+
+    color:#94a3b8;
+
+    font-size:14px;
+
+    line-height:1.5;
+
+}
+
+
+.conversation-confirm-actions{
+
+    display:flex;
+
+    justify-content:flex-end;
+
+    gap:10px;
+
+    margin-top:24px;
+
+}
+
+
+.conversation-confirm-actions button{
+
+    padding:10px 18px;
+
+    border:none;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    font-weight:600;
+
+}
+
+
+.cancel-confirm{
+
+    background:rgba(255,255,255,.08);
+
+    color:#cbd5e1;
+
+}
+
+
+.danger-confirm{
+
+    background:#ef4444;
+
+    color:white;
+
+}
+
+
+.restore-confirm{
+
+    background:#06b6d4;
+
+    color:white;
+
+}
+
+/* =========================
+   CONVERSATION CONFIRM MODAL
+========================= */
+
+.conversation-confirm-overlay {
+
+    position:fixed;
+
+    inset:0;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:rgba(2,6,23,.75);
+
+    backdrop-filter:blur(8px);
+
+    z-index:9999;
+
+    animation:confirmFade .2s ease;
+}
+
+
+.conversation-confirm-box {
+
+    width:380px;
+
+    padding:30px;
+
+    border-radius:22px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(30,41,59,.98),
+            rgba(15,23,42,.98)
+        );
+
+    border:1px solid rgba(148,163,184,.15);
+
+    box-shadow:
+        0 25px 70px rgba(0,0,0,.55);
+
+    text-align:center;
+
+    animation:confirmScale .25s ease;
+}
+
+
+/* ICON */
+
+.conversation-confirm-box > i {
+
+    width:70px;
+
+    height:70px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    margin:0 auto 18px;
+
+    border-radius:50%;
+
+    font-size:30px;
+
+    color:#22d3ee;
+
+    background:rgba(6,182,212,.12);
+
+    border:1px solid rgba(34,211,238,.25);
+
+}
+
+
+/* TITLE */
+
+.conversation-confirm-box h3 {
+
+    margin-bottom:12px;
+
+    color:#f8fafc;
+
+    font-size:22px;
+
+    font-weight:700;
+}
+
+
+/* MESSAGE */
+
+.conversation-confirm-box p {
+
+    color:#94a3b8;
+
+    font-size:14px;
+
+    line-height:1.6;
+
+    margin-bottom:28px;
+}
+
+
+/* ACTIONS */
+
+.conversation-confirm-actions {
+
+    display:flex;
+
+    gap:12px;
+
+    justify-content:center;
+}
+
+
+.conversation-confirm-actions button {
+
+    flex:1;
+
+    height:42px;
+
+    border:none;
+
+    border-radius:12px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.25s ease;
+}
+
+
+/* CANCEL */
+
+.cancel-confirm {
+
+    background:rgba(148,163,184,.12);
+
+    color:#cbd5e1;
+}
+
+
+.cancel-confirm:hover {
+
+    background:rgba(148,163,184,.22);
+
+}
+
+
+/* ARCHIVE */
+
+.danger-confirm {
+
+    background:rgba(239,68,68,.15);
+
+    color:#f87171;
+
+    border:1px solid rgba(239,68,68,.25)!important;
+}
+
+
+.danger-confirm:hover {
+
+    background:#ef4444;
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
+
+/* RESTORE */
+
+.restore-confirm {
+
+    background:rgba(6,182,212,.15);
+
+    color:#22d3ee;
+
+    border:1px solid rgba(34,211,238,.25)!important;
+
+}
+
+
+.restore-confirm:hover {
+
+    background:#06b6d4;
+
+    color:white;
+
+    transform:translateY(-2px);
+
+}
+
+
+/* ANIMATION */
+
+@keyframes confirmFade {
+
+    from {
+        opacity:0;
+    }
+
+    to {
+        opacity:1;
+    }
+}
+
+
+@keyframes confirmScale {
+
+    from {
+
+        opacity:0;
+
+        transform:
+            scale(.92)
+            translateY(10px);
+    }
+
+
+    to {
+
+        opacity:1;
+
+        transform:
+            scale(1)
+            translateY(0);
+    }
+}
+
+@keyframes menuFade{
+
+    from{
+
+        opacity:0;
+
+        transform:
+            translateY(-6px)
+            scale(.98);
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
 }

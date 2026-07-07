@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import {
   formatCategory,
@@ -62,15 +62,37 @@ const getCategoryIcon = (category) => {
 };
 
 export default function ConversationList({
-  conversations,
-  selectedConversation,
-  onSelect,
-  loading,
-  filter,
-  setFilter,
+    conversations,
+    selectedConversation,
+    onSelect,
+    onArchive,
+    onUnarchive,
+    loading,
+    filter,
+    setFilter,
 }) {
 
 const [search, setSearch] = useState("");
+const [openMenu, setOpenMenu] = useState(null);
+const [confirmAction, setConfirmAction] = useState(null);
+
+useEffect(() => {
+  const handleClickOutside = () => {
+    setOpenMenu(null);
+  };
+
+  document.addEventListener(
+    "click",
+    handleClickOutside
+  );
+
+  return () => {
+    document.removeEventListener(
+      "click",
+      handleClickOutside
+    );
+  };
+}, []);
 
 const query = search.toLowerCase();
 
@@ -83,15 +105,16 @@ const filteredConversations = conversations.filter((conversation) => {
     conversation.ticketId?.category?.toLowerCase().includes(query) ||
     conversation.lastMessage?.toLowerCase().includes(query);
 
-  let matchesFilter = true;
+    let matchesFilter = !conversation.isArchived;
 
-  if (filter === "unread") {
-    matchesFilter = conversation.unread === true;
-  }
+    if (filter === "unread") {
+        matchesFilter =
+            conversation.unread && !conversation.isArchived;
+    }
 
-  if (filter === "archives") {
-    matchesFilter = conversation.isArchived === true;
-  }
+    if (filter === "archives") {
+        matchesFilter = conversation.isArchived;
+    }
 
   return matchesSearch && matchesFilter;
 });
@@ -106,9 +129,9 @@ const filteredConversations = conversations.filter((conversation) => {
 
             <h2 className="messages-title">Messages</h2>
 
-            <span className="conversation-count">
-                {conversations.length}
-            </span>
+        <span className="conversation-count">
+            {filteredConversations.length}
+        </span>
     </div>
 
       {/* FILTER TABS */}
@@ -151,12 +174,16 @@ const filteredConversations = conversations.filter((conversation) => {
       </div>
 
       {loading ? (
-        <p className="muted">Loading conversations...</p>
-      ) : conversations.length === 0 ? (
-        <p className="muted">No conversations yet</p>
+        <p className="muted">
+          Loading conversations...
+        </p>
+      ) : filteredConversations.length === 0 ? (
+        <p className="muted">
+          No conversations found
+        </p>
       ) : (
+        filteredConversations.map((c) => (
 
-      filteredConversations.map((c) => (
           <div
             key={c._id}
             className={`conversation-item ${
@@ -192,11 +219,70 @@ const filteredConversations = conversations.filter((conversation) => {
 
               </div>
 
-              <span
-                className={`conversation-status ${c.ticketId?.status}`}
-              >
-                {formatStatus(c.ticketId?.status)}
-              </span>
+              <div className="conversation-actions">
+
+                  <span
+                      className={`conversation-status ${c.ticketId?.status}`}
+                  >
+                      {formatStatus(c.ticketId?.status)}
+                  </span>
+
+                  <div className="conversation-menu-wrapper">
+
+                      <button
+                          className="conversation-menu-btn"
+                          onClick={(e) => {
+                              e.stopPropagation();
+                              setOpenMenu(openMenu === c._id ? null : c._id);
+                          }}
+                      >
+                          <i className="fa-solid fa-ellipsis-vertical"></i>
+                      </button>
+
+                      {openMenu === c._id && (
+                          <div
+                              className="conversation-menu"
+                              onClick={(e) => e.stopPropagation()}
+                          >
+                              {filter === "archives" ? (
+                                  <button
+                                      className="conversation-menu-item"
+                                      onClick={() => {
+                                          setConfirmAction({
+                                              type: "restore",
+                                              id: c._id,
+                                              title: c.ticketId?.title || "this conversation"
+                                          });
+
+                                          setOpenMenu(null);
+                                      }}
+                                  >
+                                      <i className="fa-solid fa-box-open"></i>
+                                      Restore
+                                  </button>
+                              ) : (
+                                  <button
+                                      className="conversation-menu-item"
+                                      onClick={() => {
+                                          setConfirmAction({
+                                              type: "archive",
+                                              id: c._id,
+                                              title: c.ticketId?.title || "this conversation"
+                                          });
+
+                                          setOpenMenu(null);
+                                      }}
+                                  >
+                                      <i className="fa-solid fa-box-archive"></i>
+                                      Archive
+                                  </button>
+                              )}
+                          </div>
+                      )}
+
+                  </div>
+
+              </div>
 
             </div>
 
@@ -230,11 +316,13 @@ const filteredConversations = conversations.filter((conversation) => {
 
               </span>
 
-            <span
-              className={`conversation-priority ${c.ticketId?.priority}`}
-            >
-              {formatPriority(c.ticketId?.priority)?.toUpperCase()}
-            </span>
+              <span
+                className={`conversation-priority ${
+                  c.ticketId?.priority || "unknown"
+                }`}
+              >
+                {formatPriority(c.ticketId?.priority) || "NORMAL"}
+              </span>
 
             </div>
 
@@ -254,6 +342,78 @@ const filteredConversations = conversations.filter((conversation) => {
 
           </div>
         ))
+      )}
+
+      {confirmAction && (
+          <div className="conversation-confirm-overlay">
+
+              <div className="conversation-confirm-box">
+
+                  <i
+                    className={
+                      confirmAction.type === "archive"
+                      ? "fa-solid fa-box-archive"
+                      : "fa-solid fa-box-open"
+                    }
+                  ></i>
+
+
+                  <h3>
+                    {confirmAction.type === "archive"
+                      ? "Archive this conversation?"
+                      : "Restore this conversation?"}
+                  </h3>
+
+
+                  <p>
+                    {confirmAction.type === "archive"
+                      ? `Are you sure you want to archive "${confirmAction.title}"?`
+                      : `Are you sure you want to restore "${confirmAction.title}" back to active conversations?`
+                    }
+                  </p>
+
+
+                  <div className="conversation-confirm-actions">
+
+                      <button
+                          className="cancel-confirm"
+                          onClick={() => setConfirmAction(null)}
+                      >
+                          Cancel
+                      </button>
+
+
+                      <button
+                          className={
+                            confirmAction.type === "archive"
+                            ? "danger-confirm"
+                            : "restore-confirm"
+                          }
+                          onClick={() => {
+
+                              if(confirmAction.type === "archive"){
+                                  onArchive(confirmAction.id);
+                              }
+                              else{
+                                  onUnarchive(confirmAction.id);
+                              }
+
+                              setConfirmAction(null);
+
+                          }}
+                      >
+                          {
+                            confirmAction.type === "archive"
+                            ? "Archive"
+                            : "Restore"
+                          }
+                      </button>
+
+                  </div>
+
+              </div>
+
+          </div>
       )}
 
     </div>
