@@ -3,6 +3,7 @@ const router = require("express").Router();
 const {
   sendMessage,
   getMessages,
+  downloadAttachment,
 } = require("../controllers/message.controller");
 
 const authMiddleware = require("../middleware/auth.middleware");
@@ -19,8 +20,21 @@ router.post(
 );
 
 // ===============================
+// DOWNLOAD ATTACHMENT
+// ===============================
+router.get(
+  "/download/:filename",
+  authMiddleware,
+  downloadAttachment
+);
+
+// ===============================
 // GET MESSAGES
 // ===============================
-router.get("/:conversationId", authMiddleware, getMessages);
+router.get(
+  "/:conversationId",
+  authMiddleware,
+  getMessages
+);
 
 module.exports = router;

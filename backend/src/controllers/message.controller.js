@@ -1,3 +1,4 @@
+const path = require("path");
 const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
 
@@ -82,14 +83,27 @@ const sendMessage = async (req, res) => {
     // ===============================
     // UPDATE CONVERSATION
     // ===============================
-    await Conversation.findByIdAndUpdate(conversationId, {
-      lastMessage: text?.trim()
-        ? text.trim()
-        : req.file
-        ? "📎 Attachment"
-        : "",
-      updatedAt: new Date(),
-    });
+    conversation.lastMessage = text?.trim()
+      ? text.trim()
+      : req.file
+      ? "📎 Attachment"
+      : "";
+
+    conversation.updatedAt = new Date();
+
+    // User sent a message
+    if (req.user.role === "user") {
+      conversation.adminUnread = true;
+    }
+
+    // Admin sent a message
+    if (req.user.role === "admin") {
+      conversation.userUnread = true;
+    }
+
+    await conversation.save();
+
+    console.log("Conversation saved.");
 
     // ===============================
     // SOCKET.IO
@@ -119,22 +133,19 @@ const sendMessage = async (req, res) => {
   }
 };
 
-// ===============================
-// 📥 GET MESSAGES
-// ===============================
-const getMessages = async (req, res) => {
-  try {
-    const { conversationId } = req.params;
-
-    if (!conversationId) {
-      return res.status(400).json({
-        message: "conversationId is required",
-      });
-    }
-
     // ===============================
-    // GET CONVERSATION
+    // 📥 GET MESSAGES
     // ===============================
+    const getMessages = async (req, res) => {
+      try {
+        const { conversationId } = req.params;
+
+        if (!conversationId) {
+          return res.status(400).json({
+            message: "conversationId is required",
+          });
+        }
+
     const conversation = await Conversation.findById(conversationId)
       .populate({
         path: "ticketId",
@@ -151,6 +162,17 @@ const getMessages = async (req, res) => {
         message: "Conversation not found",
       });
     }
+
+    // ===============================
+    // RESET UNREAD FLAG
+    // ===============================
+    if (req.user.role === "admin") {
+      conversation.adminUnread = false;
+    } else {
+      conversation.userUnread = false;
+    }
+
+    await conversation.save();
 
     // ===============================
     // REQUESTER INFO
@@ -194,7 +216,45 @@ const getMessages = async (req, res) => {
   }
 };
 
+  // ===============================
+  // 📥 DOWNLOAD ATTACHMENT
+  // ===============================
+  const downloadAttachment = async (req, res) => {
+    try {
+      const { filename } = req.params;
+
+      const message = await Message.findOne({
+        "attachment.filename": filename,
+      });
+
+      if (!message || !message.attachment) {
+        return res.status(404).json({
+          message: "Attachment not found",
+        });
+      }
+
+      const filePath = path.join(
+        __dirname,
+        "../../uploads/messages",
+        message.attachment.filename
+      );
+
+      return res.download(
+        filePath,
+        message.attachment.originalname
+      );
+
+    } catch (err) {
+      console.log("DOWNLOAD ERROR:", err);
+
+      return res.status(500).json({
+        message: err.message,
+      });
+    }
+  };
+
 module.exports = {
   sendMessage,
   getMessages,
+  downloadAttachment,
 };

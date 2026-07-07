@@ -13,14 +13,24 @@
     overflow: hidden;
 }
 
+/* MESSAGES HEADER TOP */
+.messages-header-top{
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+}
+
 /* ===========================
    HEADER
 =========================== */
 
 .messages-sidebar-header{
     display:flex;
-    align-items:center;
-    justify-content:space-between;
+    flex-direction:column;
+    gap:16px;
 
     padding:22px;
 
@@ -147,18 +157,42 @@
 }
 
 .conversation-title {
+
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
     font-size: 15px;
     font-weight: 700;
+
     color: #f8fafc;
 
     line-height: 1.35;
+}
 
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
+.conversation-title span:first-child {
+
+    flex: 1;
 
     overflow: hidden;
 
-    word-break: break-word;
+    white-space: nowrap;
+
+    text-overflow: ellipsis;
+}
+
+.conversation-unread-dot {
+
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+
+    background: #22d3ee;
+
+    flex-shrink: 0;
+
+    box-shadow: 0 0 8px rgba(34, 211, 238, .6);
 }
 
 .conversation-ticket {
@@ -357,7 +391,7 @@
 
     margin-top:14px;
 
-    margin-bottom:10pxl
+    margin-bottom:10px;
 }
 
 .conversation-search i{
@@ -434,4 +468,72 @@
     text-align: center;
 
     color: #64748b;
+}
+
+/* ===========================
+   FILTER TABS
+=========================== */
+
+.conversation-filters{
+
+    display:flex;
+
+    gap:6px;
+
+    padding:5px;
+
+    border-radius:14px;
+
+    background:rgba(255,255,255,.04);
+
+    border:1px solid rgba(255,255,255,.06);
+}
+
+.conversation-filters button{
+
+    flex:1;
+
+    height:38px;
+
+    border:none;
+    outline:none;
+
+    border-radius:10px;
+
+    background:transparent;
+
+    color:#94a3b8;
+
+    font-size:13px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:all .25s ease;
+}
+
+.conversation-filters button:hover{
+
+    color:#f8fafc;
+
+    background:rgba(255,255,255,.05);
+}
+
+.conversation-filters button.active{
+
+    background:linear-gradient(
+        135deg,
+        #06b6d4,
+        #0891b2
+    );
+
+    color:white;
+
+    box-shadow:
+        0 6px 14px rgba(6,182,212,.30);
+}
+
+.conversation-filters button:active{
+
+    transform:scale(.97);
 }

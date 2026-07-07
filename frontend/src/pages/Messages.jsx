@@ -19,6 +19,9 @@ export default function Messages() {
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
+  const [filter, setFilter] = useState("all");
 
   const [typingUsers, setTypingUsers] = useState({});
 
@@ -56,6 +59,8 @@ export default function Messages() {
         const res = await api.get("/conversations", {
           headers: { Authorization: `Bearer ${token}` },
         });
+
+    console.log("First conversation:", res.data.conversations[0]);
 
         setConversations(res.data.conversations || []);
       } catch (err) {
@@ -104,9 +109,7 @@ export default function Messages() {
     fetchMessages();
   }, [selectedConversation, token]);
 
-  // =========================
-  // 🔥 ADD THIS RIGHT BELOW
-  // =========================
+  
   useEffect(() => {
     if (!selectedConversation?._id) return;
 
@@ -187,6 +190,100 @@ export default function Messages() {
   };
 
   // =========================
+  // DRAG & DROP
+  // =========================
+  const handleDragEnter = (e) => {
+    if (!selectedConversation) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    setIsDragging(true);
+  };
+
+  const handleDragOver = (e) => {
+    if (!selectedConversation) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    // Prevent flickering when hovering child elements
+  if (
+    e.relatedTarget &&
+    e.currentTarget.contains(e.relatedTarget)
+  ) {
+    return;
+  }
+
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e) => {
+    if (!selectedConversation) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    setIsDragging(false);
+
+    const files = e.dataTransfer.files;
+
+    if (!files || files.length === 0) return;
+
+    const file = files[0];
+
+    setSelectedFile(file);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.files = files;
+    }
+  };
+
+  // =========================
+  // DOWNLOAD ATTACHMENT
+  // =========================
+  const downloadAttachment = async (attachment) => {
+    try {
+      const response = await api.get(
+        `/messages/download/${attachment.filename}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          responseType: "blob",
+        }
+      );
+
+      const blob = new Blob([response.data], {
+        type: attachment.mimetype,
+      });
+
+      const url = window.URL.createObjectURL(blob);
+
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = attachment.originalname;
+
+      document.body.appendChild(link);
+
+      link.click();
+
+      link.remove();
+
+      window.URL.revokeObjectURL(url);
+
+    } catch (err) {
+      console.log("DOWNLOAD ERROR:", err);
+    }
+  };
+
+  // =========================
   // SEND MESSAGE
   // =========================
   const sendMessage = async () => {
@@ -251,6 +348,66 @@ export default function Messages() {
   };
 
   // =========================
+  // FILE TYPE ICON
+  // =========================
+  const getFileIcon = (filename = "") => {
+    const extension = filename.split(".").pop()?.toLowerCase();
+
+    switch (extension) {
+      case "pdf":
+        return "fa-file-pdf";
+
+      case "doc":
+      case "docx":
+        return "fa-file-word";
+
+      case "xls":
+      case "xlsx":
+      case "csv":
+        return "fa-file-excel";
+
+      case "ppt":
+      case "pptx":
+        return "fa-file-powerpoint";
+
+      case "zip":
+      case "rar":
+      case "7z":
+        return "fa-file-zipper";
+
+      case "png":
+      case "jpg":
+      case "jpeg":
+      case "gif":
+      case "webp":
+        return "fa-file-image";
+
+      case "txt":
+        return "fa-file-lines";
+
+      default:
+        return "fa-file";
+    }
+  };
+
+  // =========================
+  // IMAGE CHECKER
+  // =========================
+  const isImageFile = (filename = "") => {
+    const extension = filename.split(".").pop()?.toLowerCase();
+
+    return [
+      "png",
+      "jpg",
+      "jpeg",
+      "gif",
+      "webp",
+      "bmp",
+      "svg",
+    ].includes(extension);
+  };
+
+  // =========================
   // FIXED ALIGNMENT LOGIC
   // =========================
   const isStaffMessage = (msg) => {
@@ -272,10 +429,71 @@ export default function Messages() {
         selectedConversation={selectedConversation}
         onSelect={setSelectedConversation}
         loading={loading}
+        filter={filter}
+        setFilter={setFilter}
       />
 
       {/* RIGHT */}
-      <div className="messages-chat">
+      <div
+        className="messages-chat"
+        onDragEnter={handleDragEnter}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
+
+      {isDragging && (
+        <div className="drag-overlay">
+
+          <div className="drag-overlay-content">
+
+            <i className="fa-solid fa-cloud-arrow-up"></i>
+
+            <h2>Drop file to upload</h2>
+
+            <p>
+              Release your mouse to attach the file
+            </p>
+
+          </div>
+
+        </div>
+      )}
+
+        {previewImage && (
+          <div
+            className="image-preview-overlay"
+            onClick={() => setPreviewImage(null)}
+          >
+            <div
+              className="image-preview-container"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="image-preview-actions">
+
+                <button
+                  className="image-preview-download"
+                  onClick={() => downloadAttachment(previewImage)}
+                >
+                  <i className="fa-solid fa-download"></i>
+                </button>
+
+                <button
+                  className="image-preview-close"
+                  onClick={() => setPreviewImage(null)}
+                >
+                  <i className="fa-solid fa-xmark"></i>
+                </button>
+
+              </div>
+
+              <img
+                src={previewImage.url}
+                alt={previewImage.name}
+              />
+            </div>
+          </div>
+        )}
 
         {selectedConversation ? (
           <>
@@ -415,14 +633,58 @@ export default function Messages() {
                     {msg.text && <p>{msg.text}</p>}
 
                     {msg.attachment && (
-                      <a
-                          className="message-attachment"
-                          href={`${BACKEND_URL}${msg.attachment.url}`}
-                          target="_blank"
-                          rel="noreferrer"
-                      >
-                          📎 {msg.attachment.originalname}
-                      </a>
+                    <div className="message-attachment-card">
+
+                      {isImageFile(msg.attachment.originalname) && (
+                      <img
+                          className="attachment-preview"
+                          src={`${BACKEND_URL}${msg.attachment.url}`}
+                          alt={msg.attachment.originalname}
+                          onClick={() =>
+                              setPreviewImage({
+                                  ...msg.attachment,
+                                  url: `${BACKEND_URL}${msg.attachment.url}`,
+                              })
+                          }
+                      />
+                      )}
+
+                      <div className="attachment-info">
+
+                          <i
+                            className={`fa-solid ${getFileIcon(
+                              msg.attachment.originalname
+                            )}`}
+                          ></i>
+
+                          <div className="attachment-details">
+
+                            <strong>
+                              {msg.attachment.originalname}
+                            </strong>
+
+                            <small>
+                              {msg.attachment.mimetype || "File"}
+                            </small>
+
+                            <small>
+                              {(msg.attachment.size / 1024).toFixed(1)} KB
+                            </small>
+
+                          </div>
+
+                        </div>
+
+                        <button
+                          type="button"
+                          className="attachment-download"
+                          onClick={() => downloadAttachment(msg.attachment)}
+                        >
+                          <i className="fa-solid fa-download"></i>
+                          Download
+                        </button>
+
+                      </div>
                     )}
 
                       <small>

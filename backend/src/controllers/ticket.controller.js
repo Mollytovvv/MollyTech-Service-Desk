@@ -67,6 +67,9 @@ console.log("FORMATTED PHONE:", phoneNumber);
             {
               userId: req.user._id || req.user.id,
               role: req.user.role || "user",
+              unreadCount: 0,
+              lastReadAt: new Date(),
+              isArchived: false,
             },
           ]
         : [

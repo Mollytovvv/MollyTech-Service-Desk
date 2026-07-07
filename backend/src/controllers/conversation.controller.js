@@ -8,57 +8,64 @@ const getConversations = async (req, res) => {
     const userId = req.user?.id;
 
     if (!userId) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({
+        message: "Unauthorized",
+      });
     }
 
     let query = {};
 
+    // ===============================
     // ADMIN sees all conversations
-    if (req.user.role === "admin") {
-      query = {};
-    } 
-    // USER sees only their conversations
-    else {
+    // ===============================
+    if (req.user.role !== "admin") {
       query = {
         "participants.userId": userId,
       };
     }
 
-  const conversations = await Conversation.find(query)
-    .sort({ updatedAt: -1 })
-    .populate(
-      "ticketId",
-      "title status priority category"
-    )
-    .populate(
-      "participants.userId",
-      "firstName lastName email"
-    )
-    .lean();
+    const conversations = await Conversation.find(query)
+      .sort({ updatedAt: -1 })
+      .populate(
+        "ticketId",
+        "title status priority category"
+      )
+      .populate(
+        "participants.userId",
+        "firstName lastName email"
+      )
+      .lean();
 
-    console.log(
-      JSON.stringify(conversations, null, 2)
-    );
-
-  const formattedConversations = conversations.map((conversation) => {
-    const requesterParticipant = conversation.participants.find(
-      (p) => p.role === "user"
-    );
+    const formattedConversations = conversations.map((conversation) => {
+      const requesterParticipant = conversation.participants.find(
+        (p) => p.role === "user"
+      );
 
     return {
       ...conversation,
-      requester: requesterParticipant?.userId || null,
-    };
-  });
 
-  return res.json({
-    count: formattedConversations.length,
-    conversations: formattedConversations,
-  });
+      requester: requesterParticipant?.userId || null,
+
+      unread:
+        req.user.role === "admin"
+          ? conversation.adminUnread
+          : conversation.userUnread,
+
+      isArchived: false,
+    };
+    });
+
+    return res.json({
+      count: formattedConversations.length,
+      conversations: formattedConversations,
+    });
 
   } catch (err) {
     console.log("GET CONVERSATIONS ERROR:", err);
-    return res.status(500).json({ message: err.message });
+
+    return res.status(500).json({
+      message: err.message,
+    });
   }
 };
 
@@ -71,14 +78,19 @@ const getConversationById = async (req, res) => {
       .populate("ticketId", "title status");
 
     if (!conversation) {
-      return res.status(404).json({ message: "Conversation not found" });
+      return res.status(404).json({
+        message: "Conversation not found",
+      });
     }
 
     return res.json(conversation);
 
   } catch (err) {
     console.log("GET CONVERSATION ERROR:", err);
-    return res.status(500).json({ message: err.message });
+
+    return res.status(500).json({
+      message: err.message,
+    });
   }
 };
 

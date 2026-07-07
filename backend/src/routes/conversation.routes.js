@@ -1,24 +1,15 @@
 const express = require("express");
 const router = express.Router();
 
-const Conversation = require("../models/Conversation");
 const authMiddleware = require("../middleware/auth.middleware");
 
-// ===============================
-// GET ALL CONVERSATIONS
-// ===============================
-router.get("/", authMiddleware, async (req, res) => {
-  try {
-    const conversations = await Conversation.find()
-      .sort({ updatedAt: -1 })
-      .populate("ticketId");
+const {
+  getConversations,
+  getConversationById,
+} = require("../controllers/conversation.controller");
 
-    res.json({
-      conversations,
-    });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-});
+router.get("/", authMiddleware, getConversations);
+
+router.get("/:id", authMiddleware, getConversationById);
 
 module.exports = router;

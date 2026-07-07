@@ -66,37 +66,76 @@ export default function ConversationList({
   selectedConversation,
   onSelect,
   loading,
+  filter,
+  setFilter,
 }) {
 
 const [search, setSearch] = useState("");
 
-const filteredConversations = conversations.filter((conversation) => {
-  const query = search.toLowerCase();
+const query = search.toLowerCase();
 
-  return (
+const filteredConversations = conversations.filter((conversation) => {
+  const matchesSearch =
     conversation.ticketId?.title?.toLowerCase().includes(query) ||
     conversation.ticketId?._id?.toLowerCase().includes(query) ||
-    conversation.ticketId?.submittedBy?.firstName
-      ?.toLowerCase()
-      .includes(query) ||
-    conversation.ticketId?.submittedBy?.lastName
-      ?.toLowerCase()
-      .includes(query) ||
+    conversation.ticketId?.submittedBy?.firstName?.toLowerCase().includes(query) ||
+    conversation.ticketId?.submittedBy?.lastName?.toLowerCase().includes(query) ||
     conversation.ticketId?.category?.toLowerCase().includes(query) ||
-    conversation.lastMessage?.toLowerCase().includes(query)
-  );
+    conversation.lastMessage?.toLowerCase().includes(query);
+
+  let matchesFilter = true;
+
+  if (filter === "unread") {
+    matchesFilter = conversation.unread === true;
+  }
+
+  if (filter === "archives") {
+    matchesFilter = conversation.isArchived === true;
+  }
+
+  return matchesSearch && matchesFilter;
 });
 
   return (
-    <div className="messages-sidebar">
+  <div className="messages-sidebar">
 
-      <div className="messages-sidebar-header">
-        <h2 className="messages-title">Messages</h2>
+    {/* HEADER */}
+    <div className="messages-sidebar-header">
 
-        <span className="conversation-count">
-          {conversations.length}
-        </span>
+        <div className="messages-header-top">
+
+            <h2 className="messages-title">Messages</h2>
+
+            <span className="conversation-count">
+                {conversations.length}
+            </span>
+    </div>
+
+      {/* FILTER TABS */}
+      <div className="conversation-filters">
+        <button
+          className={filter === "all" ? "active" : ""}
+          onClick={() => setFilter("all")}
+        >
+          All
+        </button>
+
+        <button
+          className={filter === "unread" ? "active" : ""}
+          onClick={() => setFilter("unread")}
+        >
+          Unread
+        </button>
+
+        <button
+          className={filter === "archives" ? "active" : ""}
+          onClick={() => setFilter("archives")}
+        >
+          Archives
+        </button>
       </div>
+
+    </div>
 
       <div className="conversation-search">
 
@@ -132,9 +171,17 @@ const filteredConversations = conversations.filter((conversation) => {
 
               <div className="conversation-title-group">
 
-                <div className="conversation-title">
+              <div className="conversation-title">
+
+                <span>
                   {c.ticketId?.title || "Untitled Ticket"}
-                </div>
+                </span>
+
+                {c.unread && (
+                  <span className="conversation-unread-dot"></span>
+                )}
+
+              </div>
 
               <div className="conversation-ticket">
                 <span className="ticket-label">Ticket ID:</span>{" "}
@@ -160,8 +207,8 @@ const filteredConversations = conversations.filter((conversation) => {
               <i className="fa-solid fa-user"></i>
 
             <span>
-              {c.ticketId?.submittedBy
-                ? `${c.ticketId.submittedBy.firstName} ${c.ticketId.submittedBy.lastName}`
+              {c.requester
+                ? `${c.requester.firstName} ${c.requester.lastName}`
                 : "Unknown User"}
             </span>
 

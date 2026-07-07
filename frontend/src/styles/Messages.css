@@ -15,10 +15,14 @@
 ========================= */
 
 .messages-chat {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
+    flex: 1;
+
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
 }
 
 /* =========================
@@ -445,6 +449,466 @@
   background: rgba(239, 68, 68, 0.15);
   color: #ef4444;
   transform: scale(1.05);
+}
+
+/* =========================
+   DRAG & DROP OVERLAY
+========================= */
+
+.drag-overlay {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(15, 23, 42, .72);
+    backdrop-filter: blur(8px);
+
+    z-index: 100;
+
+    animation: dragFade .25s ease;
+}
+
+.drag-overlay-content {
+
+    width: 420px;
+    max-width: 90%;
+
+    padding: 40px 32px;
+
+    text-align: center;
+
+    border-radius: 22px;
+
+    background: rgba(30, 41, 59, .96);
+
+    border: 2px dashed rgba(34, 211, 238, .55);
+
+    box-shadow:
+        0 25px 60px rgba(0,0,0,.45),
+        0 0 40px rgba(6,182,212,.12);
+
+    animation: dragScale .25s ease;
+}
+
+.drag-overlay-content i {
+
+    font-size: 64px;
+
+    color: #22d3ee;
+
+    margin-bottom: 20px;
+}
+
+.drag-overlay-content h2 {
+
+    color: #f8fafc;
+
+    font-size: 28px;
+    font-weight: 700;
+
+    margin-bottom: 10px;
+}
+
+.drag-overlay-content p {
+
+    color: #94a3b8;
+
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+@keyframes dragFade {
+
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes dragScale {
+
+    from {
+        opacity: 0;
+
+        transform:
+            translateY(12px)
+            scale(.95);
+    }
+
+    to {
+        opacity: 1;
+
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+/* =========================
+   MESSAGE ATTACHMENT
+========================= */
+
+.message-attachment-card {
+
+    margin-top: 12px;
+    padding: 14px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 14px;
+
+    max-width: 340px;
+
+    border-radius: 14px;
+
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(148,163,184,.12);
+
+    transition: all .25s ease;
+}
+
+.message-attachment-card:hover {
+
+    border-color: rgba(34,211,238,.25);
+
+    background: rgba(255,255,255,.07);
+}
+
+.attachment-info{
+
+    display:flex;
+    align-items:center;
+
+    gap:14px;
+
+    width:100%;
+}
+
+.attachment-info i{
+    width:40px;
+    height:40px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex-shrink:0;
+
+    font-size:24px;
+
+    border-radius:10px;
+
+    background:rgba(255,255,255,.05);
+
+    transition:.25s ease;
+}
+
+/* PDF */
+
+.fa-file-pdf{
+    color:#ef4444;
+}
+
+/* WORD */
+
+.fa-file-word{
+    color:#3b82f6;
+}
+
+/* EXCEL */
+
+.fa-file-excel{
+    color:#22c55e;
+}
+
+/* POWERPOINT */
+
+.fa-file-powerpoint{
+    color:#f97316;
+}
+
+/* IMAGE */
+
+.fa-file-image{
+    color:#a855f7;
+}
+
+/* ZIP */
+
+.fa-file-zipper{
+    color:#eab308;
+}
+
+/* TEXT */
+
+.fa-file-lines{
+    color:#94a3b8;
+}
+
+/* DEFAULT */
+
+.fa-file{
+    color:#22d3ee;
+}
+
+.attachment-details {
+
+    display: flex;
+    flex-direction: column;
+
+    min-width: 0;
+}
+
+.attachment-details strong {
+
+    color: #f8fafc;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.attachment-details small {
+
+    color: #94a3b8;
+
+    font-size: 12px;
+
+    margin-top: 2px;
+}
+
+.attachment-download{
+
+    align-self:flex-end;
+
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+
+    padding:8px 14px;
+
+    border:none;
+    border-radius:10px;
+
+    background:rgba(6,182,212,.15);
+
+    color:#22d3ee;
+
+    cursor:pointer;
+
+    transition:.25s ease;
+}
+
+.attachment-download:hover {
+
+    background: #06b6d4;
+
+    color: white;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 8px 20px rgba(6,182,212,.25);
+}
+
+.attachment-download i {
+
+    font-size: 13px;
+}
+
+/* =========================
+   IMAGE PREVIEW
+========================= */
+
+.attachment-preview{
+
+    width:100%;
+
+    max-width:100%;
+
+    max-height:220px;
+
+    object-fit:cover;
+
+    border-radius:12px;
+
+    display:block;
+
+    cursor: pointer;
+
+    transition: transform .25s ease, box-shadow .25s ease;
+}
+
+.attachment-preview:hover{
+
+    transform:scale(1.02);
+
+    box-shadow:0 12px 28px rgba(0,0,0,.35);
+}
+
+/* =========================
+   IMAGE PREVIEW MODAL
+========================= */
+
+.image-preview-overlay {
+    position: fixed;
+    inset: 0;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    padding: 40px;
+
+    background: rgba(0, 0, 0, 0.82);
+    backdrop-filter: blur(10px);
+
+    z-index: 9999;
+
+    animation: fadeIn .2s ease;
+}
+
+.image-preview-container {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    max-width: 92vw;
+    max-height: 92vh;
+}
+
+.image-preview-container img {
+    max-width: 100%;
+    max-height: calc(92vh - 80px);
+
+    object-fit: contain;
+
+    border-radius: 16px;
+
+    box-shadow:
+        0 25px 70px rgba(0,0,0,.55);
+
+    animation: fadeIn .2s ease;
+
+    position: relative;
+    z-index: 1;
+}
+
+.image-preview-download,
+.image-preview-close {
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: none;
+    border-radius: 50%;
+
+    cursor: pointer;
+
+    color: white;
+
+    transition: all .25s ease;
+}
+
+.image-preview-download {
+    background: #06b6d4;
+}
+
+.image-preview-download:hover {
+    background: #0891b2;
+    transform: scale(1.08);
+}
+
+.image-preview-close {
+    background: rgba(15,23,42,.92);
+}
+
+.image-preview-close:hover {
+    background: #ef4444;
+    transform: scale(1.08);
+}
+
+/* =========================
+   IMAGE PREVIEW TOOLBAR
+========================= */
+
+.image-preview-toolbar {
+    width: 100%;
+
+    margin-bottom: 18px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.image-preview-name {
+    flex: 1;
+
+    color: #f8fafc;
+
+    font-size: 15px;
+    font-weight: 600;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.image-preview-actions{
+    position:absolute;
+
+    top:16px;
+    right:16px;
+
+    display:flex;
+    gap:10px;
+
+    z-index:100;
+}
+
+.image-download-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 18px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #06b6d4;
+    color: white;
+
+    cursor: pointer;
+
+    font-size: 14px;
+    font-weight: 600;
+
+    transition: all .25s ease;
+}
+
+.image-download-btn:hover {
+    background: #0891b2;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 10px 24px rgba(6,182,212,.35);
 }
 
 /* =========================

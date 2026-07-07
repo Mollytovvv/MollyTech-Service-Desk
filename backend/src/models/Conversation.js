@@ -14,6 +14,7 @@ const conversationSchema = new mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",
         },
+
         role: {
           type: String,
           default: "user",
@@ -24,6 +25,15 @@ const conversationSchema = new mongoose.Schema(
     lastMessage: {
       type: String,
       default: "",
+    },
+    adminUnread: {
+      type: Boolean,
+      default: false,
+    },
+
+    userUnread: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
