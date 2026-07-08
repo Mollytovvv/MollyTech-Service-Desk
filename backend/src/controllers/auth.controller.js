@@ -96,9 +96,31 @@ const login = async (req, res) => {
 };
 
 // ===============================
+// 👥 GET ALL USERS
+// ===============================
+const getUsers = async (req, res) => {
+  try {
+    const users = await User.find()
+      .select("-password")
+      .sort({ createdAt: -1 });
+
+    res.json({
+      count: users.length,
+      users,
+    });
+
+  } catch (err) {
+    res.status(500).json({
+      message: err.message,
+    });
+  }
+};
+
+// ===============================
 // 📦 EXPORTS
 // ===============================
 module.exports = {
   register,
-  login
+  login,
+  getUsers,
 };

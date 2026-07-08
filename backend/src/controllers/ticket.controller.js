@@ -28,9 +28,28 @@ const phoneNumber = rawPhone
 console.log("FORMATTED PHONE:", phoneNumber);
 
     // =========================
+    // GENERATE TICKET ID
+    // =========================
+    const lastTicket = await Ticket.findOne()
+      .sort({ createdAt: -1 })
+      .select("ticketId");
+
+    let ticketId = "MT-000001";
+
+    if (lastTicket?.ticketId) {
+      const lastNumber = parseInt(
+        lastTicket.ticketId.replace("MT-", ""),
+        10
+      );
+
+      ticketId = `MT-${String(lastNumber + 1).padStart(6, "0")}`;
+    }
+
+    // =========================
     // 1. CREATE TICKET
     // =========================
     const ticket = await Ticket.create({
+      ticketId,
       title: req.body.title,
       description: req.body.description,
       category: req.body.category,
@@ -209,6 +228,10 @@ const getTicketById = async (req, res) => {
       ticket.updatedAt = new Date();
 
       const updatedTicket = await ticket.save();
+
+      const io = req.app.get("io");
+
+      io.emit("ticketUpdated", updatedTicket);
 
       return res.json({
         message: "Ticket updated successfully",

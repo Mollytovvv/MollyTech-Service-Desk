@@ -1,4 +1,8 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import {
+  connectSocket,
+  disconnectSocket,
+} from "../socket/socket";
 
 const AuthContext = createContext();
 
@@ -34,6 +38,19 @@ export const AuthProvider = ({ children }) => {
       setAuthReady(true);
     }
   }, []);
+
+  // =========================
+  // SOCKET CONNECTION
+  // =========================
+  useEffect(() => {
+    if (user?._id) {
+      connectSocket(user._id);
+    }
+
+    return () => {
+      disconnectSocket();
+    };
+  }, [user]);
 
   // =========================
   // LOGIN

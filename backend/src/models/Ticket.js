@@ -72,6 +72,12 @@ const activitySchema = new mongoose.Schema({
 // ===============================
 const ticketSchema = new mongoose.Schema(
   {
+
+    ticketId: {
+      type: String,
+      unique: true,
+    },
+
     title: {
       type: String,
       required: true,
@@ -145,5 +151,13 @@ const ticketSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+ticketSchema.pre("save", function (next) {
+  if (!this.ticketId) {
+    this.ticketId = "#" + this._id.toString().slice(-6);
+  }
+
+  next();
+});
 
 module.exports = mongoose.model("Ticket", ticketSchema);

@@ -4,8 +4,8 @@ import "../styles/TopCards.css";
 export default function TopCards({ tickets = [] }) {
 
   const totalTickets = tickets.length;
-  const pending = tickets.filter(t => t.status === "pending").length;
-  const resolved = tickets.filter(t => t.status === "closed").length;
+  const pending = tickets.filter(t => t.status === "open").length;
+  const resolved = tickets.filter(t => t.status === "resolved").length;
 
   const kpis = [
     {
