@@ -304,15 +304,30 @@ export default function Dashboard() {
                       {activity.status.toUpperCase()}
                     </span>
 
-                    <small>
-                      Today
-                      <br />
-                      {new Date(activity.createdAt)
-                        .toLocaleTimeString([], {
-                          hour:"2-digit",
-                          minute:"2-digit"
-                        })}
-                    </small>
+                    {(() => {
+                      const created = new Date(activity.createdAt);
+                      const today = new Date();
+
+                      const isToday =
+                        created.toDateString() === today.toDateString();
+
+                      return (
+                        <small>
+                          {isToday
+                            ? "Today"
+                            : created.toLocaleDateString([], {
+                                month: "short",
+                                day: "numeric",
+                                year: "numeric",
+                              })}
+                          <br />
+                          {created.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </small>
+                      );
+                    })()}
 
                   </div>
 
