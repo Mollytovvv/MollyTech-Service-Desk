@@ -70,7 +70,7 @@
   text-transform: uppercase;
 }
 
-.ticket-status.open {
+.ticket-status.pending {
   background: rgba(245, 158, 11, .18);
   color: #fbbf24;
 }

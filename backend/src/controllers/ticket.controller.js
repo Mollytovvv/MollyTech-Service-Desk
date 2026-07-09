@@ -191,13 +191,13 @@ const getTicketById = async (req, res) => {
         const previous = ticket.status;
         const next = req.body.status;
 
-        const allowedStatuses = [
-          "open",
-          "in_progress",
-          "resolved",
-          "closed",
-          "archived"
-        ];
+      const allowedStatuses = [
+        "pending",
+        "in_progress",
+        "resolved",
+        "closed",
+        "archived"
+      ];
 
         if (!allowedStatuses.includes(next)) {
           return res.status(400).json({ message: "Invalid status value" });
@@ -313,7 +313,7 @@ const reopenTicket = async (req, res) => {
       });
     }
 
-    ticket.status = "open";
+    ticket.status = "pending";
 
     ticket.activityLogs.push({
       action: "Ticket Reopened",
@@ -366,7 +366,7 @@ const deleteTicket = async (req, res) => {
 const getTicketStats = async (req, res) => {
   try {
     const total = await Ticket.countDocuments();
-    const open = await Ticket.countDocuments({ status: "open" });
+    const pending = await Ticket.countDocuments({ status: "pending" });
     const in_progress = await Ticket.countDocuments({ status: "in_progress" });
     const resolved = await Ticket.countDocuments({ status: "resolved" });
     const closed = await Ticket.countDocuments({ status: "closed" });
@@ -374,7 +374,7 @@ const getTicketStats = async (req, res) => {
 
     res.json({
       total,
-      open,
+      pending,
       in_progress,
       resolved,
       closed,
@@ -393,7 +393,7 @@ const getTicketsByStatus = async (req, res) => {
   try {
     const { status } = req.params;
 
-    const allowed = ["open", "in_progress", "resolved", "closed", "archived"];
+    const allowed = ["pending", "in_progress", "resolved", "closed", "archived"];
 
     if (!allowed.includes(status)) {
       return res.status(400).json({ message: "Invalid status" });

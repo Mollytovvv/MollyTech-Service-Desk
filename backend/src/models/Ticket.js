@@ -114,8 +114,14 @@ const ticketSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["open", "in_progress", "resolved", "closed", "archived"],
-      default: "open",
+      enum: [
+        "pending",
+        "in_progress",
+        "resolved",
+        "closed",
+        "archived",
+      ],
+      default: "pending",
     },
 
     priority: {
@@ -156,8 +162,6 @@ ticketSchema.pre("save", function (next) {
   if (!this.ticketId) {
     this.ticketId = "#" + this._id.toString().slice(-6);
   }
-
-  next();
 });
 
 module.exports = mongoose.model("Ticket", ticketSchema);

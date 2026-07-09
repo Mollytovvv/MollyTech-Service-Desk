@@ -226,7 +226,7 @@
     text-transform: uppercase;
 }
 
-.conversation-status.open {
+.conversation-status.pending {
     background: rgba(245,158,11,.18);
     color: #fbbf24;
 }
