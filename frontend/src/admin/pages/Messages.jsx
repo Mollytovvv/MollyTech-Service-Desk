@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import api from "../api/axios";
-import { useAuth } from "../context/AuthContext";
+import api from "../../api/axios";
+import { useAuth } from "../../context/AuthContext";
 import "../styles/Messages.css";
 import ConversationList from "../components/messages/ConversationList";
-import socket from "../socket/socket";
-import { useToast } from "../context/ToastContext";
-import { formatCategory, formatPriority, formatStatus, formatAssignedTo, } from "../utils/formatter";
+import socket from "../../socket/socket";
+import { useToast } from "../../context/ToastContext";
+
+import {formatCategory,formatPriority,formatStatus,formatAssignedTo,} from "../../utils/formatter";
 
 export default function Messages() {
   const { token, user } = useAuth();

@@ -4,7 +4,7 @@ import {
   formatCategory,
   formatStatus,
   formatPriority,
-} from "../../utils/formatter";
+} from "../../../utils/formatter";
 
 import "../../styles/ConversationList.css";
 

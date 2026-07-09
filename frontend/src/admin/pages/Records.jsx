@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import api from "../api/axios";
-import { useAuth } from "../context/AuthContext";
+import api from "../../api/axios";
+import { useAuth } from "../../context/AuthContext";
 import "../styles/Records.css";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../context/ToastContext";
+import { useToast } from "../../context/ToastContext";
 
 export default function Records() {
   const [archivedTickets, setArchivedTickets] = useState([]);

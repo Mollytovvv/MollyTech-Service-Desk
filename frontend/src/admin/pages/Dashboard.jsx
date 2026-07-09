@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import api from "../api/axios";
-import socket from "../socket/socket";
-import { useAuth } from "../context/AuthContext";
+import api from "../../api/axios";
+import socket from "../../socket/socket";
+import { useAuth } from "../../context/AuthContext";
 import "../styles/Dashboard.css";
 import TopCards from "../components/TopCards";
 import { FiActivity, FiUsers, FiBarChart2 } from "react-icons/fi";

@@ -1,7 +1,7 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import "../styles/DashboardLayout.css";
-import logo from "../assets/mollytech_logo.jpg";
+import logo from "../../assets/mollytech_logo.jpg";
 import {
   FiHome,
   FiList,

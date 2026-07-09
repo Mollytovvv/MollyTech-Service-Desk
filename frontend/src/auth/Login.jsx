@@ -2,7 +2,7 @@ import { useState } from "react";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import "../styles/Login.css";
+import "./Login.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");

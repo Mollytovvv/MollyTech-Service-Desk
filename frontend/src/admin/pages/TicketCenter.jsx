@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import api from "../api/axios";
-import { useAuth } from "../context/AuthContext";
+import api from "../../api/axios";
+import { useAuth } from "../../context/AuthContext";
 import "../styles/TicketCenter.css";
 import { FiSearch } from "react-icons/fi";
 import { useNavigate } from "react-router-dom";
-import { useToast } from "../context/ToastContext";
-import socket from "../socket/socket";
+import { useToast } from "../../context/ToastContext";
+import socket from "../../socket/socket";
 import { FiAlertTriangle } from "react-icons/fi";
 
 export default function TicketCenter() {
