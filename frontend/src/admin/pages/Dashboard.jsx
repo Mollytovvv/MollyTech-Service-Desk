@@ -100,13 +100,6 @@ export default function Dashboard() {
   }, [token]);
 
   // =========================
-  // DERIVED DATA
-  // =========================
-  const openTickets = tickets.filter(
-    (t) => t.status === "pending"
-  ).length;
-
-  // =========================
   // ACITVITY FEED
   // =========================
   const [feedFilter, setFeedFilter] = useState("all");

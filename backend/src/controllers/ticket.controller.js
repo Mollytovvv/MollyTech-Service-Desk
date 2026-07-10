@@ -57,15 +57,11 @@ console.log("FORMATTED PHONE:", phoneNumber);
       email: req.body.email,
       phoneNumber,
 
-      submittedBy: req.user
-        ? {
-            firstName: req.user?.firstName || "Unknown",
-            lastName: req.user?.lastName || "User",
-          }
-        : {
-            firstName: "System",
-            lastName: "User",
-          },
+      submittedBy: {
+        userId: req.user.id,
+        firstName: req.user.firstName,
+        lastName: req.user.lastName,
+      },
 
       activityLogs: [
         {
@@ -666,6 +662,70 @@ const archiveTickets = async (req, res) => {
     }
   };
 
+  // ===============================
+  // 👤 USER DASHBOARD
+  // ===============================
+  const getMyDashboard = async (req, res) => {
+    try {
+      const tickets = await Ticket.find({
+        "submittedBy.userId": req.user.id,
+        status: { $ne: "archived" },
+      }).sort({ createdAt: -1 });
+
+      const stats = {
+        total: tickets.length,
+        pending: tickets.filter(t => t.status === "pending").length,
+        in_progress: tickets.filter(t => t.status === "in_progress").length,
+        resolved: tickets.filter(t => t.status === "resolved").length,
+        closed: tickets.filter(t => t.status === "closed").length,
+      };
+
+      const recentTickets = tickets.slice(0, 5);
+
+      return res.json({
+        stats,
+        recentTickets,
+      });
+
+    } catch (err) {
+      console.log("USER DASHBOARD ERROR:", err);
+
+      return res.status(500).json({
+        message: err.message,
+      });
+    }
+  };
+
+  // ===============================
+  // 👤 GET MY TICKETS
+  // ===============================
+  const getMyTickets = async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({
+          message: "Unauthorized",
+        });
+      }
+
+      const tickets = await Ticket.find({
+        "submittedBy.userId": req.user.id,
+        status: { $ne: "archived" },
+      }).sort({ createdAt: -1 });
+
+      return res.json({
+        count: tickets.length,
+        tickets,
+      });
+
+    } catch (err) {
+      console.log("GET MY TICKETS ERROR:", err);
+
+      return res.status(500).json({
+        message: err.message,
+      });
+    }
+  };
+
 // ===============================
 // 📦 EXPORTS
 // ===============================
@@ -683,5 +743,7 @@ module.exports = {
   getMyAssignedTickets,
   addTicketComment,
   archiveTickets,
-  unarchiveTickets
+  unarchiveTickets,
+  getMyDashboard, 
+  getMyTickets,
 };

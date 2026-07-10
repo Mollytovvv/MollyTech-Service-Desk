@@ -14,18 +14,28 @@ const {
   addTicketComment,
   archiveTickets,
   unarchiveTickets,
-  deleteArchivedTickets, // NEW
+  deleteArchivedTickets, 
+  getMyTickets,
+  getMyDashboard,
 } = require("../controllers/ticket.controller");
 
 const authMiddleware = require("../middleware/auth.middleware");
 const roleMiddleware = require("../middleware/role.middleware");
 
+// ===============================
+// USER DASHBOARD
+// ===============================
+router.get(
+  "/my/dashboard",
+  authMiddleware,
+  roleMiddleware("user"),
+  getMyDashboard
+);
 
 // ===============================
 // PUBLIC READ ROUTES
 // ===============================
 router.get("/", getTickets);
-
 
 // ===============================
 // SPECIFIC ROUTES (MUST BE BEFORE /:id)
@@ -93,6 +103,13 @@ router.delete(
   authMiddleware,
   roleMiddleware("admin"),
   deleteArchivedTickets
+);
+
+router.get(
+  "/my",
+  authMiddleware,
+  roleMiddleware("user"),
+  getMyTickets
 );
 
 // ===============================

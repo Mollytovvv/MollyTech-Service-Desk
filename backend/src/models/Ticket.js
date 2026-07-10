@@ -90,8 +90,21 @@ const ticketSchema = new mongoose.Schema(
     },
 
     submittedBy: {
-      firstName: { type: String, required: true },
-      lastName: { type: String, required: true },
+      userId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+      },
+
+      firstName: {
+        type: String,
+        required: true,
+      },
+
+      lastName: {
+        type: String,
+        required: true,
+      },
     },
 
     email: {

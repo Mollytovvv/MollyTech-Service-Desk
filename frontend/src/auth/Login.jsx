@@ -31,16 +31,25 @@ export default function Login() {
         throw new Error("Invalid login response from server");
       }
 
-      // ✅ SAVE AUTH PROPERLY
-      login(token, user);
+    // ✅ SAVE AUTH PROPERLY
+    login(token, user);
 
-      // backup storage
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(user));
+    // backup storage
+    localStorage.setItem("token", token);
+    localStorage.setItem("user", JSON.stringify(user));
 
-      alert("Login successful!");
-
+    // =========================
+    // ROLE BASED REDIRECT
+    // =========================
+    if (user.role === "admin") {
       navigate("/dashboard");
+    }
+    else if (user.role === "user") {
+      navigate("/user/dashboard");
+    }
+    else {
+      navigate("/");
+    }
 
     } catch (err) {
       console.log("LOGIN ERROR:", err.response?.data || err.message);

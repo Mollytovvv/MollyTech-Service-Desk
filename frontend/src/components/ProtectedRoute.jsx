@@ -1,16 +1,24 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 
-export default function ProtectedRoute({ children }) {
-  const { token, authReady } = useAuth();
+export default function ProtectedRoute({
+  children,
+  allowedRoles = [],
+}) {
+  const { token, user, authReady } = useAuth();
 
-  // ⛔ IMPORTANT: wait until auth is initialized
   if (!authReady) {
-    return null; // or a loading spinner
+    return null;
   }
 
-  // 🔐 after auth is ready, decide access
   if (!token) {
+    return <Navigate to="/" replace />;
+  }
+
+  if (
+    allowedRoles.length > 0 &&
+    !allowedRoles.includes(user?.role)
+  ) {
     return <Navigate to="/" replace />;
   }
 

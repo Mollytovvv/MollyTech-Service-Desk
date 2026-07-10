@@ -4,92 +4,156 @@ import {
   disconnectSocket,
 } from "../socket/socket";
 
+
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
-  const [user, setUser] = useState(null);
-  const [authReady, setAuthReady] = useState(false);
+
 
   // =========================
-  // LOAD FROM LOCAL STORAGE
+  // LOAD TOKEN
   // =========================
-  useEffect(() => {
-    try {
-      const savedToken = localStorage.getItem("token");
-      const savedUser = localStorage.getItem("user");
 
-      if (savedToken) {
-        setToken(savedToken);
+  const [token, setToken] = useState(() => {
+
+    return localStorage.getItem("token");
+
+  });
+
+  // =========================
+  // LOAD USER
+  // =========================
+  const [user, setUser] = useState(() => {
+
+    const savedUser = localStorage.getItem("user");
+
+
+    if(savedUser && savedUser !== "undefined"){
+
+      try{
+
+        return JSON.parse(savedUser);
+
+      }
+      catch(err){
+
+        console.log(
+          "USER LOAD ERROR:",
+          err
+        );
+
+        localStorage.removeItem("user");
+
       }
 
-      if (savedUser && savedUser !== "undefined") {
-        setUser(JSON.parse(savedUser));
-      } else {
-        setUser(null);
-      }
-    } catch (err) {
-      console.log("AUTH LOAD ERROR:", err);
-
-      // safety reset if JSON is corrupted
-      localStorage.removeItem("user");
-      setUser(null);
-    } finally {
-      setAuthReady(true);
     }
-  }, []);
+
+
+    return null;
+
+
+  });
+
+  const authReady = true;
 
   // =========================
   // SOCKET CONNECTION
   // =========================
-  useEffect(() => {
-    if (user?._id) {
+  useEffect(()=>{
+
+
+    if(user?._id){
+
       connectSocket(user._id);
+
     }
 
-    return () => {
+
+    return()=>{
+
       disconnectSocket();
+
     };
-  }, [user]);
+
+
+  },[user]);
 
   // =========================
   // LOGIN
   // =========================
-  const login = (newToken, newUser) => {
-    if (!newToken) return console.log("No token provided");
-    if (!newUser) return console.log("No user provided");
+  const login = (newToken,newUser)=>{
 
-    localStorage.setItem("token", newToken);
-    localStorage.setItem("user", JSON.stringify(newUser));
+    if(!newToken){
+
+      console.log("No token provided");
+
+      return;
+
+    }
+
+    if(!newUser){
+
+      console.log("No user provided");
+
+      return;
+
+    }
+
+    localStorage.setItem(
+      "token",
+      newToken
+    );
+
+
+    localStorage.setItem(
+      "user",
+      JSON.stringify(newUser)
+    );
 
     setToken(newToken);
+
     setUser(newUser);
+
   };
 
   // =========================
   // LOGOUT
   // =========================
-  const logout = () => {
+  const logout = ()=>{
+
     localStorage.removeItem("token");
+
     localStorage.removeItem("user");
 
     setToken(null);
+
     setUser(null);
+
   };
 
-  return (
+  return(
+
     <AuthContext.Provider
+
       value={{
         token,
         user,
         login,
         logout,
-        authReady,
+        authReady
       }}
+
     >
+
       {children}
+
+
     </AuthContext.Provider>
+
+
   );
+
+
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = ()=>useContext(AuthContext);
