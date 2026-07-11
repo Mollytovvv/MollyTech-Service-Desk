@@ -150,7 +150,7 @@ const sendMessage = async (req, res) => {
       .populate({
         path: "ticketId",
         select:
-          "_id title description status priority category assignedTo createdAt comments email phoneNumber",
+        "_id ticketId title description status priority category assignedTo createdAt comments email phoneNumber"
       })
       .populate({
         path: "participants.userId",

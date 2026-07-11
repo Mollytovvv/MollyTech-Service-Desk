@@ -8,6 +8,7 @@ import Records from "./admin/pages/Records";
 import Messages from "./admin/pages/Messages";
 
 import UserDashboard from "./user/pages/UserDashboard";
+import UserTicketCenter from "./user/pages/UserTicketCenter";
 
 import DashboardLayout from "./admin/layouts/DashboardLayout";
 import UserDashboardLayout from "./user/layouts/UserDashboardLayout";
@@ -21,12 +22,19 @@ function App() {
     <ToastProvider>
       <Routes>
 
-        {/* PUBLIC */}
-        <Route path="/" element={<Login />} />
+        {/* ===========================
+            PUBLIC ROUTES
+        ============================ */}
+
+        <Route
+          path="/"
+          element={<Login />}
+        />
 
         {/* ===========================
             ADMIN ROUTES
         ============================ */}
+
         <Route
           element={
             <ProtectedRoute allowedRoles={["admin"]}>
@@ -34,15 +42,31 @@ function App() {
             </ProtectedRoute>
           }
         >
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/ticket-center" element={<TicketCenter />} />
-          <Route path="/records" element={<Records />} />
-          <Route path="/messages" element={<Messages />} />
+          <Route
+            path="/dashboard"
+            element={<Dashboard />}
+          />
+
+          <Route
+            path="/ticket-center"
+            element={<TicketCenter />}
+          />
+
+          <Route
+            path="/records"
+            element={<Records />}
+          />
+
+          <Route
+            path="/messages"
+            element={<Messages />}
+          />
         </Route>
 
         {/* ===========================
             USER ROUTES
         ============================ */}
+
         <Route
           element={
             <ProtectedRoute allowedRoles={["user"]}>
@@ -54,6 +78,31 @@ function App() {
             path="/user/dashboard"
             element={<UserDashboard />}
           />
+
+          <Route
+            path="/user/tickets"
+            element={<UserTicketCenter />}
+          />
+
+          {/* Future Pages */}
+
+          {/* 
+          <Route
+            path="/user/messages"
+            element={<UserMessages />}
+          />
+
+          <Route
+            path="/user/profile"
+            element={<UserProfile />}
+          />
+
+          <Route
+            path="/user/settings"
+            element={<UserSettings />}
+          />
+          */}
+
         </Route>
 
       </Routes>

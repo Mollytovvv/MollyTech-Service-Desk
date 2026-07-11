@@ -146,7 +146,7 @@ export default function Dashboard() {
 
     title: t.title || "Untitled Ticket",
 
-    ticketId: `#${t._id.slice(-6)}`,
+    ticketId: t.ticketId,
 
     submittedBy:
       t.submittedBy

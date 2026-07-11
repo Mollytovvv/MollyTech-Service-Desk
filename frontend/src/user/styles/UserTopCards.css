@@ -3,95 +3,94 @@
 ===================================== */
 
 .kpi-grid {
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:16px;
-    margin-bottom:18px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 18px;
 }
 
 /* CARD */
 
-.kpi-card{
-    display:flex;
-    align-items:center;
-    gap:14px;
+.kpi-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
 
-    padding:16px 18px;
+    padding: 16px 18px;
 
-    background:var(--panel);
-    border:1px solid var(--border);
-    border-radius:14px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
 
-    transition:.2s ease;
+    transition: .2s ease;
 }
 
-.kpi-card:hover{
-    transform:translateY(-3px);
-    border-color:rgba(59,130,246,.4);
+.kpi-card:hover {
+    transform: translateY(-3px);
+    border-color: rgba(59,130,246,.4);
 }
 
 /* ICON */
 
-.kpi-icon{
-    width:44px;
-    height:44px;
+.kpi-icon {
+    width: 44px;
+    height: 44px;
 
-    display:flex;
-    align-items:center;
-    justify-content:center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-    border-radius:12px;
+    border-radius: 12px;
 
-    font-size:18px;
+    font-size: 18px;
 }
 
 /* TEXT */
 
-.kpi-content p{
-    margin:0;
-    font-size:12px;
-    color:var(--muted);
+.kpi-content p {
+    margin: 0;
+    font-size: 12px;
+    color: var(--muted);
 }
 
-.kpi-content h2{
-    margin:2px 0 0;
-    font-size:22px;
-    font-weight:700;
-    color:var(--text);
+.kpi-content h2 {
+    margin: 2px 0 0;
+    font-size: 22px;
+    color: var(--text);
 }
 
 /* COLORS */
 
-.kpi-icon.tickets{
-    background:rgba(99,102,241,.15);
-    color:#6366f1;
+.kpi-icon.tickets {
+    background: rgba(99,102,241,.15);
+    color: #6366f1;
 }
 
-.kpi-icon.pending{
-    background:rgba(245,158,11,.15);
-    color:#f59e0b;
+.kpi-icon.pending {
+    background: rgba(245,158,11,.15);
+    color: #f59e0b;
 }
 
-.kpi-icon.progress{
-    background:rgba(59,130,246,.15);
-    color:#3b82f6;
+.kpi-icon.messages{
+    background:rgba(168,85,247,.15);
+    color:#a855f7;
 }
 
-.kpi-icon.resolved{
-    background:rgba(34,197,94,.15);
-    color:#22c55e;
+.kpi-icon.resolved {
+    background: rgba(34,197,94,.15);
+    color: #22c55e;
 }
 
 /* RESPONSIVE */
 
-@media(max-width:1000px){
-    .kpi-grid{
-        grid-template-columns:repeat(2,1fr);
+@media (max-width:1000px) {
+    .kpi-grid {
+        grid-template-columns: repeat(2,1fr);
     }
 }
 
-@media(max-width:600px){
-    .kpi-grid{
-        grid-template-columns:1fr;
+@media (max-width:600px) {
+    .kpi-grid {
+        grid-template-columns: 1fr;
     }
 }

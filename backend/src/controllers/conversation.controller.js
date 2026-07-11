@@ -52,7 +52,7 @@ const getConversations = async (req, res) => {
       .sort({ updatedAt: -1 })
       .populate(
         "ticketId",
-        "title status priority category"
+        "_id ticketId title status priority category"
       )
       .populate(
         "participants.userId",

@@ -10,8 +10,8 @@ import {
   FiPlus,
   FiFolder,
   FiMessageCircle,
-  FiBookOpen,
-  FiBell
+  FiBell,
+  FiSettings
 } from "react-icons/fi";
 
 export default function UserDashboard() {
@@ -20,12 +20,12 @@ export default function UserDashboard() {
 
   const [dashboard, setDashboard] = useState({
 
-    stats:{
-      total:0,
-      pending:0,
-      in_progress:0,
-      resolved:0
-    },
+  stats:{
+    total:0,
+    pending:0,
+    messages:0,
+    resolved:0
+  },
 
     recentTickets:[]
 
@@ -343,16 +343,16 @@ export default function UserDashboard() {
 
             >
 
-              <FiBookOpen/>
+              <FiSettings/>
 
               <div>
 
                 <h4>
-                  Knowledge Base
+                  Settings
                 </h4>
 
                 <p>
-                  Find solutions
+                 Manage your account
                 </p>
 
               </div>

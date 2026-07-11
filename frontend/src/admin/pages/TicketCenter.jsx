@@ -456,9 +456,9 @@ const handleReopen = async (id) => {
 
                 <div className="meta-item">
                   <span className="meta-label">Ticket ID</span>
-                  <span className="meta-value">
-                    #{t._id?.slice(-6)}
-                  </span> 
+                    <span className="meta-value">
+                      {t.ticketId}
+                    </span>
                 </div>
 
                   <div className="meta-item">
@@ -593,10 +593,10 @@ const handleReopen = async (id) => {
               {/* GRID */}
               <div className="view-grid">
 
-                <div className="view-box">
-                  <span className="label">Ticket ID</span>
-                  <span>#{selectedTicket._id?.slice(-6)}</span>
-                </div>
+              <div className="view-box">
+                <span className="label">Ticket ID</span>
+                <span>{selectedTicket.ticketId}</span>
+              </div>
 
                 <div className="view-box">
                   <span className="label">Priority</span>

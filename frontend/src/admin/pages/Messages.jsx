@@ -627,7 +627,7 @@ export default function Messages() {
 
                     <div className="messages-meta-content">
                       <small>Ticket ID:</small>
-                      <span>#{ticket?._id?.slice(-6) || "------"}</span>
+                      <span>{ticket?.ticketId || "------"}</span>
                     </div>
                   </div>
 

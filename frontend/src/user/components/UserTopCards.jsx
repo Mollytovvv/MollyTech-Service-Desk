@@ -1,62 +1,56 @@
 import {
-  FiFileText,
-  FiClock,
-  FiLoader,
-  FiCheckCircle
-} from "react-icons/fi";
+  FaTicketAlt,
+  FaClock,
+  FaComments,
+  FaCheckCircle
+} from "react-icons/fa";
 
 import "../styles/UserTopCards.css";
 
 export default function UserTopCards({ stats }) {
-
   const cards = [
     {
-      label: "Total Tickets",
+      title: "Total Tickets",
       value: stats.total,
-      icon: <FiFileText />,
-      type: "tickets"
+      icon: <FaTicketAlt />,
+      type: "tickets",
     },
     {
-      label: "Pending",
+      title: "Pending",
       value: stats.pending,
-      icon: <FiClock />,
-      type: "pending"
+      icon: <FaClock />,
+      type: "pending",
     },
     {
-      label: "In Progress",
-      value: stats.in_progress,
-      icon: <FiLoader />,
-      type: "progress"
+      title: "Messages",
+      value: stats.messages ?? 0,
+      icon: <FaComments />,
+      type: "messages",
     },
     {
-      label: "Resolved",
+      title: "Resolved",
       value: stats.resolved,
-      icon: <FiCheckCircle />,
-      type: "resolved"
-    }
+      icon: <FaCheckCircle />,
+      type: "resolved",
+    },
   ];
 
   return (
     <div className="kpi-grid">
-
       {cards.map((card, index) => (
-        <div
-          key={index}
-          className="kpi-card"
-        >
+        <div key={index} className="kpi-card">
 
           <div className={`kpi-icon ${card.type}`}>
             {card.icon}
           </div>
 
           <div className="kpi-content">
-            <p>{card.label}</p>
+            <p>{card.title}</p>
             <h2>{card.value}</h2>
           </div>
 
         </div>
       ))}
-
     </div>
   );
 }

@@ -112,6 +112,7 @@ const scrollToBottom = () => {
 
 const query = search.toLowerCase();
 
+console.log("CONVERSATIONS:", conversations);
 const filteredConversations = conversations.filter((conversation) => {
   const matchesSearch =
     conversation.ticketId?.title?.toLowerCase().includes(query) ||
@@ -233,9 +234,9 @@ const filteredConversations = conversations.filter((conversation) => {
 
               <div className="conversation-ticket">
                 <span className="ticket-label">Ticket ID:</span>{" "}
-                <span className="ticket-number">
-                  #{c.ticketId?._id?.slice(-6) || "------"}
-                </span>
+                  <span className="ticket-number">
+                    {c.ticketId?.ticketId || "------"}
+                  </span>
               </div>
 
               </div>
