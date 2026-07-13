@@ -100,60 +100,6 @@
 
 }
 
-
-
-/* CREATE BUTTON */
-
-
-.create-ticket-btn {
-
-
-    display:flex;
-
-    align-items:center;
-
-    gap:8px;
-
-
-    padding:9px 15px;
-
-
-    border:none;
-
-    border-radius:8px;
-
-
-    background:var(--primary);
-
-
-    color:white;
-
-
-    font-size:13px;
-
-    font-weight:600;
-
-
-    cursor:pointer;
-
-
-    transition:.2s ease;
-
-
-}
-
-
-
-.create-ticket-btn:hover {
-
-
-    transform:translateY(-2px);
-
-    opacity:.9;
-
-
-}
-
 /* =====================================
    MAIN CONTENT
 ===================================== */
@@ -363,205 +309,300 @@
 
 
 .action-item p {
-
-
     margin:2px 0 0;
 
     font-size:11px;
 
     color:var(--muted);
-
-
 }
 
 
 
 .action-item:hover {
-
-
     transform:translateX(3px);
-
 
     border-color:
     rgba(59,130,246,.4);
-
-
 }
-
-
-
-
 
 /* =====================================
-   TICKETS
+   RECENT TICKETS
 ===================================== */
 
-
-.ticket-list {
-
-
+.ticket-list{
     display:flex;
-
     flex-direction:column;
+    gap:12px;
+}
 
-    gap:8px;
+/* CARD */
 
+.ticket-row{
+    display:flex;
+    align-items:center;
+
+    gap:14px;
+
+    padding:12px 16px;   /* was 16px 18px */
+
+    min-height:88px;      /* keep cards compact */
+
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:12px;
+
+    position:relative;
+    overflow:hidden;
+
+    transition:.25s ease;
+}
+
+.ticket-row::before{
+
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    top:0;
+
+    width:3px;
+    height:100%;
+
+    background:var(--primary);
 
 }
 
+.ticket-row:hover{
 
+    transform:translateY(-2px);
 
+    border-color:rgba(59,130,246,.45);
 
-.ticket-row {
+    background:rgba(17,28,51,.95);
 
+    box-shadow:0 8px 22px rgba(59,130,246,.08);
+
+}
+
+/* ICON */
+
+.ticket-icon{
+
+    width:36px;
+    height:36px;
+
+    flex-shrink:0;
 
     display:flex;
+    align-items:center;
+    justify-content:center;
 
+    border-radius:12px;
+
+    background:rgba(59,130,246,.12);
+
+    border:1px solid rgba(59,130,246,.25);
+
+    font-size:16px;
+
+}
+
+/* CONTENT */
+
+.ticket-content{
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    gap:2px;          /* was around 6px */
+    flex:1;
+}
+
+.ticket-label{
+
+    font-size:10px;
+
+    font-weight:700;
+
+    letter-spacing:1px;
+
+    text-transform:uppercase;
+
+    color:var(--muted);
+
+    margin-bottom:3px;
+
+}
+
+.ticket-title{
+
+    margin:0 0 6px;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    color:var(--text);
+
+    line-height:1.3;
+
+}
+
+.ticket-info{
+
+    display:flex;
+    align-items:center;
+    gap:6px;
+
+    font-size:12px;
+
+    color:var(--muted);
+
+}
+
+.ticket-info i{
+
+    color:var(--primary);
+
+}
+
+/* META */
+
+.ticket-meta{
+
+    margin-left:auto;
+
+    display:flex;
+    flex-direction:column;
+
+    align-items:flex-end;
 
     justify-content:space-between;
 
+    min-width:180px;
 
-    align-items:center;
-
-
-    padding:12px;
-
-
-    background:var(--panel-2);
-
-
-    border:1px solid var(--border);
-
-
-    border-radius:10px;
-
-
-    transition:.2s ease;
-
+    height:100%;
 
 }
 
+.ticket-badges{
 
+    display:flex;
 
-.ticket-row:hover {
+    gap:8px;
 
-
-    border-color:
-    rgba(59,130,246,.35);
-
-
-}
-
-
-
-.ticket-row h4 {
-
-
-    margin:0 0 3px;
-
-
-    font-size:13px;
-
+    margin-bottom:10px;
 
 }
 
+.ticket-date{
 
-
-.ticket-row small {
-
+    text-align:right;
 
     font-size:11px;
 
     color:var(--muted);
 
+    line-height:18px;
 
 }
 
+/* BADGES */
 
+.status,
+.priority{
 
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-
-/* =====================================
-   STATUS BADGES
-===================================== */
-
-
-.status {
-
-
-    padding:5px 10px;
-
+    width:88px;
+    height:30px;
 
     border-radius:999px;
 
-
-    font-size:9px;
-
+    font-size:10px;
 
     font-weight:700;
 
+    letter-spacing:.7px;
 
-    letter-spacing:.8px;
-
+    text-transform:uppercase;
 
 }
 
+/* STATUS */
 
-
-.status.pending {
-
+.status.pending{
 
     background:rgba(245,158,11,.12);
 
     color:#fbbf24;
 
-
 }
 
-
-
-.status.in_progress {
-
+.status.in_progress{
 
     background:rgba(59,130,246,.12);
 
     color:#60a5fa;
 
-
 }
 
-
-
-.status.resolved {
-
+.status.resolved{
 
     background:rgba(34,197,94,.12);
 
     color:#4ade80;
 
-
 }
 
-
-
-.status.closed {
-
+.status.closed{
 
     background:rgba(148,163,184,.12);
 
     color:#cbd5e1;
 
+}
+
+/* PRIORITY */
+
+.priority.low{
+
+    background:rgba(34,197,94,.12);
+
+    color:#4ade80;
 
 }
 
+.priority.medium{
 
+    background:rgba(245,158,11,.12);
 
+    color:#fbbf24;
+
+}
+
+.priority.high{
+
+    background:rgba(239,68,68,.12);
+
+    color:#f87171;
+
+}
+
+.priority.urgent{
+
+    background:rgba(220,38,38,.18);
+
+    color:#ef4444;
+
+}
 
 
 /* =====================================
    ANNOUNCEMENTS
 ===================================== */
-
 
 .announcements {
 
@@ -689,8 +730,6 @@
 
 }
 
-@media(max-width:700px){
-
 .dashboard-intro {
 
 
@@ -703,16 +742,25 @@
 
 }
 
-.ticket-row {
+@media(max-width:700px){
 
-
+.ticket-row{
     flex-direction:column;
-
     align-items:flex-start;
-
-    gap:10px;
-
+    gap:14px;
 }
 
+.ticket-right{
+    width:100%;
+    align-items:flex-start;
+}
+
+.ticket-badges{
+    flex-wrap:wrap;
+}
+
+.ticket-title{
+    white-space:normal;
+}
 
 }

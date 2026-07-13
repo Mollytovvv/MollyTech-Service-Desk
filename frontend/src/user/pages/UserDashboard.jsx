@@ -115,28 +115,6 @@ export default function UserDashboard() {
 
         </div>
 
-
-
-
-
-        <button
-
-          type="button"
-
-          className="create-ticket-btn"
-
-          onClick={()=>navigate("/user/create-ticket")}
-
-        >
-
-          <FiPlus/>
-
-          Create Ticket
-
-
-        </button>
-
-
       </section>
 
       <UserTopCards
@@ -197,45 +175,66 @@ export default function UserDashboard() {
 
                 dashboard.recentTickets?.map(ticket=>(
 
-                  <div
-
+                <div
                     key={ticket._id}
-
                     className="ticket-row"
+                >
 
-                  >
+                    <div className="ticket-icon">
+                        🎫
+                    </div>
 
-                    <div className="ticket-info">
+                    <div className="ticket-content">
 
-                      <h4>
-                        {ticket.title}
-                      </h4>
+                        <span className="ticket-label">
+                            SUPPORT TICKET
+                        </span>
 
-                      <small>
-                        {ticket.ticketId}
-                      </small>
+                        <h4 className="ticket-title">
+                            {ticket.title}
+                        </h4>
+
+                        <div className="ticket-info">
+                            <i className="fa-solid fa-ticket"></i>
+                            <span>Ticket ID: {ticket.ticketId}</span>
+                        </div>
 
                     </div>
 
                     <div className="ticket-meta">
 
-                      <span
+                        <div className="ticket-badges">
 
-                        className={`status ${ticket.status}`}
+                            <span className={`status ${ticket.status}`}>
+                                {ticket.status.replace("_", " ").toUpperCase()}
+                            </span>
 
-                      >
+                            <span className={`priority ${ticket.priority}`}>
+                                {ticket.priority.toUpperCase()}
+                            </span>
 
-                        {
-                          ticket.status
-                          .replace("_"," ")
-                          .toUpperCase()
-                        }
+                        </div>
 
-                      </span>
+                        <div className="ticket-date">
+
+                            {new Date(ticket.createdAt).toLocaleDateString([],{
+                                month:"short",
+                                day:"numeric",
+                                year:"numeric",
+                            })}
+
+                            <br/>
+
+                            {new Date(ticket.createdAt).toLocaleTimeString([],{
+                                hour:"2-digit",
+                                minute:"2-digit",
+                            })}
+
+                        </div>
 
                     </div>
 
-                  </div>
+                </div>
 
                 ))
 

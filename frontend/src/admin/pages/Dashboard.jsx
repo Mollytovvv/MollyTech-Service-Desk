@@ -154,8 +154,9 @@ export default function Dashboard() {
         : "Unknown User",
 
     status: t.status,
+    priority: t.priority,
 
-    createdAt: t.createdAt
+    createdAt: t.createdAt,
   }));
 
   const recentUsers = users.slice(0, 5);
@@ -266,13 +267,9 @@ export default function Dashboard() {
 
                 <div className="activity-content">
 
-                <div className="activity-title-row">
-
-                  <h5>
+                <p className="activity-label">
                     {activity.event}
-                  </h5>
-
-                </div>
+                </p>
 
 
                 <h4 className="activity-ticket-title">
@@ -293,9 +290,17 @@ export default function Dashboard() {
 
                   <div className="activity-meta">
 
+                  <div className="activity-badges">
+
                     <span className={`tag ${activity.status}`}>
-                      {activity.status.toUpperCase()}
+                      {activity.status.replace("_", " ").toUpperCase()}
                     </span>
+
+                    <span className={`priority-tag ${activity.priority}`}>
+                      {activity.priority.toUpperCase()}
+                    </span>
+
+                  </div>
 
                     {(() => {
                       const created = new Date(activity.createdAt);
