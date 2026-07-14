@@ -115,7 +115,8 @@
 
 .search-box{
     flex:1;
-    min-width:550px;
+    min-width:300px;
+    max-width:700px;
 
     display:flex;
     align-items:center;
@@ -126,7 +127,6 @@
     padding:0 14px;
 
     background:var(--panel-2);
-
     border:1px solid var(--border);
     border-radius:10px;
 
@@ -195,9 +195,9 @@
     display:flex;
     flex-direction:column;
 
-    min-height:450px;
+    min-height:400px;
 
-    padding:20px;
+    padding:30px;
 
     background:var(--panel);
 
@@ -309,14 +309,15 @@
     display:flex;
     justify-content:space-between;
     align-items:flex-start;
-    gap:28px;
 
-    padding:24px;
+    gap:20px;
+
+    padding:16px 18px;
 
     background:var(--panel-2);
 
     border:1px solid var(--border);
-    border-radius:16px;
+    border-radius:14px;
 
     transition:
         transform .25s ease,
@@ -348,7 +349,7 @@
 ===================================== */
 
 .ticket-field{
-    margin-bottom:18px;
+    margin-bottom:16px;
 }
 
 .ticket-field:last-child{
@@ -389,10 +390,9 @@
 .user-ticket-info h4{
     margin:0;
 
-    font-size:20px;
+    font-size:17px;
     font-weight:600;
-
-    color:var(--text);
+    line-height:1.35;
 }
 
 
@@ -404,10 +404,9 @@
     color:var(--muted);
 
     font-size:13px;
-    line-height:1.8;
+    line-height:1.6;
 
     display:-webkit-box;
-
     -webkit-box-orient:vertical;
 
     overflow:hidden;
@@ -450,10 +449,10 @@
 .user-ticket-meta{
     display:flex;
     flex-direction:column;
-    align-items:flex-end;
-    gap:12px;
 
-    min-width:220px;
+    gap:8px;
+
+    min-width:180px;
 }
 
 
@@ -471,13 +470,13 @@
     align-items:center;
     gap:8px;
 
-    padding:9px 14px;
+    padding:7px 12px;
 
-    min-width:150px;
+    min-width:130px;
 
     border-radius:999px;
 
-    font-size:12px;
+    font-size:11px;
     font-weight:600;
 
     justify-content:flex-start;
@@ -508,8 +507,44 @@
 ===================================== */
 
 .user-ticket-priority{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    padding:7px 12px;
+
+    border-radius:999px;
+
+    font-size:11px;
+    font-weight:600;
+}
+
+/* LOW */
+
+.user-priority-low{
+    background:rgba(34,197,94,.12);
+    color:#4ade80;
+}
+
+/* MEDIUM */
+
+.user-priority-medium{
     background:rgba(245,158,11,.12);
     color:#fbbf24;
+}
+
+/* HIGH */
+
+.user-priority-high{
+    background:rgba(239,68,68,.15);
+    color:#f87171;
+}
+
+/* URGENT */
+
+.user-priority-urgent{
+    background:rgba(127,29,29,.30);
+    color:#ef4444;
 }
 
 
@@ -540,28 +575,37 @@
 .ticket-row{
     display:flex;
     justify-content:space-between;
-    gap:20px;
-    margin-bottom:20px;
+    gap:14px;
+    margin-bottom:12px;
 }
 
 .ticket-contact-grid{
     display:grid;
     grid-template-columns:repeat(2,1fr);
-    gap:20px;
-    margin-top:24px;
-    padding-top:20px;
+
+    gap:14px;
+
+    margin-top:14px;
+    padding-top:14px;
+
     border-top:1px solid var(--border);
 }
 
 .ticket-meta-card{
     width:100%;
+
     display:flex;
     flex-direction:column;
-    gap:8px;
-    padding:14px;
+
+    gap:6px;
+
+    padding:8px 10px;
+
     background:var(--panel);
+
     border:1px solid var(--border);
-    border-radius:12px;
+
+    border-radius:10px;
 }
 
 .ticket-meta-card small{
@@ -569,6 +613,185 @@
     font-size:11px;
     text-transform:uppercase;
     letter-spacing:.08em;
+}
+
+/* ===============================
+   TICKET ACTION MENU
+================================ */
+
+.ticket-actions-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    width:100%;
+
+    margin-bottom:2px;
+}
+
+.ticket-actions-header span{
+    font-size:11px;
+    font-weight:600;
+
+    letter-spacing:.08em;
+    text-transform:uppercase;
+
+    color:var(--muted);
+}
+
+.ticket-menu-container{
+    position:relative;
+}
+
+.ticket-menu-btn{
+
+    width:30px;
+    height:30px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:transparent;
+
+    border:none;
+    border-radius:8px;
+
+    color:var(--muted);
+
+    cursor:pointer;
+
+    transition:.2s ease;
+}
+
+.ticket-menu-btn:hover{
+
+    background:rgba(255,255,255,.08);
+
+    color:white;
+
+}
+
+
+.ticket-menu-btn svg {
+    font-size: 20px;
+}
+
+.ticket-action-menu{
+
+    position:absolute;
+
+    top:36px;
+    right:0;
+
+    width:180px;
+
+    background:var(--panel);
+
+    border:1px solid var(--border);
+
+    border-radius:12px;
+
+    padding:6px;
+
+    z-index:100;
+
+    box-shadow:
+        0 16px 40px rgba(0,0,0,.35);
+
+    animation:menuFade .18s ease;
+}
+
+.ticket-action-menu button {
+
+    width: 100%;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 10px 12px;
+
+    border-radius: 8px;
+
+    border: none;
+
+    background: transparent;
+
+    color: #e5e7eb;
+
+    font-size: 14px;
+
+    cursor: pointer;
+
+    transition: background 0.2s ease;
+}
+
+
+.ticket-action-menu button:hover {
+
+    background: rgba(255,255,255,0.08);
+
+}
+
+.ticket-action-menu svg {
+
+    font-size: 16px;
+
+}
+
+/* Keep Ticket (Blue) */
+.btn-keep-ticket{
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:10px 18px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s ease;
+}
+
+.btn-keep-ticket:hover{
+    background:#1d4ed8;
+}
+
+
+/* Cancel Request (Red) */
+.btn-cancel-ticket{
+    background:#dc2626;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:10px 18px;
+    font-weight:600;
+    cursor:pointer;
+    transition:.2s ease;
+}
+
+.btn-cancel-ticket:hover{
+    background:#b91c1c;
+}
+
+/* ===========================
+   DELETE TICKET (RED)
+=========================== */
+
+.btn-delete-ticket{
+    background:#dc2626;
+    color:#fff;
+    border:none;
+    border-radius:8px;
+    padding:10px 18px;
+    font-weight:600;
+    cursor:pointer;
+    transition:0.2s ease;
+}
+
+.btn-delete-ticket:hover{
+    background:#b91c1c;
 }
 
 /* =====================================
@@ -622,6 +845,20 @@
     .user-status-resolved,
     .user-status-closed{
         width:100%;
+    }
+
+}
+
+@keyframes menuFade {
+
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
 
 }

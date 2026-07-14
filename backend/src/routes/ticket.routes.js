@@ -6,15 +6,17 @@ const {
   getTickets,
   getTicketById,
   updateTicket,
+  cancelTicket,
   assignTicket,
   reopenTicket,
   deleteTicket,
+  deleteMyTicket,
   getTicketsByStatus,
   getMyAssignedTickets,
   addTicketComment,
   archiveTickets,
   unarchiveTickets,
-  deleteArchivedTickets, 
+  deleteArchivedTickets,
   getMyTickets,
   getMyDashboard,
 } = require("../controllers/ticket.controller");
@@ -65,6 +67,15 @@ router.post(
   createTicket
 );
 
+// ===============================
+// CANCEL TICKET
+// ===============================
+router.patch(
+  "/:id/cancel",
+  authMiddleware,
+  roleMiddleware("user"),
+  cancelTicket
+);
 
 // ===============================
 // COMMENT
@@ -121,6 +132,17 @@ router.get("/:id", getTicketById);
 // ===============================
 // UPDATE / ASSIGN / RESOLVE / REOPEN
 // ===============================
+router.get("/:id", getTicketById);
+router.put(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("user", "admin"),
+  updateTicket
+);
+
+// ===============================
+// ASSIGN
+// ===============================
 router.patch(
   "/:id/assign",
   authMiddleware,
@@ -142,6 +164,15 @@ router.patch(
   updateTicket
 );
 
+// ===============================
+// USER DELETE TICKET
+// ===============================
+router.delete(
+  "/my/:id",
+  authMiddleware,
+  roleMiddleware("user"),
+  deleteMyTicket
+);
 
 // ===============================
 // DELETE

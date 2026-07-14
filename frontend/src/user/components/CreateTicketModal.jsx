@@ -14,11 +14,13 @@ import {
 } from "react-icons/fi";
 
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import api from "../../api/axios";
 import "../styles/CreateTicketModal.css";
 
 export default function CreateTicketModal({ onClose }) {
   const { user } = useAuth();
+  const { showToast } = useToast();
 
   const DESCRIPTION_LIMIT = 500;
 
@@ -58,7 +60,10 @@ export default function CreateTicketModal({ onClose }) {
 
       console.log("Ticket Created:", response.data);
 
-      alert("Ticket created successfully");
+      showToast(
+        "success",
+        "Ticket created successfully"
+      );
 
       onClose();
     } catch (error) {
@@ -67,10 +72,12 @@ export default function CreateTicketModal({ onClose }) {
         error.response?.data || error.message
       );
 
-      alert(
+      showToast(
+        "error",
         error.response?.data?.message ||
           "Failed to create ticket"
       );
+      
     } finally {
       setLoading(false);
     }

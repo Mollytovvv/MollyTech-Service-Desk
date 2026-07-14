@@ -132,6 +132,7 @@ const ticketSchema = new mongoose.Schema(
         "in_progress",
         "resolved",
         "closed",
+        "cancelled",
         "archived",
       ],
       default: "pending",
@@ -162,6 +163,10 @@ const ticketSchema = new mongoose.Schema(
     },
 
     archivedAt: {
+      type: Date,
+      default: null,
+    },
+    cancelledAt: {
       type: Date,
       default: null,
     },

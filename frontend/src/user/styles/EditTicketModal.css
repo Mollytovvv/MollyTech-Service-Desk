@@ -1,0 +1,345 @@
+/* =====================================
+   EDIT TICKET MODAL
+   MollyTech Service Desk
+===================================== */
+
+.modal-overlay{
+    position:fixed;
+    inset:0;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    padding:24px;
+
+    background:rgba(15,23,42,.75);
+    backdrop-filter:blur(6px);
+
+    z-index:1000;
+}
+
+
+/* =====================================
+   MODAL
+===================================== */
+
+.edit-ticket-modal{
+    width:100%;
+    max-width:760px;
+
+    background:var(--panel);
+
+    border:1px solid var(--border);
+    border-radius:18px;
+
+    box-shadow:
+        0 24px 60px rgba(0,0,0,.45);
+
+    overflow:hidden;
+
+    animation:modalFade .25s ease;
+}
+
+
+/* =====================================
+   HEADER
+===================================== */
+
+.modal-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    gap:20px;
+
+    padding:24px;
+
+    border-bottom:1px solid var(--border);
+}
+
+.modal-header h2{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    margin:0;
+
+    font-size:22px;
+    font-weight:700;
+
+    color:var(--text);
+}
+
+.modal-header h2 svg{
+    color:var(--primary);
+}
+
+.modal-header p{
+    margin:8px 0 0;
+
+    font-size:13px;
+    line-height:1.6;
+
+    color:var(--muted);
+}
+
+
+/* =====================================
+   CLOSE BUTTON
+===================================== */
+
+.close-btn{
+    width:40px;
+    height:40px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    background:transparent;
+
+    border:none;
+    border-radius:10px;
+
+    color:var(--muted);
+
+    cursor:pointer;
+
+    transition:.25s;
+}
+
+.close-btn:hover{
+    background:rgba(255,255,255,.06);
+    color:white;
+}
+
+
+/* =====================================
+   FORM
+===================================== */
+
+.edit-ticket-modal form{
+    display:flex;
+    flex-direction:column;
+    gap:22px;
+
+    padding:24px;
+}
+
+
+/* =====================================
+   GRID
+===================================== */
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:18px;
+}
+
+
+/* =====================================
+   FORM GROUP
+===================================== */
+
+.form-group{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.form-group label{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    font-size:12px;
+    font-weight:600;
+
+    color:var(--text);
+}
+
+.form-group label svg{
+    color:var(--primary);
+}
+
+
+/* =====================================
+   INPUTS
+===================================== */
+
+.form-group input,
+.form-group select,
+.form-group textarea{
+
+    width:100%;
+
+    padding:13px 14px;
+
+    background:var(--panel-2);
+
+    color:var(--text);
+
+    border:1px solid var(--border);
+    border-radius:10px;
+
+    font-size:14px;
+
+    outline:none;
+
+    transition:
+        border-color .25s ease,
+        box-shadow .25s ease;
+}
+
+.form-group textarea{
+    resize:vertical;
+    min-height:150px;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus{
+
+    border-color:var(--primary);
+
+    box-shadow:
+        0 0 0 3px rgba(59,130,246,.15);
+}
+
+.form-group input::placeholder,
+.form-group textarea::placeholder{
+    color:var(--muted);
+}
+
+
+/* =====================================
+   FOOTER
+===================================== */
+
+.modal-actions{
+    display:flex;
+    justify-content:flex-end;
+    gap:14px;
+
+    margin-top:8px;
+}
+
+
+/* =====================================
+   BUTTONS
+===================================== */
+
+.cancel-btn,
+.save-btn{
+
+    padding:11px 20px;
+
+    border:none;
+    border-radius:10px;
+
+    font-size:13px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:
+        transform .2s ease,
+        opacity .2s ease,
+        box-shadow .2s ease;
+}
+
+.cancel-btn{
+
+    background:var(--panel-2);
+
+    color:var(--text);
+
+    border:1px solid var(--border);
+}
+
+.cancel-btn:hover{
+
+    background:#2b3444;
+}
+
+.save-btn{
+
+    background:var(--primary);
+
+    color:white;
+}
+
+.save-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 10px 24px rgba(37,99,235,.35);
+}
+
+.cancel-btn:disabled,
+.save-btn:disabled{
+
+    opacity:.6;
+
+    cursor:not-allowed;
+}
+
+
+/* =====================================
+   ANIMATION
+===================================== */
+
+@keyframes modalFade{
+
+    from{
+
+        opacity:0;
+        transform:translateY(18px) scale(.98);
+
+    }
+
+    to{
+
+        opacity:1;
+        transform:translateY(0) scale(1);
+
+    }
+
+}
+
+
+/* =====================================
+   RESPONSIVE
+===================================== */
+
+@media (max-width:768px){
+
+    .edit-ticket-modal{
+
+        max-width:100%;
+    }
+
+    .form-grid{
+
+        grid-template-columns:1fr;
+    }
+
+    .modal-header{
+
+        flex-direction:column;
+    }
+
+    .modal-actions{
+
+        flex-direction:column-reverse;
+    }
+
+    .cancel-btn,
+    .save-btn{
+
+        width:100%;
+    }
+
+}

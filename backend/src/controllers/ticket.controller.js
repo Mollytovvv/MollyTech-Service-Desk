@@ -130,7 +130,9 @@ module.exports = {
   const getTickets = async (req, res) => {
     try {
   const tickets = await Ticket.find({
-    status: { $ne: "archived" }
+      status: {
+          $nin: ["archived", "cancelled"]
+      }
   })
   .sort({ createdAt: -1 });
 
@@ -168,60 +170,61 @@ const getTicketById = async (req, res) => {
   // ✏️ UPDATE TICKET
   // ===============================
   const updateTicket = async (req, res) => {
-  console.log("STATUS UPDATE HIT:", req.body.status);
     try {
-  const ticket = await Ticket.findById(req.params.id);
+
+      const ticket = await Ticket.findById(req.params.id);
 
       if (!ticket) {
-        return res.status(404).json({ message: "Ticket not found" });
+        return res.status(404).json({
+          message: "Ticket not found",
+        });
       }
 
-      if (!req.user) {
-        return res.status(401).json({ message: "Unauthorized" });
+      // ==========================
+      // USER MUST OWN THE TICKET
+      // ==========================
+
+      if (
+        req.user.role === "user" &&
+        ticket.submittedBy.userId.toString() !== req.user.id
+      ) {
+        return res.status(403).json({
+          message: "You are not allowed to edit this ticket",
+        });
       }
 
-      // =========================
-      // STATUS UPDATE (SAFE)
-      // =========================
-      if (req.body.status) {
-        const previous = ticket.status;
-        const next = req.body.status;
+      // ==========================
+      // ONLY PENDING TICKETS
+      // ==========================
 
-      const allowedStatuses = [
-        "pending",
-        "in_progress",
-        "resolved",
-        "closed",
-        "archived"
-      ];
-
-        if (!allowedStatuses.includes(next)) {
-          return res.status(400).json({ message: "Invalid status value" });
-        }
-
-        if (previous !== next) {
-          ticket.status = next;
-
-          ticket.activityLogs.push({
-            action: "Status Updated",
-            performedBy: req.user._id || req.user.id,
-            details: `${previous} → ${next}`
-          });
-
-          if (next === "archived") {
-            ticket.archivedAt = new Date();
-          }
-        }
+      if (
+        req.user.role === "user" &&
+        ticket.status !== "pending"
+      ) {
+        return res.status(400).json({
+          message: "Only pending tickets can be edited.",
+        });
       }
 
-      // =========================
-      // OTHER FIELDS
-      // =========================
-      if (req.body.title) ticket.title = req.body.title;
-      if (req.body.description) ticket.description = req.body.description;
-      if (req.body.priority) ticket.priority = req.body.priority;
+      // ==========================
+      // UPDATE FIELDS
+      // ==========================
 
-      ticket.updatedAt = new Date();
+      ticket.title = req.body.title ?? ticket.title;
+      ticket.description = req.body.description ?? ticket.description;
+      ticket.category = req.body.category ?? ticket.category;
+      ticket.priority = req.body.priority ?? ticket.priority;
+      ticket.email = req.body.email ?? ticket.email;
+
+      if (req.body.phoneNumber) {
+        ticket.phoneNumber = formatPHNumber(req.body.phoneNumber);
+      }
+
+      ticket.activityLogs.push({
+        action: "Ticket Updated",
+        performedBy: req.user.id,
+        details: "User edited the ticket information",
+      });
 
       const updatedTicket = await ticket.save();
 
@@ -231,14 +234,77 @@ const getTicketById = async (req, res) => {
 
       return res.json({
         message: "Ticket updated successfully",
-        ticket: updatedTicket
+        ticket: updatedTicket,
       });
 
     } catch (err) {
+
       console.log("UPDATE ERROR:", err);
+
       return res.status(500).json({
-        message: err.message
+        message: err.message,
       });
+
+    }
+  };
+
+  // ===============================
+  // ❌ CANCEL TICKET (USER)
+  // ===============================
+  const cancelTicket = async (req, res) => {
+    try {
+
+      const ticket = await Ticket.findById(req.params.id);
+
+      if (!ticket) {
+        return res.status(404).json({
+          message: "Ticket not found",
+        });
+      }
+
+      // Owner only
+      if (
+        ticket.submittedBy.userId.toString() !== req.user.id
+      ) {
+        return res.status(403).json({
+          message: "Unauthorized",
+        });
+      }
+
+      // Only pending tickets
+      if (ticket.status !== "pending") {
+        return res.status(400).json({
+          message: "Only pending tickets can be cancelled.",
+        });
+      }
+
+      ticket.status = "cancelled";
+
+      ticket.activityLogs.push({
+        action: "Ticket Cancelled",
+        performedBy: req.user.id,
+        details: "User cancelled the ticket.",
+      });
+
+      await ticket.save();
+
+      const io = req.app.get("io");
+
+      io.emit("ticketUpdated", ticket);
+
+      return res.json({
+        message: "Ticket cancelled successfully.",
+        ticket,
+      });
+
+    } catch (err) {
+
+      console.log(err);
+
+      return res.status(500).json({
+        message: err.message,
+      });
+
     }
   };
 
@@ -693,7 +759,9 @@ const archiveTickets = async (req, res) => {
     try {
       const tickets = await Ticket.find({
         "submittedBy.userId": req.user.id,
-        status: { $ne: "archived" },
+      status: {
+          $nin: ["archived"]
+      }
       }).sort({ createdAt: -1 });
 
       const stats = {
@@ -750,6 +818,59 @@ const archiveTickets = async (req, res) => {
     }
   };
 
+  // ===============================
+  // 🗑 USER DELETE TICKET
+  // ===============================
+  const deleteMyTicket = async (req, res) => {
+    try {
+      const ticket = await Ticket.findById(req.params.id);
+
+      if (!ticket) {
+        return res.status(404).json({
+          message: "Ticket not found",
+        });
+      }
+
+      // Must own the ticket
+      if (
+        ticket.submittedBy.userId.toString() !== req.user.id
+      ) {
+        return res.status(403).json({
+          message: "Unauthorized",
+        });
+      }
+
+      // Only allow deleting cancelled tickets
+      if (ticket.status !== "cancelled") {
+        return res.status(400).json({
+          message: "Only cancelled tickets can be deleted.",
+        });
+      }
+
+      await Ticket.findByIdAndDelete(req.params.id);
+
+      // Remove conversation too
+      await Conversation.deleteOne({
+        ticketId: ticket._id,
+      });
+
+      const io = req.app.get("io");
+
+      io.emit("ticketUpdated");
+
+      return res.json({
+        message: "Ticket deleted successfully",
+      });
+
+    } catch (err) {
+      console.log("DELETE MY TICKET:", err);
+
+      return res.status(500).json({
+        message: err.message,
+      });
+    }
+  };
+
 // ===============================
 // 📦 EXPORTS
 // ===============================
@@ -770,4 +891,6 @@ module.exports = {
   unarchiveTickets,
   getMyDashboard, 
   getMyTickets,
+  cancelTicket,
+  deleteMyTicket,
 };

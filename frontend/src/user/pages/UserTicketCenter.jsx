@@ -1,5 +1,7 @@
 import { useEffect, useState } from "react";
 import CreateTicketModal from "../components/CreateTicketModal";
+import EditTicketModal from "../components/EditTicketModal";
+import { useToast } from "../../context/ToastContext";
 import api from "../../api/axios";
 import "../styles/UserTicketCenter.css";
 import { useAuth } from "../../context/AuthContext";
@@ -12,18 +14,28 @@ import {
   FiCalendar,
   FiSearch,
   FiPlus,
+  FiMoreVertical,
+  FiEdit,
+  FiXCircle,
+  FiTrash2,
 } from "react-icons/fi";
 
 export default function UserTicketCenter() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [tickets, setTickets] = useState([]);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState(null);
+  const [activeMenu, setActiveMenu] = useState(null);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
+  const [cancelTicket, setCancelTicket] = useState(null);
+  const [deleteTicket, setDeleteTicket] = useState(null);
 
   const { user } = useAuth();
+  const { showToast } = useToast();
 
   // ===============================
   // FETCH USER TICKETS
@@ -76,6 +88,75 @@ export default function UserTicketCenter() {
       .replace(/\b\w/g, (char) => char.toUpperCase());
 
     return formatted.replace(/\bIt\b/g, "IT");
+  };
+
+  const handleEdit = (ticket) => {
+    setActiveMenu(null);
+    setSelectedTicket(ticket);
+    setShowEditModal(true);
+  };
+
+  // ===============================
+  // CANCEL TICKET
+  // ===============================
+  const handleCancelTicket = async (ticketId) => {
+
+    try {
+      await api.patch(`/tickets/${ticketId}/cancel`);
+
+      // Remove immediately from UI
+      setTickets((prev) =>
+        prev.filter((t) => t._id !== ticketId)
+      );
+
+      setActiveMenu(null);
+
+      showToast(
+        "success",
+        "Ticket request cancelled successfully."
+      );
+
+    } catch (err) {
+      console.log(err);
+
+      showToast(
+        "error",
+        err.response?.data?.message ||
+        "Failed to cancel ticket."
+      );
+    }
+  };
+
+  const handleDeleteTicket = async (ticketId) => {
+    try {
+      await api.delete(`/tickets/my/${ticketId}`);
+
+    setTickets((prev) =>
+      prev.filter((t) => t._id !== ticketId)
+    );
+
+    setActiveMenu(null);
+
+    showToast(
+      "success",
+      "Ticket deleted successfully."
+    );
+
+    } catch (err) {
+      console.log(err);
+
+      showToast(
+        "error",
+        err.response?.data?.message ||
+        "Failed to delete ticket."
+      );
+    }
+  };
+
+  const toggleMenu = (ticketId) => {
+    setActiveMenu(
+      activeMenu === ticketId ? null : ticketId
+    );
   };
 
   const filteredTickets = tickets.filter((ticket) => {
@@ -290,6 +371,63 @@ export default function UserTicketCenter() {
 
             <div className="user-ticket-meta">
 
+              {/* ACTION HEADER */}
+
+              <div className="ticket-actions-header">
+
+                <span>Actions</span>
+
+                <div className="ticket-menu-container">
+
+                  <button
+                    className="ticket-menu-btn"
+                    onClick={() => toggleMenu(ticket._id)}
+                    aria-label="Ticket actions"
+                  >
+                    <FiMoreVertical />
+                  </button>
+
+                  {activeMenu === ticket._id && (
+
+                  <div className="ticket-action-menu">
+
+                    {ticket.status === "pending" && (
+                      <button onClick={() => handleEdit(ticket)}>
+                        <FiEdit />
+                        Edit Ticket
+                      </button>
+                    )}
+
+                    {ticket.status === "pending" && (
+                      <button
+                        onClick={() => {
+                          setCancelTicket(ticket);
+                          setActiveMenu(null);
+                        }}
+                      >
+                        <FiXCircle />
+                        Cancel Request
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => {
+                        setDeleteTicket(ticket);
+                        setActiveMenu(null);
+                      }}
+                    >
+                      <FiTrash2 />
+                      Delete Ticket
+                    </button>
+
+                  </div>
+
+                  )}
+
+                </div>
+
+              </div>
+
               <div className="ticket-meta-card">
 
                 <small>Category</small>
@@ -301,16 +439,20 @@ export default function UserTicketCenter() {
 
               </div>
 
+
               <div className="ticket-meta-card">
 
                 <small>Priority</small>
 
-                <span className="user-ticket-priority">
+              <span
+                className={`user-ticket-priority user-priority-${ticket.priority?.toLowerCase()}`}
+              >
                   <FiAlertTriangle />
                   {capitalize(ticket.priority)}
                 </span>
 
               </div>
+
 
               <div className="ticket-meta-card">
 
@@ -331,12 +473,118 @@ export default function UserTicketCenter() {
         )}
       </section>
 
+      {cancelTicket && (
+        <div
+          className="modal-overlay"
+          onClick={() => setCancelTicket(null)}
+        >
+          <div
+            className="modal resolve-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="resolve-header">
+              <FiAlertTriangle className="resolve-icon" />
+              <h2>Cancel Ticket Request</h2>
+            </div>
+
+            <div className="resolve-body">
+              <p>
+                Are you sure you want to cancel this ticket request?
+              </p>
+
+              <div className="resolve-warning">
+                The ticket will disappear from the administrator's active queue.
+              </div>
+            </div>
+
+            <div className="resolve-actions">
+              <button
+                className="btn-keep-ticket"
+                onClick={() => setCancelTicket(null)}
+              >
+                Keep Ticket
+              </button>
+
+              <button
+                className="btn-cancel-ticket"
+                onClick={() => {
+                  handleCancelTicket(cancelTicket._id);
+                  setCancelTicket(null);
+                }}
+              >
+                Cancel Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {deleteTicket && (
+        <div
+          className="modal-overlay"
+          onClick={() => setDeleteTicket(null)}
+        >
+          <div
+            className="modal resolve-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="resolve-header">
+              <FiTrash2 className="resolve-icon" />
+              <h2>Delete Ticket</h2>
+            </div>
+
+            <div className="resolve-body">
+              <p>
+                Are you sure you want to permanently delete this ticket?
+              </p>
+
+              <div className="resolve-warning">
+                This action cannot be undone.
+              </div>
+            </div>
+
+            <div className="resolve-actions">
+              <button
+                className="btn-keep-ticket"
+                onClick={() => setDeleteTicket(null)}
+              >
+                Keep Ticket
+              </button>
+
+              <button
+                className="btn-delete-ticket"
+                onClick={() => {
+                  handleDeleteTicket(deleteTicket._id);
+                  setDeleteTicket(null);
+                }}
+              >
+                Delete Ticket
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* CREATE MODAL */}
 
       {showCreateModal && (
         <CreateTicketModal
           onClose={() => {
             setShowCreateModal(false);
+            fetchTickets();
+          }}
+        />
+      )}
+
+      {/* EDIT MODAL */}
+
+      {showEditModal && selectedTicket && (
+        <EditTicketModal
+          ticket={selectedTicket}
+          onClose={() => {
+            setShowEditModal(false);
+            setSelectedTicket(null);
+            setActiveMenu(null);   // <-- add this
             fetchTickets();
           }}
         />

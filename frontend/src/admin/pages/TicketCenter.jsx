@@ -274,16 +274,14 @@ const handleReopen = async (id) => {
 };
 
   // =========================
-  // REAL-TIME NEW TICKETS
+  // REAL-TIME SOCKET EVENTS
   // =========================
   useEffect(() => {
     const handleNewTicket = (ticket) => {
-      console.log("🔥 New Ticket Received:", ticket);
+      console.log("🔥 New Ticket:", ticket);
 
       setTickets((prev) => {
-        const exists = prev.some(
-          (t) => t._id === ticket._id
-        );
+        const exists = prev.some((t) => t._id === ticket._id);
 
         if (exists) return prev;
 
@@ -291,10 +289,31 @@ const handleReopen = async (id) => {
       });
     };
 
+    const handleTicketUpdated = (updatedTicket) => {
+      console.log("🟢 Ticket Updated:", updatedTicket);
+
+      setTickets((prev) =>
+        prev.map((ticket) =>
+          ticket._id === updatedTicket._id
+            ? updatedTicket
+            : ticket
+        )
+      );
+
+      // Keep the View modal synchronized if it's open
+      setSelectedTicket((prev) =>
+        prev && prev._id === updatedTicket._id
+          ? updatedTicket
+          : prev
+      );
+    };
+
     socket.on("newTicket", handleNewTicket);
+    socket.on("ticketUpdated", handleTicketUpdated);
 
     return () => {
       socket.off("newTicket", handleNewTicket);
+      socket.off("ticketUpdated", handleTicketUpdated);
     };
   }, []);
 

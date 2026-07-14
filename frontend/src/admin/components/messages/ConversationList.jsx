@@ -113,7 +113,12 @@ const scrollToBottom = () => {
 const query = search.toLowerCase();
 
 console.log("CONVERSATIONS:", conversations);
+
 const filteredConversations = conversations.filter((conversation) => {
+  if (conversation.ticketId?.status === "cancelled") {
+    return false;
+  }
+  
   const matchesSearch =
     conversation.ticketId?.title?.toLowerCase().includes(query) ||
     conversation.ticketId?._id?.toLowerCase().includes(query) ||
