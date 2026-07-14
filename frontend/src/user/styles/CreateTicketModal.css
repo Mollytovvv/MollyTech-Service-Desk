@@ -3,7 +3,6 @@
 ===================================== */
 
 .modal-overlay{
-
     position:fixed;
     inset:0;
 
@@ -11,30 +10,30 @@
     justify-content:center;
     align-items:center;
 
-    padding:20px;
+    padding:24px;
 
-    background:rgba(2,6,23,.75);
-    backdrop-filter:blur(6px);
+    background:rgba(2,6,23,.78);
+    backdrop-filter:blur(8px);
 
     z-index:9999;
 }
 
 .create-ticket-modal{
-
     width:100%;
-    max-width:720px;
+    max-width:760px;
+
+    max-height:92vh;
+    overflow-y:auto;
 
     background:var(--panel);
 
     border:1px solid var(--border);
-    border-radius:16px;
+    border-radius:18px;
 
     box-shadow:
-    0 20px 60px rgba(0,0,0,.45);
+        0 24px 70px rgba(0,0,0,.45);
 
-    overflow:hidden;
-
-    animation:modalPop .2s ease;
+    animation:modalPop .25s ease;
 }
 
 /* =====================================
@@ -42,65 +41,108 @@
 ===================================== */
 
 .modal-header{
-
     display:flex;
     justify-content:space-between;
     align-items:flex-start;
 
-    padding:20px 22px;
+    padding:24px;
 
     border-bottom:1px solid var(--border);
 }
 
 .modal-header h2{
-
     margin:0;
 
-    font-size:20px;
-    font-weight:600;
+    font-size:24px;
+    font-weight:700;
 
     color:var(--text);
 }
 
 .modal-header p{
+    margin-top:8px;
 
-    margin:6px 0 0;
+    max-width:480px;
 
-    font-size:13px;
+    line-height:1.6;
+    font-size:14px;
 
     color:var(--muted);
 }
 
 .close-btn{
-
-    width:38px;
-    height:38px;
+    width:42px;
+    height:42px;
 
     display:flex;
     justify-content:center;
     align-items:center;
 
-    border:none;
-    border-radius:10px;
-
     background:transparent;
+
+    border:none;
+    border-radius:12px;
 
     color:var(--muted);
 
     cursor:pointer;
 
-    transition:.2s ease;
+    transition:.25s;
 }
 
 .close-btn svg{
-
     font-size:20px;
 }
 
 .close-btn:hover{
-
     background:var(--panel-2);
     color:var(--text);
+}
+
+/* =====================================
+   TIPS
+===================================== */
+
+.ticket-tips{
+    margin:22px;
+
+    padding:18px;
+
+    background:rgba(59,130,246,.08);
+
+    border:1px solid rgba(59,130,246,.18);
+    border-radius:14px;
+}
+
+.tips-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    margin-bottom:12px;
+
+    font-weight:600;
+
+    color:#93c5fd;
+}
+
+.tips-title svg{
+    font-size:18px;
+}
+
+.ticket-tips ul{
+    margin:0;
+    padding-left:18px;
+
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+}
+
+.ticket-tips li{
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.6;
 }
 
 /* =====================================
@@ -108,22 +150,63 @@
 ===================================== */
 
 .ticket-form{
-
     display:flex;
     flex-direction:column;
-    gap:18px;
+    gap:28px;
 
-    padding:22px;
+    padding:24px;
 }
 
-.form-group{
+/* =====================================
+   SECTIONS
+===================================== */
 
+.form-section-title{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    margin:0;
+
+    padding-bottom:12px;
+
+    font-size:16px;
+    font-weight:700;
+
+    color:var(--text);
+
+    border-bottom:1px solid var(--border);
+}
+
+.form-section-title svg{
+    font-size:20px;
+    color:var(--primary);
+}
+
+/* =====================================
+   ROWS
+===================================== */
+
+.form-row{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+/* =====================================
+   GROUPS
+===================================== */
+
+.form-group{
     display:flex;
     flex-direction:column;
-    gap:8px;
+    gap:10px;
 }
 
 .form-group label{
+    display:flex;
+    align-items:center;
+    gap:8px;
 
     font-size:13px;
     font-weight:600;
@@ -131,42 +214,66 @@
     color:var(--text);
 }
 
+.form-group label svg{
+    font-size:18px;
+    color:var(--primary);
+}
+
 .form-group input,
 .form-group select,
 .form-group textarea{
-
     width:100%;
 
-    padding:12px 14px;
+    padding:13px 15px;
 
     background:var(--panel-2);
 
     border:1px solid var(--border);
-    border-radius:10px;
+    border-radius:12px;
 
     color:var(--text);
 
-    font-size:13px;
+    font-size:14px;
 
     outline:none;
 
-    transition:.2s ease;
+    transition:.2s;
 }
 
 .form-group textarea{
-
     resize:vertical;
-    min-height:140px;
+    min-height:180px;
+    line-height:1.6;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus{
-
     border-color:var(--primary);
 
     box-shadow:
-    0 0 0 3px rgba(59,130,246,.15);
+        0 0 0 3px rgba(59,130,246,.18);
+}
+
+.form-group input:disabled,
+.form-group select:disabled,
+.form-group textarea:disabled{
+    opacity:.65;
+    cursor:not-allowed;
+}
+
+/* =====================================
+   CHARACTER COUNTER
+===================================== */
+
+.character-counter{
+    margin-top:6px;
+
+    text-align:right;
+
+    font-size:12px;
+
+    color:var(--muted);
 }
 
 /* =====================================
@@ -174,44 +281,44 @@
 ===================================== */
 
 .modal-actions{
-
     display:flex;
     justify-content:flex-end;
 
-    gap:12px;
+    gap:14px;
 
-    margin-top:8px;
+    padding-top:10px;
+
+    border-top:1px solid var(--border);
 }
 
 .cancel-btn{
-
-    padding:10px 18px;
+    padding:11px 20px;
 
     background:transparent;
 
     border:1px solid var(--border);
-    border-radius:10px;
+    border-radius:12px;
 
     color:var(--text);
 
+    font-weight:500;
+
     cursor:pointer;
 
-    transition:.2s ease;
+    transition:.2s;
 }
 
 .cancel-btn:hover{
-
     background:var(--panel-2);
 }
 
 .submit-btn{
-
-    padding:10px 18px;
+    padding:11px 24px;
 
     background:var(--primary);
 
     border:none;
-    border-radius:10px;
+    border-radius:12px;
 
     color:white;
 
@@ -219,14 +326,17 @@
 
     cursor:pointer;
 
-    transition:.2s ease;
+    transition:.25s;
 }
 
-.submit-btn:hover{
+.submit-btn:hover:not(:disabled){
+    transform:translateY(-2px);
+    opacity:.95;
+}
 
-    opacity:.9;
-
-    transform:translateY(-1px);
+.submit-btn:disabled{
+    opacity:.65;
+    cursor:not-allowed;
 }
 
 /* =====================================
@@ -236,15 +346,13 @@
 @keyframes modalPop{
 
     from{
-
         opacity:0;
-        transform:scale(.96);
+        transform:translateY(10px) scale(.98);
     }
 
     to{
-
         opacity:1;
-        transform:scale(1);
+        transform:translateY(0) scale(1);
     }
 
 }
@@ -253,32 +361,39 @@
    RESPONSIVE
 ===================================== */
 
-@media(max-width:768px){
+@media (max-width:768px){
 
-.create-ticket-modal{
+    .modal-overlay{
+        padding:14px;
+    }
 
-    max-width:100%;
-}
+    .create-ticket-modal{
+        max-height:96vh;
+    }
 
-.modal-header{
+    .modal-header{
+        padding:20px;
+    }
 
-    padding:18px;
-}
+    .ticket-form{
+        padding:20px;
+    }
 
-.ticket-form{
+    .ticket-tips{
+        margin:20px;
+    }
 
-    padding:18px;
-}
+    .form-row{
+        grid-template-columns:1fr;
+    }
 
-.modal-actions{
+    .modal-actions{
+        flex-direction:column-reverse;
+    }
 
-    flex-direction:column-reverse;
-}
-
-.cancel-btn,
-.submit-btn{
-
-    width:100%;
-}
+    .cancel-btn,
+    .submit-btn{
+        width:100%;
+    }
 
 }

@@ -3,6 +3,7 @@ import CreateTicketModal from "../components/CreateTicketModal";
 import api from "../../api/axios";
 import "../styles/UserTicketCenter.css";
 import { useAuth } from "../../context/AuthContext";
+import socket from "../../socket/socket";
 
 import {
   FiTag,
@@ -20,6 +21,7 @@ export default function UserTicketCenter() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { user } = useAuth();
 
@@ -27,9 +29,11 @@ export default function UserTicketCenter() {
   // FETCH USER TICKETS
   // ===============================
 
-  const fetchTickets = async () => {
+  const fetchTickets = async (showLoader = true) => {
     try {
-      setLoading(true);
+      if (showLoader) {
+        setLoading(true);
+      }
 
       const response = await api.get("/tickets/my");
 
@@ -40,23 +44,50 @@ export default function UserTicketCenter() {
         error.response?.data || error.message
       );
     } finally {
-      setLoading(false);
+      if (showLoader) {
+        setLoading(false);
+      }
     }
   };
 
   useEffect(() => {
-    fetchTickets();
+    fetchTickets(true);
+  }, []);
+
+  useEffect(() => {
+    const handleTicketUpdate = () => {
+      fetchTickets(false);
+    };
+
+    socket.on("ticketUpdated", handleTicketUpdate);
+    socket.on("newTicket", handleTicketUpdate);
+
+    return () => {
+      socket.off("ticketUpdated", handleTicketUpdate);
+      socket.off("newTicket", handleTicketUpdate);
+    };
   }, []);
 
   const capitalize = (text) => {
     if (!text) return "";
 
-    return text
+    const formatted = text
       .replace(/_/g, " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
+
+    return formatted.replace(/\bIt\b/g, "IT");
   };
 
   const filteredTickets = tickets.filter((ticket) => {
+
+    const query = searchTerm.trim().toLowerCase();
+
+    const matchesSearch =
+      query === "" ||
+      ticket.ticketId?.toLowerCase().includes(query) ||
+      ticket.title?.toLowerCase().includes(query) ||
+      ticket.description?.toLowerCase().includes(query);
+
     const matchesStatus =
       statusFilter === "all" ||
       ticket.status === statusFilter;
@@ -70,6 +101,7 @@ export default function UserTicketCenter() {
       ticket.category?.toLowerCase() === categoryFilter.toLowerCase();
 
     return (
+      matchesSearch &&
       matchesStatus &&
       matchesPriority &&
       matchesCategory
@@ -106,10 +138,12 @@ export default function UserTicketCenter() {
         <div className="search-box">
           <FiSearch className="search-icon" />
 
-          <input
-            type="text"
-            placeholder="Search tickets..."
-          />
+        <input
+          type="text"
+          placeholder="Search by Ticket ID, title, or description..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
         </div>
 
         <select
@@ -187,22 +221,40 @@ export default function UserTicketCenter() {
 
             <div className="user-ticket-info">
 
-              <div className="ticket-row">
+            <div className="ticket-row">
 
-                <div className="ticket-field">
-                  <span className="ticket-label">Ticket ID</span>
-                  <h3 className="ticket-id">{ticket.ticketId}</h3>
-                </div>
-
-                <div className="ticket-field">
-                  <span className="ticket-label">Created</span>
-                  <span className="ticket-date">
-                    <FiCalendar />
-                    {new Date(ticket.createdAt).toLocaleDateString()}
-                  </span>
-                </div>
-
+              <div className="ticket-field">
+                <span className="ticket-label">Ticket ID</span>
+                <h3 className="ticket-id">{ticket.ticketId}</h3>
               </div>
+
+              <div className="ticket-field">
+                <span className="ticket-label">Created</span>
+
+                <span className="ticket-date">
+                  <FiCalendar />
+                  {new Date(ticket.createdAt).toLocaleDateString([], {
+                    year: "numeric",
+                    month: "short",
+                    day: "numeric",
+                  })}
+                  {" • "}
+                  {new Date(ticket.createdAt).toLocaleTimeString([], {
+                    hour: "numeric",
+                    minute: "2-digit",
+                  })}
+                </span>
+              </div>
+
+              <div className="ticket-field">
+                <span className="ticket-label">Assigned To</span>
+
+                <span className="ticket-assigned">
+                  {ticket.assignedTo ? capitalize(ticket.assignedTo) : "Unassigned"}
+                </span>
+              </div>
+
+            </div>
 
               <div className="ticket-field">
                 <span className="ticket-label">Title</span>
@@ -222,12 +274,12 @@ export default function UserTicketCenter() {
 
                 <div className="ticket-field">
                   <span className="ticket-label">Email</span>
-                  <span>{user?.email || "N/A"}</span>
+                  <span>{ticket.email || "N/A"}</span>
                 </div>
 
                 <div className="ticket-field">
                   <span className="ticket-label">Phone</span>
-                  <span>{user?.phone || "N/A"}</span>
+                  <span>{ticket.phoneNumber || "N/A"}</span>
                 </div>
 
               </div>

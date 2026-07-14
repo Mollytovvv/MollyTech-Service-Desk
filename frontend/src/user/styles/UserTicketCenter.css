@@ -430,6 +430,18 @@
     font-size:15px;
 }
 
+.ticket-assigned{
+    display:flex;
+    align-items:center;
+
+    min-height:22px;
+
+    font-size:13px;
+    font-weight:600;
+
+    color:#60a5fa;
+}
+
 
 /* =====================================
    RIGHT SIDE

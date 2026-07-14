@@ -273,6 +273,10 @@ const assignTicket = async (req, res) => {
       return res.status(404).json({ message: "Ticket not found" });
     }
 
+    const io = req.app.get("io");
+
+    io.emit("ticketUpdated", updatedTicket);
+
     return res.json({
       message: "Ticket assigned successfully",
       ticket: updatedTicket,
@@ -319,6 +323,10 @@ const reopenTicket = async (req, res) => {
 
     await ticket.save();
 
+    const io = req.app.get("io");
+
+    io.emit("ticketUpdated", ticket);
+
     return res.json({
       message: "Ticket reopened successfully",
       ticket,
@@ -344,6 +352,10 @@ const deleteTicket = async (req, res) => {
     }
 
     const ticket = await Ticket.findByIdAndDelete(req.params.id);
+
+    const io = req.app.get("io");
+
+    io.emit("ticketUpdated");
 
     if (!ticket) {
       return res.status(404).json({ message: "Ticket not found" });
@@ -576,6 +588,10 @@ const archiveTickets = async (req, res) => {
       }
     );
 
+    const io = req.app.get("io");
+
+    io.emit("ticketUpdated");
+
     res.json({
       message: "Tickets archived successfully",
       archivedCount: ticketIds.length
@@ -612,6 +628,10 @@ const archiveTickets = async (req, res) => {
         }
       );
 
+      const io = req.app.get("io");
+
+      io.emit("ticketUpdated");
+      
       return res.json({
         message: "Tickets restored successfully",
         restoredCount: ticketIds.length
@@ -647,6 +667,10 @@ const archiveTickets = async (req, res) => {
         _id: { $in: ticketIds },
         status: "archived",
       });
+
+      const io = req.app.get("io");
+
+      io.emit("ticketUpdated");
 
       return res.json({
         message: "Tickets deleted successfully",

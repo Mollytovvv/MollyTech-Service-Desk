@@ -1,147 +1,125 @@
 import { useState } from "react";
-import { FiX } from "react-icons/fi";
+import {
+  FiX,
+  FiInfo,
+  FiLayers,
+  FiEdit3,
+  FiUsers,
+  FiAtSign,
+  FiSmartphone,
+  FiGrid,
+  FiFlag,
+  FiMessageSquare,
+  FiFileText,
+} from "react-icons/fi";
 
+import { useAuth } from "../../context/AuthContext";
 import api from "../../api/axios";
-
 import "../styles/CreateTicketModal.css";
 
-
 export default function CreateTicketModal({ onClose }) {
+  const { user } = useAuth();
 
+  const DESCRIPTION_LIMIT = 500;
 
   const [formData, setFormData] = useState({
     title: "",
-    email: "",
+    email: user?.email || "",
     phoneNumber: "",
     category: "",
     priority: "low",
     description: "",
   });
 
-
   const [loading, setLoading] = useState(false);
-
-
 
   // ===============================
   // HANDLE INPUT CHANGE
   // ===============================
 
   const handleChange = (e) => {
-
     setFormData({
-
       ...formData,
-
       [e.target.name]: e.target.value,
-
     });
-
   };
-
-
 
   // ===============================
   // SUBMIT TICKET
   // ===============================
 
   const handleSubmit = async (e) => {
-
     e.preventDefault();
 
-
     try {
-
       setLoading(true);
 
+      const response = await api.post("/tickets", formData);
 
-      const response = await api.post(
-        "/tickets",
-        formData
-      );
-
-
-      console.log(
-        "Ticket Created:",
-        response.data
-      );
-
+      console.log("Ticket Created:", response.data);
 
       alert("Ticket created successfully");
 
-
       onClose();
-
-
     } catch (error) {
-
-
       console.log(
         "CREATE TICKET ERROR:",
         error.response?.data || error.message
       );
 
-
       alert(
         error.response?.data?.message ||
-        "Failed to create ticket"
+          "Failed to create ticket"
       );
-
-
     } finally {
-
       setLoading(false);
-
     }
-
   };
 
-
-
   return (
-
     <div
       className="modal-overlay"
       onClick={onClose}
     >
-
       <div
         className="create-ticket-modal"
         onClick={(e) => e.stopPropagation()}
       >
-
-
         {/* HEADER */}
 
         <div className="modal-header">
-
           <div>
-
-            <h2>
-              Create Support Ticket
-            </h2>
+            <h2>Create Support Ticket</h2>
 
             <p>
-              Fill in the details below to submit your request.
+              Submit an IT issue and our support team
+              will review it as soon as possible.
             </p>
-
           </div>
-
 
           <button
             className="close-btn"
             onClick={onClose}
           >
-
             <FiX />
-
           </button>
-
-
         </div>
 
+        {/* TIPS */}
 
+        <div className="ticket-tips">
+          <div className="tips-title">
+            <FiInfo />
+            <span>Before submitting your request</span>
+          </div>
 
+          <ul>
+            <li>Use a clear and descriptive subject.</li>
+            <li>Mention any error messages shown.</li>
+            <li>Include the affected device or software.</li>
+            <li>Describe the issue step-by-step.</li>
+          </ul>
+        </div>
 
         {/* FORM */}
 
@@ -149,284 +127,202 @@ export default function CreateTicketModal({ onClose }) {
           className="ticket-form"
           onSubmit={handleSubmit}
         >
+          {/* REQUEST DETAILS */}
 
-
-
-          {/* SUBJECT */}
+          <h3 className="form-section-title">
+            <FiLayers />
+            Request Details
+          </h3>
 
           <div className="form-group">
-
             <label>
-              Subject
+              <FiEdit3 />
+              Subject *
             </label>
 
-
             <input
-
               type="text"
-
               name="title"
-
               value={formData.title}
-
               onChange={handleChange}
-
               placeholder="Briefly describe your issue"
-
+              disabled={loading}
               required
-
             />
-
-
           </div>
 
+          <div className="form-row">
+            <div className="form-group">
+              <label>
+                <FiGrid />
+                Category *
+              </label>
 
+              <select
+                name="category"
+                value={formData.category}
+                onChange={handleChange}
+                disabled={loading}
+                required
+              >
+                <option value="">
+                  Select Category
+                </option>
 
+                <option value="hardware">
+                  Hardware
+                </option>
 
-          {/* EMAIL */}
+                <option value="software">
+                  Software
+                </option>
 
-          <div className="form-group">
+                <option value="network">
+                  Network
+                </option>
 
-            <label>
-              Email
-            </label>
+                <option value="email">
+                  Email
+                </option>
 
+                <option value="account">
+                  Account
+                </option>
 
-            <input
+                <option value="others">
+                  Others
+                </option>
+              </select>
+            </div>
 
-              type="email"
+            <div className="form-group">
+              <label>
+                <FiFlag />
+                Priority
+              </label>
 
-              name="email"
+              <select
+                name="priority"
+                value={formData.priority}
+                onChange={handleChange}
+                disabled={loading}
+              >
+                <option value="low">
+                  🟢 Low
+                </option>
 
-              value={formData.email}
+                <option value="medium">
+                  🟡 Medium
+                </option>
 
-              onChange={handleChange}
-
-              placeholder="Enter your email"
-
-              required
-
-            />
-
-
+                <option value="high">
+                  🔴 High
+                </option>
+              </select>
+            </div>
           </div>
 
+          {/* CONTACT */}
 
+          <h3 className="form-section-title">
+            <FiUsers />
+            Contact Information
+          </h3>
 
+          <div className="form-row">
+            <div className="form-group">
+              <label>
+                <FiAtSign />
+                Email *
+              </label>
 
-          {/* PHONE NUMBER */}
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
+                disabled={loading}
+                required
+              />
+            </div>
 
-          <div className="form-group">
+            <div className="form-group">
+              <label>
+                <FiSmartphone />
+                Phone Number
+              </label>
 
-            <label>
-              Phone Number
-            </label>
-
-
-            <input
-
-              type="text"
-
-              name="phoneNumber"
-
-              value={formData.phoneNumber}
-
-              onChange={handleChange}
-
-              placeholder="09XXXXXXXXX"
-
-            />
-
-
+              <input
+                type="text"
+                name="phoneNumber"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                placeholder="09XXXXXXXXX"
+                disabled={loading}
+              />
+            </div>
           </div>
-
-
-
-
-          {/* CATEGORY */}
-
-          <div className="form-group">
-
-            <label>
-              Category
-            </label>
-
-
-            <select
-
-              name="category"
-
-              value={formData.category}
-
-              onChange={handleChange}
-
-              required
-
-            >
-
-              <option value="">
-                Select Category
-              </option>
-
-              <option value="hardware">
-                Hardware
-              </option>
-
-              <option value="software">
-                Software
-              </option>
-
-              <option value="network">
-                Network
-              </option>
-
-              <option value="email">
-                Email
-              </option>
-
-              <option value="account">
-                Account
-              </option>
-
-              <option value="others">
-                Others
-              </option>
-
-
-            </select>
-
-
-          </div>
-
-
-
-
-          {/* PRIORITY */}
-
-          <div className="form-group">
-
-            <label>
-              Priority
-            </label>
-
-
-            <select
-
-              name="priority"
-
-              value={formData.priority}
-
-              onChange={handleChange}
-
-            >
-
-              <option value="low">
-                Low
-              </option>
-
-              <option value="medium">
-                Medium
-              </option>
-
-              <option value="high">
-                High
-              </option>
-
-
-            </select>
-
-
-          </div>
-
-
-
 
           {/* DESCRIPTION */}
 
-          <div className="form-group">
+          <h3 className="form-section-title">
+            <FiMessageSquare />
+            Issue Description
+          </h3>
 
+          <div className="form-group">
             <label>
-              Description
+              <FiFileText />
+              Description *
             </label>
 
-
             <textarea
-
               name="description"
-
               value={formData.description}
-
               onChange={handleChange}
-
               rows="6"
+              maxLength={DESCRIPTION_LIMIT}
+              disabled={loading}
+              placeholder={`Example:
 
-              placeholder="Describe your issue in detail..."
-
-              required
-
+• What were you doing?
+• What happened?
+• Any error messages?
+• When did it start?`}
+                            required
             />
 
-
+            <div className="character-counter">
+              {formData.description.length} /{" "}
+              {DESCRIPTION_LIMIT}
+            </div>
           </div>
-
-
-
 
           {/* ACTIONS */}
 
           <div className="modal-actions">
-
-
             <button
-
               type="button"
-
               className="cancel-btn"
-
               onClick={onClose}
-
+              disabled={loading}
             >
-
               Cancel
-
             </button>
 
-
-
-
             <button
-
               type="submit"
-
               className="submit-btn"
-
               disabled={loading}
-
             >
-
               {loading
                 ? "Submitting..."
-                : "Submit Ticket"
-              }
-
-
+                : "Submit Ticket"}
             </button>
-
-
           </div>
-
-
-
         </form>
-
-
-
       </div>
-
-
-
     </div>
-
   );
-
 }
