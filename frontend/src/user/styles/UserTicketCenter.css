@@ -116,7 +116,7 @@
 .search-box{
     flex:1;
     min-width:300px;
-    max-width:700px;
+    max-width:1300px;
 
     display:flex;
     align-items:center;
@@ -586,9 +586,15 @@
     gap:14px;
 
     margin-top:14px;
-    padding-top:14px;
+}
 
-    border-top:1px solid var(--border);
+.ticket-divider{
+    height:1px;
+
+    width:calc(100% + 198px);
+    margin:12px 0 1px -1px;
+
+    background:var(--border);
 }
 
 .ticket-meta-card{
@@ -792,6 +798,79 @@
 
 .btn-delete-ticket:hover{
     background:#b91c1c;
+}
+
+.ticket-content-grid{
+    display:grid;
+    grid-template-columns:minmax(0, 1fr) 405px;
+    gap:24px;
+    align-items:start;
+    margin:11px 0;
+}
+
+.ticket-title{
+    margin-top:8px;
+
+    font-size:1.05rem;
+    font-weight:600;
+    color:var(--text);
+
+    line-height:1.5;
+}
+
+.ticket-description{
+    margin-top:8px;
+
+    color:var(--muted);
+    line-height:1.7;
+
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+
+.ticket-details-card{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:12px;
+
+    padding:18px;
+}
+
+.admin-response-card{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+
+    background:var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:12px;
+
+    padding:24px;
+}
+
+.admin-response-text{
+    margin-top:10px;
+    line-height:1.6;
+    color:var(--text);
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+
+.admin-response-date{
+    display:block;
+    margin-top:14px;
+    color:var(--muted);
+    font-size:.8rem;
+}
+
+.admin-response-empty{
+    margin-top:10px;
+    color:var(--muted);
+    line-height:1.6;
 }
 
 /* =====================================

@@ -1,0 +1,396 @@
+/* ==========================================
+   VIEW TICKET MODAL
+========================================== */
+
+.view-ticket-modal{
+    width:min(1100px,96vw);
+    max-height:92vh;
+
+    overflow:hidden;
+
+    display:flex;
+    flex-direction:column;
+
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:18px;
+
+    box-shadow:0 28px 80px rgba(0,0,0,.45);
+}
+
+
+/* ==========================================
+   HEADER
+========================================== */
+
+.view-ticket-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+
+    padding:28px 32px;
+
+    border-bottom:1px solid var(--border);
+
+    background:linear-gradient(
+        180deg,
+        rgba(255,255,255,.02),
+        transparent
+    );
+}
+
+.view-ticket-header h2{
+    margin:0;
+    font-size:1.7rem;
+    color:var(--text-primary);
+    font-weight:700;
+}
+
+.view-ticket-header p{
+    margin-top:6px;
+    color:var(--text-secondary);
+    font-size:.95rem;
+}
+
+.close-modal-btn{
+    width:44px;
+    height:44px;
+
+    border:none;
+    border-radius:12px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    cursor:pointer;
+
+    background:transparent;
+    color:var(--text-secondary);
+
+    transition:.25s;
+}
+
+.close-modal-btn:hover{
+    background:rgba(255,255,255,.06);
+    color:white;
+}
+
+
+/* ==========================================
+   BODY
+========================================== */
+
+.view-ticket-body{
+    overflow-y:auto;
+}
+
+
+/* ==========================================
+   SUMMARY
+========================================== */
+
+.view-ticket-summary{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+
+    gap:18px;
+
+    padding:26px 30px;
+
+    border-bottom:1px solid var(--border);
+}
+
+.summary-item{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+
+    padding:18px;
+
+    border:1px solid var(--border);
+    border-radius:14px;
+
+    background:var(--surface-light);
+}
+
+.summary-item small{
+    color:var(--text-secondary);
+    font-size:.78rem;
+    text-transform:uppercase;
+    letter-spacing:.5px;
+}
+
+.summary-item span{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    font-weight:600;
+    color:var(--text-primary);
+}
+
+
+/* ==========================================
+   SECTION
+========================================== */
+
+.ticket-section{
+    padding:30px;
+}
+
+.ticket-section + .ticket-section{
+    border-top:1px solid var(--border);
+}
+
+.ticket-section h3{
+    display:flex;
+    align-items:center;
+    gap:10px;
+
+    margin:0 0 20px;
+
+    color:white;
+    font-size:1.05rem;
+}
+
+
+/* ==========================================
+   TIMELINE CONVERSATION
+========================================== */
+
+.conversation-message{
+    position:relative;
+
+    margin-bottom:22px;
+    padding-left:32px;
+}
+
+.conversation-message:last-child{
+    margin-bottom:0;
+}
+
+/* timeline */
+
+.conversation-message::before{
+    content:"";
+
+    position:absolute;
+    left:8px;
+    top:10px;
+
+    width:12px;
+    height:12px;
+
+    border-radius:50%;
+}
+
+.conversation-message::after{
+    content:"";
+
+    position:absolute;
+    left:13px;
+    top:26px;
+    bottom:-24px;
+
+    width:2px;
+
+    background:var(--border);
+}
+
+.conversation-message:last-child::after{
+    display:none;
+}
+
+
+/* colors */
+
+.conversation-message.user::before{
+    background:#3b82f6;
+}
+
+.conversation-message.admin::before{
+    background:#22c55e;
+}
+
+
+/* bubble */
+
+.conversation-message.user .message-card{
+    background:rgba(59,130,246,.08);
+    border-left:4px solid #3b82f6;
+}
+
+.conversation-message.admin .message-card{
+    background:rgba(34,197,94,.08);
+    border-left:4px solid #22c55e;
+}
+
+.message-card{
+    padding:18px 20px;
+
+    border:1px solid var(--border);
+    border-radius:14px;
+}
+
+
+/* ==========================================
+   MESSAGE HEADER
+========================================== */
+
+.message-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+
+    margin-bottom:14px;
+}
+
+.message-header strong{
+    color:white;
+    font-size:.95rem;
+}
+
+.message-header small{
+    color:var(--text-secondary);
+    font-size:.8rem;
+}
+
+
+/* ==========================================
+   MESSAGE BODY
+========================================== */
+
+.message-card p{
+    margin:0;
+
+    line-height:1.75;
+    color:var(--text-primary);
+
+    white-space:pre-wrap;
+    word-break:break-word;
+}
+
+
+/* ==========================================
+   EMPTY
+========================================== */
+
+.empty-conversation{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+
+    gap:16px;
+
+    text-align:center;
+
+    padding:70px 30px;
+
+    border:2px dashed var(--border);
+    border-radius:16px;
+
+    color:var(--text-secondary);
+}
+
+.empty-conversation svg{
+    opacity:.7;
+}
+
+.empty-conversation h4{
+    margin:0;
+    color:white;
+}
+
+.empty-conversation p{
+    margin:0;
+    max-width:500px;
+    line-height:1.6;
+}
+
+
+/* ==========================================
+   STATUS COLORS
+========================================== */
+
+.status-pending{
+    color:#fbbf24;
+}
+
+.status-resolved{
+    color:#22c55e;
+}
+
+.status-cancelled{
+    color:#ef4444;
+}
+
+.priority-low{
+    color:#22c55e;
+}
+
+.priority-medium{
+    color:#f59e0b;
+}
+
+.priority-high{
+    color:#fb923c;
+}
+
+.priority-urgent{
+    color:#ef4444;
+}
+
+
+/* ==========================================
+   SCROLLBAR
+========================================== */
+
+.view-ticket-body::-webkit-scrollbar{
+    width:8px;
+}
+
+.view-ticket-body::-webkit-scrollbar-thumb{
+    background:#394150;
+    border-radius:999px;
+}
+
+
+/* ==========================================
+   RESPONSIVE
+========================================== */
+
+@media (max-width:1000px){
+
+    .view-ticket-summary{
+        grid-template-columns:repeat(2,1fr);
+    }
+
+}
+
+@media (max-width:768px){
+
+    .view-ticket-header{
+        flex-direction:column;
+        gap:18px;
+    }
+
+    .close-modal-btn{
+        align-self:flex-end;
+    }
+
+    .view-ticket-summary{
+        grid-template-columns:1fr;
+    }
+
+    .message-header{
+        flex-direction:column;
+        align-items:flex-start;
+        gap:6px;
+    }
+
+    .ticket-section{
+        padding:22px;
+    }
+
+}

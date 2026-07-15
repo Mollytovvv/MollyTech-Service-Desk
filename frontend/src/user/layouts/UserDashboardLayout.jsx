@@ -6,6 +6,7 @@ import logo from "../../assets/mollytech_logo.jpg";
 import {
   FiHome,
   FiFileText,
+  FiArchive,
   FiMessageSquare,
   FiUser,
   FiSettings,
@@ -31,6 +32,11 @@ const UserDashboardLayout = () => {
     "/user/tickets": {
       title: "My Tickets",
       description: "Track and manage all of your support requests.",
+    },
+
+    "/user/archives": {
+      title: "Archived Tickets",
+      description: "Review your archived support requests.",
     },
 
     "/user/messages": {
@@ -116,6 +122,16 @@ const UserDashboardLayout = () => {
             >
               <FiFileText className="icon" />
               My Tickets
+            </NavLink>
+
+            <NavLink
+              to="/user/archives"
+              className={({ isActive }) =>
+                isActive ? "active" : ""
+              }
+            >
+              <FiArchive className="icon" />
+              Archived Tickets
             </NavLink>
 
             <NavLink

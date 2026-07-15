@@ -7,10 +7,13 @@ const {
   getTicketById,
   updateTicket,
   cancelTicket,
+  resolveTicket,
   assignTicket,
   reopenTicket,
   deleteTicket,
   deleteMyTicket,
+  unarchiveMyTicket,
+  archiveMyTicket,
   getTicketsByStatus,
   getMyAssignedTickets,
   addTicketComment,
@@ -19,6 +22,7 @@ const {
   deleteArchivedTickets,
   getMyTickets,
   getMyDashboard,
+  getMyArchivedTickets,
 } = require("../controllers/ticket.controller");
 
 const authMiddleware = require("../middleware/auth.middleware");
@@ -78,6 +82,16 @@ router.patch(
 );
 
 // ===============================
+// USER ARCHIVE TICKET
+// ===============================
+router.patch(
+  "/my/:id/archive",
+  authMiddleware,
+  roleMiddleware("user"),
+  archiveMyTicket
+);
+
+// ===============================
 // COMMENT
 // ===============================
 router.post(
@@ -124,15 +138,34 @@ router.get(
 );
 
 // ===============================
-// GET SINGLE TICKET
+// USER ARCHIVED TICKETS
 // ===============================
-router.get("/:id", getTicketById);
+router.get(
+  "/my/archived",
+  authMiddleware,
+  roleMiddleware("user"),
+  getMyArchivedTickets
+);
 
+// ===============================
+// USER UNARCHIVE TICKET
+// ===============================
+router.patch(
+  "/my/:id/unarchive",
+  authMiddleware,
+  roleMiddleware("user"),
+  unarchiveMyTicket
+);
 
 // ===============================
 // UPDATE / ASSIGN / RESOLVE / REOPEN
 // ===============================
-router.get("/:id", getTicketById);
+router.get(
+  "/:id",
+  authMiddleware,
+  getTicketById
+);
+
 router.put(
   "/:id",
   authMiddleware,
@@ -161,7 +194,7 @@ router.patch(
   "/:id/resolve",
   authMiddleware,
   roleMiddleware("admin", "technician"),
-  updateTicket
+  resolveTicket
 );
 
 // ===============================

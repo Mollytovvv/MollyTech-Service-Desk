@@ -5,6 +5,7 @@ import { useToast } from "../../context/ToastContext";
 import api from "../../api/axios";
 import "../styles/UserTicketCenter.css";
 import { useAuth } from "../../context/AuthContext";
+import ViewTicketModal from "../components/ViewTicketModal";
 import socket from "../../socket/socket";
 
 import {
@@ -18,6 +19,8 @@ import {
   FiEdit,
   FiXCircle,
   FiTrash2,
+  FiEye,
+  FiArchive,
 } from "react-icons/fi";
 
 export default function UserTicketCenter() {
@@ -33,6 +36,9 @@ export default function UserTicketCenter() {
   const [searchTerm, setSearchTerm] = useState("");
   const [cancelTicket, setCancelTicket] = useState(null);
   const [deleteTicket, setDeleteTicket] = useState(null);
+  const [archiveTicket, setArchiveTicket] = useState(null);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [viewTicket, setViewTicket] = useState(null);
 
   const { user } = useAuth();
   const { showToast } = useToast();
@@ -90,10 +96,24 @@ export default function UserTicketCenter() {
     return formatted.replace(/\bIt\b/g, "IT");
   };
 
+  const getLatestAdminResponse = (ticket) => {
+    if (!ticket.comments || ticket.comments.length === 0) {
+      return null;
+    }
+
+    return ticket.comments[ticket.comments.length - 1];
+  };
+
   const handleEdit = (ticket) => {
     setActiveMenu(null);
     setSelectedTicket(ticket);
     setShowEditModal(true);
+  };
+
+  const handleView = (ticket) => {
+    setActiveMenu(null);
+    setViewTicket(ticket);
+    setShowViewModal(true);
   };
 
   // ===============================
@@ -127,6 +147,10 @@ export default function UserTicketCenter() {
     }
   };
 
+
+  // ===============================
+  // DELETE TICKET
+  // ===============================
   const handleDeleteTicket = async (ticketId) => {
     try {
       await api.delete(`/tickets/my/${ticketId}`);
@@ -149,6 +173,32 @@ export default function UserTicketCenter() {
         "error",
         err.response?.data?.message ||
         "Failed to delete ticket."
+      );
+    }
+  };
+
+  const handleArchiveTicket = async (ticketId) => {
+    try {
+      await api.patch(`/tickets/my/${ticketId}/archive`);
+
+      setTickets((prev) =>
+        prev.filter((t) => t._id !== ticketId)
+      );
+
+      setActiveMenu(null);
+
+      showToast(
+        "success",
+        "Ticket archived successfully."
+      );
+
+    } catch (err) {
+      console.log(err);
+
+      showToast(
+        "error",
+        err.response?.data?.message ||
+        "Failed to archive ticket."
       );
     }
   };
@@ -298,6 +348,7 @@ export default function UserTicketCenter() {
             className="user-ticket-card"
             key={ticket._id}
           >
+      
             {/* LEFT SIDE */}
 
             <div className="user-ticket-info">
@@ -337,33 +388,78 @@ export default function UserTicketCenter() {
 
             </div>
 
-              <div className="ticket-field">
-                <span className="ticket-label">Title</span>
+            <div className="ticket-content-grid">
 
-                <h4>{ticket.title}</h4>
-              </div>
-
-              <div className="ticket-field">
-                <span className="ticket-label">Description</span>
-
-                <p className="ticket-description">
-                  {ticket.description}
-                </p>
-              </div>
-
-              <div className="ticket-contact-grid">
+              {/* LEFT */}
+              <div className="ticket-details-card">
 
                 <div className="ticket-field">
-                  <span className="ticket-label">Email</span>
-                  <span>{ticket.email || "N/A"}</span>
+                  <span className="ticket-label">Title</span>
+
+                  <h4 className="ticket-title">
+                    {ticket.title}
+                  </h4>
                 </div>
 
                 <div className="ticket-field">
-                  <span className="ticket-label">Phone</span>
-                  <span>{ticket.phoneNumber || "N/A"}</span>
+                  <span className="ticket-label">Description</span>
+
+                  <p className="ticket-description">
+                    {ticket.description}
+                  </p>
                 </div>
 
               </div>
+
+              {/* RIGHT */}
+              <div className="admin-response-card">
+
+                <span className="ticket-label">
+                  Admin Response
+                </span>
+
+                {getLatestAdminResponse(ticket) ? (
+
+                  <>
+                    <p className="admin-response-text">
+                      {getLatestAdminResponse(ticket).message}
+                    </p>
+
+                    <small className="admin-response-date">
+                      {new Date(
+                        getLatestAdminResponse(ticket).createdAt
+                      ).toLocaleString()}
+                    </small>
+                  </>
+
+                ) : (
+
+                  <p className="admin-response-empty">
+                    No response yet.
+                    Our support team will update you here once they begin working on your request.
+                  </p>
+
+                )}
+
+              </div>
+
+            </div>
+
+            <div className="ticket-divider"></div>
+
+            <div className="ticket-contact-grid">
+
+              <div className="ticket-field">
+                <span className="ticket-label">Email</span>
+                <span>{ticket.email || "N/A"}</span>
+              </div>
+
+              <div className="ticket-field">
+                <span className="ticket-label">Phone</span>
+                <span>{ticket.phoneNumber || "N/A"}</span>
+              </div>
+
+            </div>
 
             </div>
 
@@ -391,6 +487,11 @@ export default function UserTicketCenter() {
 
                   <div className="ticket-action-menu">
 
+                    <button onClick={() => handleView(ticket)}>
+                      <FiEye />
+                      View Ticket
+                    </button>
+
                     {ticket.status === "pending" && (
                       <button onClick={() => handleEdit(ticket)}>
                         <FiEdit />
@@ -410,15 +511,29 @@ export default function UserTicketCenter() {
                       </button>
                     )}
 
-                    <button
-                      onClick={() => {
-                        setDeleteTicket(ticket);
-                        setActiveMenu(null);
-                      }}
-                    >
-                      <FiTrash2 />
-                      Delete Ticket
-                    </button>
+                    {(ticket.status === "resolved" || ticket.status === "closed") && (
+                      <button
+                        onClick={() => {
+                          setArchiveTicket(ticket);
+                          setActiveMenu(null);
+                        }}
+                      >
+                        <FiArchive />
+                        Archive Ticket
+                      </button>
+                    )}
+
+                    {ticket.status === "cancelled" && (
+                      <button
+                        onClick={() => {
+                          setDeleteTicket(ticket);
+                          setActiveMenu(null);
+                        }}
+                      >
+                        <FiTrash2 />
+                        Delete Ticket
+                      </button>
+                    )}
 
                   </div>
 
@@ -463,7 +578,7 @@ export default function UserTicketCenter() {
                   {capitalize(ticket.status)}
                 </span>
 
-              </div>
+              </div>         
 
             </div>
 
@@ -513,6 +628,52 @@ export default function UserTicketCenter() {
                 }}
               >
                 Cancel Request
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {archiveTicket && (
+        <div
+          className="modal-overlay"
+          onClick={() => setArchiveTicket(null)}
+        >
+          <div
+            className="modal resolve-modal"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="resolve-header">
+              <FiArchive className="resolve-icon" />
+              <h2>Archive Ticket</h2>
+            </div>
+
+            <div className="resolve-body">
+              <p>
+                Are you sure you want to archive this ticket?
+              </p>
+
+              <div className="resolve-warning">
+                Archived tickets will be moved to your Archives page.
+              </div>
+            </div>
+
+            <div className="resolve-actions">
+              <button
+                className="btn-keep-ticket"
+                onClick={() => setArchiveTicket(null)}
+              >
+                Keep Ticket
+              </button>
+
+              <button
+                className="btn-delete-ticket"
+                onClick={() => {
+                  handleArchiveTicket(archiveTicket._id);
+                  setArchiveTicket(null);
+                }}
+              >
+                Archive Ticket
               </button>
             </div>
           </div>
@@ -586,6 +747,19 @@ export default function UserTicketCenter() {
             setSelectedTicket(null);
             setActiveMenu(null);   // <-- add this
             fetchTickets();
+          }}
+        />
+      )}
+
+      {/* VIEW MODAL */}
+
+      {showViewModal && viewTicket && (
+        <ViewTicketModal
+          ticket={viewTicket}
+          onClose={() => {
+            setShowViewModal(false);
+            setViewTicket(null);
+            setActiveMenu(null);
           }}
         />
       )}

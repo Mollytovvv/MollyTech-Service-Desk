@@ -355,6 +355,59 @@ const assignTicket = async (req, res) => {
 };
 
 // ===============================
+// ✅ RESOLVE TICKET
+// ===============================
+const resolveTicket = async (req, res) => {
+  try {
+
+    const ticket = await Ticket.findById(req.params.id);
+
+    if (!ticket) {
+      return res.status(404).json({
+        message: "Ticket not found",
+      });
+    }
+
+    if (ticket.status === "resolved") {
+      return res.status(400).json({
+        message: "Ticket is already resolved",
+      });
+    }
+
+    ticket.status = "resolved";
+
+    ticket.activityLogs.push({
+      action: "Ticket Resolved",
+      performedBy: req.user?.id || "system",
+      details: "Ticket marked as resolved",
+    });
+
+    const updatedTicket = await ticket.save();
+
+
+    const io = req.app.get("io");
+
+    io.emit("ticketUpdated", updatedTicket);
+
+
+    return res.json({
+      message: "Ticket resolved successfully",
+      ticket: updatedTicket,
+    });
+
+
+  } catch (err) {
+
+    console.log("RESOLVE ERROR:", err);
+
+    return res.status(500).json({
+      message: err.message,
+    });
+
+  }
+};
+
+// ===============================
 // 🔄 REOPEN / UNRESOLVE TICKET
 // ===============================
 const reopenTicket = async (req, res) => {
@@ -595,6 +648,13 @@ const addTicketComment = async (req, res) => {
 
     await ticket.save();
 
+    // ===============================
+    // REAL-TIME UPDATE
+    // ===============================
+    const io = req.app.get("io");
+
+    io.emit("ticketUpdated", ticket);
+
     return res.json({
       message: "Comment added successfully",
       ticket,
@@ -710,6 +770,68 @@ const archiveTickets = async (req, res) => {
   };
 
   // ===============================
+  // 📦 USER ARCHIVE TICKET
+  // ===============================
+  const archiveMyTicket = async (req, res) => {
+    try {
+      const ticket = await Ticket.findById(req.params.id);
+
+      if (!ticket) {
+        return res.status(404).json({
+          message: "Ticket not found",
+        });
+      }
+
+      // User must own the ticket
+      if (
+        ticket.submittedBy.userId.toString() !== req.user.id
+      ) {
+        return res.status(403).json({
+          message: "Unauthorized",
+        });
+      }
+
+      // Only resolved or closed tickets
+      if (
+        ticket.status !== "resolved" &&
+        ticket.status !== "closed"
+      ) {
+        return res.status(400).json({
+          message:
+            "Only resolved or closed tickets can be archived.",
+        });
+      }
+
+      ticket.status = "archived";
+      ticket.archivedAt = new Date();
+
+      ticket.activityLogs.push({
+        action: "Ticket Archived",
+        performedBy: req.user.id,
+        details: "User archived the ticket.",
+      });
+
+      await ticket.save();
+
+      const io = req.app.get("io");
+
+      io.emit("ticketUpdated", ticket);
+
+      return res.json({
+        message: "Ticket archived successfully.",
+        ticket,
+      });
+
+    } catch (err) {
+      console.log("ARCHIVE MY TICKET:", err);
+
+      return res.status(500).json({
+        message: err.message,
+      });
+    }
+  };
+
+  // ===============================
   // 🗑 BULK DELETE ARCHIVED TICKETS
   // ===============================
   const deleteArchivedTickets = async (req, res) => {
@@ -819,6 +941,38 @@ const archiveTickets = async (req, res) => {
   };
 
   // ===============================
+  // 📦 GET MY ARCHIVED TICKETS
+  // ===============================
+  const getMyArchivedTickets = async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({
+          message: "Unauthorized",
+        });
+      }
+
+      const tickets = await Ticket.find({
+        "submittedBy.userId": req.user.id,
+        status: "archived",
+      }).sort({ archivedAt: -1 });
+
+      return res.json({
+        count: tickets.length,
+        tickets,
+      });
+
+    } catch (err) {
+
+      console.log("GET MY ARCHIVED TICKETS:", err);
+
+      return res.status(500).json({
+        message: err.message,
+      });
+
+    }
+  };
+
+  // ===============================
   // 🗑 USER DELETE TICKET
   // ===============================
   const deleteMyTicket = async (req, res) => {
@@ -840,10 +994,14 @@ const archiveTickets = async (req, res) => {
         });
       }
 
-      // Only allow deleting cancelled tickets
-      if (ticket.status !== "cancelled") {
+      // Allow deleting cancelled OR archived tickets
+      if (
+        ticket.status !== "cancelled" &&
+        ticket.status !== "archived"
+      ) {
         return res.status(400).json({
-          message: "Only cancelled tickets can be deleted.",
+          message:
+            "Only cancelled or archived tickets can be deleted.",
         });
       }
 
@@ -871,6 +1029,66 @@ const archiveTickets = async (req, res) => {
     }
   };
 
+  // ===============================
+  // 📦 USER UNARCHIVE TICKET
+  // ===============================
+  const unarchiveMyTicket = async (req, res) => {
+    try {
+      const ticket = await Ticket.findById(req.params.id);
+
+      if (!ticket) {
+        return res.status(404).json({
+          message: "Ticket not found",
+        });
+      }
+
+      // Must own ticket
+      if (
+        ticket.submittedBy.userId.toString() !== req.user.id
+      ) {
+        return res.status(403).json({
+          message: "Unauthorized",
+        });
+      }
+
+      // Only archived tickets
+      if (ticket.status !== "archived") {
+        return res.status(400).json({
+          message: "Only archived tickets can be restored.",
+        });
+      }
+
+      ticket.status = "resolved";
+      ticket.archivedAt = null;
+
+      ticket.activityLogs.push({
+        action: "Ticket Restored",
+        performedBy: req.user.id,
+        details: "User restored archived ticket.",
+      });
+
+      await ticket.save();
+
+      const io = req.app.get("io");
+
+      io.emit("ticketUpdated", ticket);
+
+      return res.json({
+        message: "Ticket restored successfully.",
+        ticket,
+      });
+
+    } catch (err) {
+
+      console.log("UNARCHIVE MY TICKET:", err);
+
+      return res.status(500).json({
+        message: err.message,
+      });
+
+    }
+  };
+
 // ===============================
 // 📦 EXPORTS
 // ===============================
@@ -880,6 +1098,7 @@ module.exports = {
   getTicketById,
   updateTicket,
   assignTicket,
+  resolveTicket,
   reopenTicket,
   deleteTicket,
   deleteArchivedTickets,
@@ -889,8 +1108,11 @@ module.exports = {
   addTicketComment,
   archiveTickets,
   unarchiveTickets,
-  getMyDashboard, 
+  getMyDashboard,
   getMyTickets,
   cancelTicket,
   deleteMyTicket,
+  archiveMyTicket,      
+  unarchiveMyTicket,
+  getMyArchivedTickets,
 };
