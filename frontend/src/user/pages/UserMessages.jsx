@@ -83,8 +83,8 @@ export default function UserMessages() {
         }),
       ]);
 
-console.log(activeRes.data);
-console.log(archivedRes.data);
+      console.log(activeRes.data);
+      console.log(archivedRes.data);
 
       setConversations(activeRes.data.conversations || []);
       setArchivedConversations(
@@ -565,33 +565,40 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
     );
   };
 
-const handleArchiveConversation = async (conversationId) => {
-  try {
-    await api.patch(
-      `/conversations/${conversationId}/archive`,
-      {},
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+  const handleArchiveConversation = async (conversationId) => {
+    try {
+      await api.patch(
+        `/conversations/${conversationId}/archive`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const conversation = conversations.find(
+        (c) => c._id === conversationId
+      );
+
+      if (!conversation) return;
+
+      setConversations((prev) =>
+        prev.filter((c) => c._id !== conversationId)
+      );
+
+      setArchivedConversations((prev) => [
+        { ...conversation, isArchived: true },
+        ...prev,
+      ]);
+
+      if (selectedConversation?._id === conversationId) {
+        setSelectedConversation(null);
       }
-    );
-
-    setConversations((prev) =>
-      prev.map((c) =>
-        c._id === conversationId
-          ? { ...c, isArchived: true }
-          : c
-      )
-    );
-
-    if (selectedConversation?._id === conversationId) {
-      setSelectedConversation(null);
+    } catch (err) {
+      console.log(err);
     }
-  } catch (err) {
-    console.log(err);
-  }
-};
+  };
 
   const handleUnarchiveConversation = async (conversationId) => {
     try {
@@ -605,13 +612,20 @@ const handleArchiveConversation = async (conversationId) => {
         }
       );
 
-      setConversations((prev) =>
-        prev.map((c) =>
-          c._id === conversationId
-            ? { ...c, isArchived: false }
-            : c
-        )
+      const conversation = archivedConversations.find(
+        (c) => c._id === conversationId
       );
+
+      if (!conversation) return;
+
+      setArchivedConversations((prev) =>
+        prev.filter((c) => c._id !== conversationId)
+      );
+
+      setConversations((prev) => [
+        { ...conversation, isArchived: false },
+        ...prev,
+      ]);
     } catch (err) {
       console.log(err);
     }
