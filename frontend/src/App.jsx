@@ -10,6 +10,7 @@ import Messages from "./admin/pages/Messages";
 import UserDashboard from "./user/pages/UserDashboard";
 import UserTicketCenter from "./user/pages/UserTicketCenter";
 import UserArchives from "./user/pages/UserArchives";
+import UserMessages from "./user/pages/UserMessages";
 
 import DashboardLayout from "./admin/layouts/DashboardLayout";
 import UserDashboardLayout from "./user/layouts/UserDashboardLayout";
@@ -88,6 +89,11 @@ function App() {
           <Route
             path="/user/archives"
             element={<UserArchives />}
+          />
+
+          <Route
+            path="/user/messages"
+            element={<UserMessages />}
           />
 
           {/* Future Pages */}

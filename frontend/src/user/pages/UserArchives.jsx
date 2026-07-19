@@ -104,16 +104,6 @@ export default function UserArchives() {
   return (
     <div className="user-archives">
 
-      <section className="archives-header">
-
-        <h2>Archived Tickets</h2>
-
-        <p>
-            Review your previously archived support requests.
-        </p>
-
-      </section>
-
       <section className="archives-toolbar">
 
         <div className="archives-search">

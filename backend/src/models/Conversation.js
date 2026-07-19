@@ -36,10 +36,12 @@ const conversationSchema = new mongoose.Schema(
       default: false,
     },
     
-    isArchived: {
-      type: Boolean,
-      default: false,
-    },
+    archivedBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
   },
   { timestamps: true }
 );

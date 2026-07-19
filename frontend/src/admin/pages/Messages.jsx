@@ -6,7 +6,13 @@ import ConversationList from "../components/messages/ConversationList";
 import socket from "../../socket/socket";
 import { useToast } from "../../context/ToastContext";
 
-import {formatCategory,formatPriority,formatStatus,formatAssignedTo,} from "../../utils/formatter";
+import {
+  formatCategory,
+  formatPriority,
+  formatStatus,
+  formatAssignedTo,
+  formatDateTime,
+} from "../../utils/formatter";
 
 export default function Messages() {
   const { token, user } = useAuth();
@@ -697,9 +703,7 @@ export default function Messages() {
                       <small>Created:</small>
 
                       <span>
-                        {ticket.createdAt
-                          ? new Date(ticket.createdAt).toLocaleString()
-                          : "N/A"}
+                          {formatDateTime(ticket?.createdAt)}
                       </span>
                     </div>
                   </div>
@@ -728,8 +732,8 @@ export default function Messages() {
                       key={msg._id || i}
                       className={`message-bubble ${
                         isStaffMessage(msg)
-                          ? "admin-msg"
-                          : "user-msg"
+                          ? "user-msg"
+                          : "admin-msg"
                       }`}
                     >
                     {msg.text && <p>{msg.text}</p>}
@@ -790,9 +794,7 @@ export default function Messages() {
                     )}
 
                       <small>
-                        {msg.createdAt
-                          ? new Date(msg.createdAt).toLocaleString()
-                          : ""}
+                          {formatDateTime(msg.createdAt)}
                       </small>
                     </div>
                   );
@@ -876,9 +878,11 @@ export default function Messages() {
           </>
 
         ) : (
-          <div className="empty-chat">
-            Select a conversation to start chatting
-          </div>
+            <div className="empty-chat">
+                <i className="fa-regular fa-comments"></i>
+                <h3>Select a conversation</h3>
+                <p>Choose a ticket from the sidebar to start messaging.</p>
+            </div>
         )}
 
       </div>

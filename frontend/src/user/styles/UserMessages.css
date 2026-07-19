@@ -1,0 +1,589 @@
+/* =====================================
+   USER MESSAGES
+   MollyTech Service Desk
+===================================== */
+
+.user-messages-page{
+
+    display:flex;
+
+    gap:20px;
+
+    height:100vh;
+
+    padding:20px;
+
+    background:#0f172a;
+
+    overflow:hidden;
+
+    color:var(--text);
+
+}
+
+
+/* =====================================
+   CHAT AREA
+===================================== */
+
+.user-chat{
+
+    flex:1;
+
+    display:flex;
+
+    flex-direction:column;
+
+    background:var(--panel);
+
+    border:1px solid var(--border);
+
+    border-radius:18px;
+
+    overflow:hidden;
+
+}
+
+
+/* =====================================
+   CHAT HEADER
+===================================== */
+
+.user-chat-header{
+
+    flex-shrink:0;
+
+    display:flex;
+
+    flex-direction:row;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    gap:20px;
+
+    padding:24px 28px;
+
+    background:var(--panel);
+
+    border-bottom:1px solid var(--border);
+
+}
+
+.user-chat-header h2{
+
+    margin:0;
+
+    font-size:22px;
+    font-weight:700;
+
+    color:var(--text);
+
+}
+
+
+.user-chat-header p{
+
+    margin-top:6px;
+
+    color:var(--muted);
+
+    font-size:13px;
+
+}
+
+
+/* =====================================
+   STATUS
+===================================== */
+
+.ticket-status{
+
+    display:inline-flex;
+    align-items:center;
+
+    padding:8px 16px;
+
+    border-radius:999px;
+
+    font-size:11px;
+    font-weight:700;
+
+    text-transform:uppercase;
+    letter-spacing:.06em;
+
+}
+
+
+.ticket-status.pending{
+
+    background:rgba(245,158,11,.15);
+    color:#fbbf24;
+
+}
+
+
+.ticket-status.in_progress{
+
+    background:rgba(59,130,246,.15);
+    color:#60a5fa;
+
+}
+
+
+.ticket-status.resolved{
+
+    background:rgba(34,197,94,.15);
+    color:#4ade80;
+
+}
+
+
+.ticket-status.closed{
+
+    background:rgba(148,163,184,.15);
+    color:#cbd5e1;
+
+}
+
+
+/* =====================================
+   TICKET META
+===================================== */
+
+.user-ticket-meta{
+
+    display:grid;
+
+    grid-template-columns:repeat(5,minmax(0,1fr));
+
+    gap:12px 14px;
+
+    padding:22px 28px;
+
+    background:var(--panel);
+
+    border-bottom:1px solid var(--border);
+
+}
+
+
+.meta-card{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+    padding:14px 16px;
+
+    background:var(--surface);
+
+    border:1px solid var(--border);
+
+    border-radius:14px;
+
+    transition:.25s ease;
+
+}
+
+.meta-card i{
+
+    width:42px;
+
+    height:42px;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    border-radius:12px;
+
+    color:var(--accent);
+
+    background:rgba(34,211,238,.08);
+
+}
+
+.meta-content{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:3px;
+
+    flex:1;
+
+}
+
+.meta-content small{
+
+    color:#94a3b8;
+
+    font-size:12px;
+
+    font-weight:600;
+
+}
+
+.meta-content span{
+
+    color:#f8fafc;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+.meta-card:hover{
+
+    transform:translateY(-2px);
+
+    border-color:rgba(34,211,238,.25);
+
+}
+
+/* =====================================
+   PRIORITY COLORS
+===================================== */
+
+.priority.low{
+
+    color:#4ade80;
+
+}
+
+
+.priority.medium{
+
+    color:#fbbf24;
+
+}
+
+
+.priority.high{
+
+    color:#f87171;
+
+}
+
+
+.priority.urgent{
+
+    color:#ef4444;
+
+}
+
+
+/* =====================================
+   CHAT BODY
+===================================== */
+
+.user-chat-body{
+
+    flex:1;
+
+    overflow-y:auto;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+    padding:28px;
+
+    background:var(--background);
+
+}
+
+
+/* =====================================
+   MESSAGE BUBBLES
+===================================== */
+
+.message-bubble{
+
+    max-width:68%;
+
+    padding:16px 18px;
+
+    border-radius:18px;
+
+    line-height:1.6;
+
+    animation:fadeIn .2s ease;
+
+}
+
+.message-bubble small{
+
+    display:block;
+
+    margin-top:6px;
+
+    font-size:10px;
+
+    color:#94a3b8;
+
+}
+
+.admin-msg{
+
+    align-self:flex-start;
+
+    background:linear-gradient(
+        135deg,
+        rgba(34,211,238,.18),
+        rgba(6,182,212,.12)
+    );
+
+    border:1px solid rgba(34,211,238,.25);
+
+}
+
+
+.user-msg{
+
+    align-self:flex-end;
+
+    background:var(--surface);
+
+    border:1px solid var(--border);
+
+}
+
+
+/* =====================================
+   CHAT INPUT
+===================================== */
+
+.user-chat-input{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:18px;
+
+    background:var(--panel);
+
+    border-top:1px solid var(--border);
+
+}
+
+
+.user-chat-input input{
+
+    flex:1;
+
+    height:48px;
+
+    padding:0 16px;
+
+    border-radius:12px;
+
+    border:1px solid rgba(148,163,184,.2);
+
+    background:rgba(30,41,59,.6);
+
+    color:white;
+
+    outline:none;
+
+}
+
+
+.user-chat-input input:focus{
+
+    border-color:var(--primary);
+
+}
+
+
+.user-chat-input button{
+
+    height:48px;
+
+    padding:0 24px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:linear-gradient(
+        135deg,
+        #22d3ee,
+        #0891b2
+    );
+
+    font-weight:600;
+
+    transition:.25s ease;
+
+}
+
+.user-chat-input button:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 10px 22px rgba(34,211,238,.22);
+
+}
+
+
+.attach-btn{
+
+    width:42px;
+
+    height:42px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    color:#94a3b8;
+
+    background:rgba(30,41,59,.6);
+
+    border:1px solid rgba(148,163,184,.18);
+
+}
+
+
+.attach-btn:hover{
+
+    color:#22d3ee;
+
+    border-color:#22d3ee;
+
+}
+
+/* =====================================
+   EMPTY CHAT
+===================================== */
+
+.empty-chat{
+
+    flex:1;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:14px;
+
+    color:var(--muted);
+
+    text-align:center;
+
+}
+
+.empty-chat i{
+
+    font-size:64px;
+
+    color:var(--accent);
+
+}
+
+.empty-chat h3{
+
+    margin:0;
+
+    font-size:24px;
+
+    color:var(--text);
+
+}
+
+.empty-chat p{
+
+    margin:0;
+
+    max-width:320px;
+
+    line-height:1.6;
+
+}
+
+
+/* =====================================
+   RESPONSIVE
+===================================== */
+
+@media(max-width:1400px){
+
+    .user-ticket-meta{
+
+        grid-template-columns:repeat(3,minmax(0,1fr));
+
+    }
+
+}
+
+@media(max-width:1000px){
+
+    .user-ticket-meta{
+
+        grid-template-columns:repeat(2,minmax(0,1fr));
+
+    }
+
+}
+
+@media(max-width:800px){
+
+    .user-messages-page{
+
+        flex-direction:column;
+
+        height:auto;
+
+    }
+
+    .user-ticket-meta{
+
+        grid-template-columns:1fr;
+
+    }
+
+}
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(4px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:translateY(0);
+
+    }
+
+}
