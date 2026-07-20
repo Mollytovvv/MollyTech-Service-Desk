@@ -133,7 +133,6 @@ const ticketSchema = new mongoose.Schema(
         "resolved",
         "closed",
         "cancelled",
-        "archived",
       ],
       default: "pending",
     },
@@ -162,11 +161,31 @@ const ticketSchema = new mongoose.Schema(
       default: [],
     },
 
-    archivedAt: {
+    archivedBy: {
+
+      user: {
+        type: Boolean,
+        default: false,
+      },
+
+      admin: {
+        type: Boolean,
+        default: false,
+      },
+
+    },
+
+    deletedByUser: {
+      type: Boolean,
+      default: false,
+    },
+
+    cancelledAt: {
       type: Date,
       default: null,
     },
-    cancelledAt: {
+
+    archivedAt: {
       type: Date,
       default: null,
     },

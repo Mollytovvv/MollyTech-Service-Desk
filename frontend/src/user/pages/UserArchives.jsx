@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
+import { useToast } from "../../context/ToastContext";
 import "../styles/UserArchives.css";
 
 import {
@@ -10,6 +11,7 @@ import {
 export default function UserArchives() {
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { showToast } = useToast();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -45,37 +47,57 @@ export default function UserArchives() {
   };
 
     const handleUnarchive = async (ticketId) => {
-    try {
+      try {
         await api.patch(`/tickets/my/${ticketId}/unarchive`);
 
         setTickets((prev) =>
-        prev.filter((t) => t._id !== ticketId)
+          prev.filter((t) => t._id !== ticketId)
         );
 
         setRestoreTicket(null);
 
-        // showToast("success", "Ticket restored successfully.");
-    } catch (err) {
+        showToast(
+          "success",
+          "1 archived ticket has been restored successfully."
+        );
+
+      } catch (err) {
         console.log(err);
-        // showToast("error", err.response?.data?.message);
-    }
+
+        showToast(
+          "error",
+          err.response?.data?.message ||
+          "Failed to restore archived ticket."
+        );
+      }
     };
 
     const handleDelete = async (ticketId) => {
-    try {
+      try {
         await api.delete(`/tickets/my/${ticketId}`);
-
-        setTickets((prev) =>
-        prev.filter((t) => t._id !== ticketId)
-        );
 
         setDeleteTicket(null);
 
-        // showToast("success", "Ticket deleted successfully.");
-    } catch (err) {
+        showToast(
+          "success",
+          "1 archived ticket has been deleted successfully."
+        );
+
+        setTimeout(() => {
+          setTickets((prev) =>
+            prev.filter((t) => t._id !== ticketId)
+          );
+        }, 50);
+
+      } catch (err) {
         console.log(err);
-        // showToast("error", err.response?.data?.message);
-    }
+
+        showToast(
+          "error",
+          err.response?.data?.message ||
+          "Failed to delete archived ticket."
+        );
+      }
     };
 
   const filteredTickets = tickets.filter((ticket) => {

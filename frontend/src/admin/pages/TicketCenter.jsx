@@ -292,6 +292,8 @@ const handleReopen = async (id) => {
     const handleTicketUpdated = (updatedTicket) => {
       console.log("🟢 Ticket Updated:", updatedTicket);
 
+      if (!updatedTicket) return;
+
       setTickets((prev) =>
         prev.map((ticket) =>
           ticket._id === updatedTicket._id
@@ -300,7 +302,6 @@ const handleReopen = async (id) => {
         )
       );
 
-      // Keep the View modal synchronized if it's open
       setSelectedTicket((prev) =>
         prev && prev._id === updatedTicket._id
           ? updatedTicket

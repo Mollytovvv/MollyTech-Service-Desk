@@ -26,6 +26,13 @@ const conversationSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    status: {
+      type: String,
+      enum: ["active", "closed"],
+      default: "active",
+    },
+
     adminUnread: {
       type: Boolean,
       default: false,
@@ -35,7 +42,7 @@ const conversationSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-    
+
     archivedBy: [
       {
         type: mongoose.Schema.Types.ObjectId,

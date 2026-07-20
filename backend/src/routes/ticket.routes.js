@@ -15,6 +15,7 @@ const {
   unarchiveMyTicket,
   archiveMyTicket,
   getTicketsByStatus,
+  getArchivedTickets,
   getMyAssignedTickets,
   addTicketComment,
   archiveTickets,
@@ -44,7 +45,17 @@ router.get(
 router.get("/", getTickets);
 
 // ===============================
-// SPECIFIC ROUTES (MUST BE BEFORE /:id)
+// ADMIN ARCHIVED TICKETS
+// ===============================
+router.get(
+  "/status/archived",
+  authMiddleware,
+  roleMiddleware("admin"),
+  getArchivedTickets
+);
+
+// ===============================
+// FILTER BY STATUS
 // ===============================
 router.get(
   "/status/:status",

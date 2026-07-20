@@ -24,6 +24,7 @@ export default function UserMessages() {
 
   const [messages, setMessages] = useState([]);
   const [ticket, setTicket] = useState(null);
+  const [conversationStatus, setConversationStatus] = useState("active");
 
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -126,7 +127,7 @@ export default function UserMessages() {
           }
         );
 
-console.log("USER CONVERSATIONS RESPONSE:", res.data);
+        console.log("USER CONVERSATIONS RESPONSE:", res.data);
 
         console.log("USER MESSAGE RESPONSE:", res.data);
 
@@ -138,6 +139,7 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
 
         setMessages(normalized);
         setTicket(res.data.ticket || null);
+        setConversationStatus(res.data.status || "active");
       } catch (err) {
         console.log("USER MESSAGE ERROR:", err);
       }
@@ -160,6 +162,32 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
     };
   }, [selectedConversation]);
 
+  // =========================
+  // CONVERSATION UPDATED
+  // =========================
+
+  const handleConversationUpdated = (data)=>{
+
+    setConversations((prev)=>
+      prev.map((conversation)=>{
+
+        if(
+          conversation._id !== data.conversationId
+        ){
+          return conversation;
+        }
+
+        return {
+          ...conversation,
+          lastMessage:data.lastMessage,
+          updatedAt:data.updatedAt
+        };
+
+      })
+    );
+
+  };
+  
   // =========================
   // SOCKET LISTENERS
   // =========================
@@ -195,27 +223,42 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
     });
 
 
-    setConversations((prev)=>
-      prev.map((c)=>
-        c._id === normalized.conversationId
-        ?
-        {
-          ...c,
+    setConversations((prev)=>{
+
+      const updated = prev.map((conversation)=>{
+
+        if(
+          conversation._id !== normalized.conversationId
+        ){
+          return conversation;
+        }
+
+
+        return {
+          ...conversation,
           lastMessage:
-            normalized.text ||
-            "Attachment",
+            normalized.text || "Attachment",
+
           updatedAt:
             normalized.createdAt
-        }
-        :
-        c
-      )
-    );
+        };
+
+      });
+
+
+      return updated.sort(
+        (a,b)=>
+        new Date(b.updatedAt) -
+        new Date(a.updatedAt)
+      );
+
+    });
 
   };
 
     socket.on("receiveMessage", handleReceiveMessage);
     socket.on("ticketUpdated", handleTicketUpdated);
+    socket.on("conversationUpdated", handleConversationUpdated);
 
     socket.on("typing", ({ conversationId, userId }) => {
       setTypingUsers((prev) => ({
@@ -237,6 +280,7 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
       socket.off("ticketUpdated", handleTicketUpdated);
       socket.off("typing");
       socket.off("stopTyping");
+      socket.off("conversationUpdated", handleConversationUpdated);
     };
   }, []);
 
@@ -288,6 +332,8 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
   // =========================
 
   const handleInput = (e) => {
+
+    if (conversationStatus === "closed") return;
     setInput(e.target.value);
 
     if (!selectedConversation) return;
@@ -489,8 +535,9 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
   // =========================
   // SEND MESSAGE
   // =========================
-
   const sendMessage = async () => {
+
+    if (conversationStatus === "closed") return;
     if ((!input.trim() && !selectedFile) || !selectedConversation) return;
 
     try {
@@ -706,31 +753,36 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
 
         {selectedConversation ? (
           <>
-            <div className="user-chat-header">
+          <div className="user-chat-header">
 
-                    <div className="user-chat-title">
 
-                        <h2>
-                            {ticket?.title || "Untitled Ticket"}
-                        </h2>
+              <div className="user-chat-header-top">
 
-                    </div>
 
-                    <span
-                        className={`ticket-status ${ticket?.status || ""}`}
-                    >
-                        {formatStatus(ticket?.status)}
-                    </span>
+                  <div className="user-chat-title">
 
-                </div>
+                      <h2>
+                          {ticket?.title || "Untitled Ticket"}
+                      </h2>
 
-              <div className="user-ticket-meta">
+                  </div>
 
-                  <div className="meta-card">
+
+                  <span
+                      className={`ticket-status ${ticket?.status || ""}`}
+                  >
+                      {formatStatus(ticket?.status)}
+                  </span>
+
+              </div>
+
+            <div className="user-messages-meta-grid">
+
+                  <div className="user-messages-meta-item">
 
                       <i className="fa-solid fa-hashtag"></i>
 
-                      <div className="meta-content">
+                      <div className="user-messages-meta-content">
 
                           <small>
                               Ticket ID
@@ -744,11 +796,11 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
 
                   </div>
 
-              <div className="meta-card">
+              <div className="user-messages-meta-item">
 
                   <i className="fa-solid fa-layer-group"></i>
 
-                  <div className="meta-content">
+                  <div className="user-messages-meta-content">
 
                       <small>
                           Category
@@ -764,11 +816,11 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
 
               </div>
 
-              <div className="meta-card">
+              <div className="user-messages-meta-item">
 
                   <i className="fa-solid fa-flag"></i>
 
-                  <div className="meta-content">
+                  <div className="user-messages-meta-content">
 
                       <small>
                           Priority
@@ -784,11 +836,11 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
 
               </div>
 
-              <div className="meta-card">
+              <div className="user-messages-meta-item">
 
                   <i className="fa-solid fa-user-gear"></i>
 
-                  <div className="meta-content">
+                  <div className="user-messages-meta-content">
 
                       <small>
                           Assigned To
@@ -804,11 +856,11 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
 
               </div>
 
-              <div className="meta-card">
+              <div className="user-messages-meta-item">
 
                   <i className="fa-solid fa-calendar"></i>
 
-                  <div className="meta-content">
+                  <div className="user-messages-meta-content">
 
                       <small>
                           Created
@@ -822,17 +874,18 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
 
               </div>
             </div>
+          </div>
 
             <div className="user-chat-body">
               {messages.length ? (
               messages.map((msg) => (
                 <div
                   key={msg._id}
-                  className={`message-bubble ${
-                    isStaffMessage(msg)
-                      ? "admin-msg"
-                      : "user-msg"
-                  }`}
+                    className={`user-message-bubble ${
+                        isStaffMessage(msg)
+                          ? "user-message-admin"
+                          : "user-message-owner"
+                    }`}
                 >
 
                   {msg.text && (
@@ -933,7 +986,10 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
                 </div>
               )}
 
-              <div ref={chatEndRef}></div>
+              <div 
+                  ref={chatEndRef}
+                  className="chat-end"
+              />
             </div>
 
             {selectedFile && (
@@ -970,11 +1026,31 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
               </div>
             )}
 
+            {conversationStatus === "closed" ? (
+
+            <div className="user-conversation-closed">
+
+              <i className="fa-solid fa-lock"></i>
+
+              <div>
+                <strong>Conversation Closed</strong>
+
+              <p>
+              This ticket has been deleted by the requester.
+              Messaging is no longer available.
+              </p>
+              
+              </div>
+
+            </div>
+
+            ) : (
+
             <div className="user-chat-input">
 
             <label
-              htmlFor="messageFile"
-              className="attach-btn"
+            htmlFor="messageFile"
+            className="user-attach-btn"
             >
               <i className="fa-solid fa-paperclip"></i>
             </label>
@@ -986,35 +1062,59 @@ console.log("USER CONVERSATIONS RESPONSE:", res.data);
               hidden
               accept=".png,.jpg,.jpeg,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip"
               onChange={(e)=>{
+                const file=e.target.files[0];
 
-              const file=e.target.files[0];
+                if(!file) return;
 
-              if(!file) return;
+                setSelectedFile(file);
+              }}
+            />
 
-              setSelectedFile(file);
+            <input
+              value={input}
+              disabled={
+                ticket?.deletedByUser === true ||
+                selectedConversation?.status === "closed"
+              }
+              onChange={handleInput}
+              onKeyDown={(e)=>{
+
+                if(e.key === "Enter" && !e.shiftKey){
+
+                  e.preventDefault();
+
+                  sendMessage();
+
+                }
 
               }}
-            />    
-          
-              <input
-                value={input}
-                onChange={handleInput}
-                placeholder="Type a message..."
-                onKeyDown={(e) =>
-                  e.key === "Enter" && sendMessage()
-                }
-              />
+              placeholder={
+                ticket?.deletedByUser === true ||
+                selectedConversation?.status === "closed"
+                ?
+                "Conversation closed"
+                :
+                "Type a message..."
+              }
+            />
 
-              <button
-                onClick={sendMessage}
-                disabled={sending}
-              >
-                {sending ? "Sending..." : "Send"}
-              </button>
+            <button
+            onClick={sendMessage}
+            disabled={
+              sending ||
+              ticket?.deletedByUser === true ||
+              selectedConversation?.status === "closed"
+            }
+            >
+              {sending ? "Sending..." : "Send"}
+            </button>
+
             </div>
+
+            )}
           </>
         ) : (
-              <div className="empty-chat">
+              <div className="user-empty-chat">
 
               <i className="fa-regular fa-comments"></i>
 

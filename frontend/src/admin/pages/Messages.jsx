@@ -204,9 +204,12 @@ export default function Messages() {
 
     setMessages(normalized);
 
-    // NEW
     setTicket(res.data.ticket || null);
     setRequester(res.data.requester || null);
+
+    if(res.data.conversation){
+      setSelectedConversation(res.data.conversation);
+    }
       } catch (err) {
         console.log("MESSAGE ERROR:", err);
       }
@@ -259,14 +262,63 @@ export default function Messages() {
       });
     };
 
+    const handleConversationUpdated = (data)=>{
+
+      setConversations((prev)=>{
+
+        const updated = prev.map((conversation)=>{
+
+          if(
+            conversation._id !== data.conversationId
+          ){
+            return conversation;
+          }
+
+
+          return {
+            ...conversation,
+            lastMessage:data.lastMessage,
+            updatedAt:data.updatedAt
+          };
+
+        });
+
+
+        return updated.sort(
+          (a,b)=>
+          new Date(b.updatedAt) -
+          new Date(a.updatedAt)
+        );
+
+      });
+
+    };
+
     socket.on("receiveMessage", handleReceiveMessage);
     socket.on("typing", handleTyping);
     socket.on("stopTyping", handleStopTyping);
+    socket.on("conversationUpdated", handleConversationUpdated);
 
     return () => {
       socket.off("receiveMessage", handleReceiveMessage);
       socket.off("typing", handleTyping);
       socket.off("stopTyping", handleStopTyping);
+    };
+
+    return()=>{
+
+    socket.off(
+    "receiveMessage",
+    handleReceiveMessage
+    );
+
+
+    socket.off(
+    "conversationUpdated",
+    handleConversationUpdated
+    );
+
+
     };
   }, []);
 
@@ -854,12 +906,29 @@ export default function Messages() {
               <i className="fa-solid fa-paperclip"></i>
             </label>
 
-              <input
-                value={input}
-                onChange={handleInputChange}
-                placeholder="Type a message..."
-                onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-              />
+            <input
+            value={input}
+            disabled={
+              ticket?.deletedByUser === true ||
+              selectedConversation?.status === "closed"
+            }
+
+            onChange={handleInputChange}
+
+            onKeyDown={(e)=>{
+              if(e.key === "Enter" && !sending){
+                sendMessage();
+              }
+            }}
+            placeholder={
+              ticket?.deletedByUser === true ||
+              selectedConversation?.status === "closed"
+              ?
+              "Conversation closed"
+              :
+              "Type a message..."
+            }
+            />
 
               <input
                 ref={fileInputRef}
@@ -870,7 +939,13 @@ export default function Messages() {
                 onChange={(e) => setSelectedFile(e.target.files[0])}
               />
 
-              <button onClick={sendMessage} disabled={sending}>
+              <button
+              onClick={sendMessage}
+              disabled={
+              sending ||
+              selectedConversation?.status === "closed"
+              }
+              >
                 {sending ? "Sending..." : "Send"}
               </button>
 

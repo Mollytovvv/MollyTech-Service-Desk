@@ -3,9 +3,16 @@
    MollyTech Service Desk
 ===================================== */
 
+
+/* =====================================
+   PAGE
+===================================== */
+
 .user-messages-page{
 
     display:flex;
+
+    flex-direction:row;
 
     gap:20px;
 
@@ -13,26 +20,44 @@
 
     padding:20px;
 
-    background:#0f172a;
-
     overflow:hidden;
 
-    color:var(--text);
+    background:#0f172a;
 
 }
 
 
+/* LEFT CONVERSATION PANEL */
+
+.user-messages-page > *:first-child{
+
+    flex:0 0 350px;
+
+    width:350px;
+
+    min-width:350px;
+
+}
+
+
+
 /* =====================================
-   CHAT AREA
+   CHAT
 ===================================== */
 
 .user-chat{
 
     flex:1;
 
+    min-width:0;
+
+    min-height:0;
+
     display:flex;
 
     flex-direction:column;
+
+    overflow:hidden;
 
     background:var(--panel);
 
@@ -40,13 +65,12 @@
 
     border-radius:18px;
 
-    overflow:hidden;
-
 }
 
 
+
 /* =====================================
-   CHAT HEADER
+   HEADER
 ===================================== */
 
 .user-chat-header{
@@ -55,43 +79,44 @@
 
     display:flex;
 
-    flex-direction:row;
+    flex-direction:column;
 
-    justify-content:space-between;
-
-    align-items:center;
-
-    gap:20px;
+    gap:18px;
 
     padding:24px 28px;
-
-    background:var(--panel);
 
     border-bottom:1px solid var(--border);
 
 }
 
-.user-chat-header h2{
+
+
+.user-chat-header-top{
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+
+
+.user-chat-title h2{
 
     margin:0;
 
-    font-size:22px;
+    font-size:24px;
+
     font-weight:700;
 
     color:var(--text);
 
 }
 
-
-.user-chat-header p{
-
-    margin-top:6px;
-
-    color:var(--muted);
-
-    font-size:13px;
-
-}
 
 
 /* =====================================
@@ -100,25 +125,24 @@
 
 .ticket-status{
 
-    display:inline-flex;
-    align-items:center;
-
-    padding:8px 16px;
+    padding:7px 16px;
 
     border-radius:999px;
 
     font-size:11px;
+
     font-weight:700;
 
     text-transform:uppercase;
-    letter-spacing:.06em;
 
 }
 
 
+
 .ticket-status.pending{
 
-    background:rgba(245,158,11,.15);
+    background:rgba(245,158,11,.18);
+
     color:#fbbf24;
 
 }
@@ -126,7 +150,8 @@
 
 .ticket-status.in_progress{
 
-    background:rgba(59,130,246,.15);
+    background:rgba(59,130,246,.18);
+
     color:#60a5fa;
 
 }
@@ -134,7 +159,8 @@
 
 .ticket-status.resolved{
 
-    background:rgba(34,197,94,.15);
+    background:rgba(34,197,94,.18);
+
     color:#4ade80;
 
 }
@@ -142,34 +168,33 @@
 
 .ticket-status.closed{
 
-    background:rgba(148,163,184,.15);
+    background:rgba(148,163,184,.18);
+
     color:#cbd5e1;
 
 }
+
 
 
 /* =====================================
    TICKET META
 ===================================== */
 
-.user-ticket-meta{
+
+.user-messages-meta-grid{
 
     display:grid;
 
-    grid-template-columns:repeat(5,minmax(0,1fr));
+    grid-template-columns:repeat(5,1fr);
 
     gap:12px 14px;
 
-    padding:22px 28px;
-
-    background:var(--panel);
-
-    border-bottom:1px solid var(--border);
+    margin-top:18px;
 
 }
 
 
-.meta-card{
+.user-messages-meta-item{
 
     display:flex;
 
@@ -189,10 +214,18 @@
 
 }
 
-.meta-card i{
+
+.user-messages-meta-item:hover{
+
+    border-color:rgba(34,211,238,.25);
+
+    transform:translateY(-2px);
+
+}
+
+.user-messages-meta-item i{
 
     width:42px;
-
     height:42px;
 
     display:flex;
@@ -209,29 +242,31 @@
 
 }
 
-.meta-content{
+
+
+.user-messages-meta-content{
+
+    min-width:0;
 
     display:flex;
 
     flex-direction:column;
 
-    gap:3px;
-
-    flex:1;
-
 }
 
-.meta-content small{
+
+
+.user-messages-meta-content small{
 
     color:#94a3b8;
 
     font-size:12px;
 
-    font-weight:600;
-
 }
 
-.meta-content span{
+
+
+.user-messages-meta-content span{
 
     color:#f8fafc;
 
@@ -239,46 +274,14 @@
 
     font-weight:600;
 
-}
+    overflow:hidden;
 
-.meta-card:hover{
+    text-overflow:ellipsis;
 
-    transform:translateY(-2px);
-
-    border-color:rgba(34,211,238,.25);
+    white-space:nowrap;
 
 }
 
-/* =====================================
-   PRIORITY COLORS
-===================================== */
-
-.priority.low{
-
-    color:#4ade80;
-
-}
-
-
-.priority.medium{
-
-    color:#fbbf24;
-
-}
-
-
-.priority.high{
-
-    color:#f87171;
-
-}
-
-
-.priority.urgent{
-
-    color:#ef4444;
-
-}
 
 
 /* =====================================
@@ -289,26 +292,27 @@
 
     flex:1;
 
+    min-height:0;
+
     overflow-y:auto;
 
     display:flex;
 
     flex-direction:column;
 
-    gap:18px;
+    gap:16px;
 
-    padding:28px;
-
-    background:var(--background);
+    padding:24px;
 
 }
+
 
 
 /* =====================================
    MESSAGE BUBBLES
 ===================================== */
 
-.message-bubble{
+.user-message-bubble{
 
     max-width:68%;
 
@@ -318,25 +322,25 @@
 
     line-height:1.6;
 
-    animation:fadeIn .2s ease;
-
 }
 
-.message-bubble small{
 
-    display:block;
 
-    margin-top:6px;
-
-    font-size:10px;
-
-    color:#94a3b8;
-
-}
-
-.admin-msg{
+.user-message-admin{
 
     align-self:flex-start;
+
+    background:var(--surface);
+
+    border:1px solid var(--border);
+
+}
+
+
+
+.user-message-owner{
+
+    align-self:flex-end;
 
     background:linear-gradient(
         135deg,
@@ -349,22 +353,28 @@
 }
 
 
-.user-msg{
 
-    align-self:flex-end;
+.user-message-bubble small{
 
-    background:var(--surface);
+    display:block;
 
-    border:1px solid var(--border);
+    margin-top:8px;
+
+    font-size:10px;
+
+    color:#94a3b8;
 
 }
 
 
+
 /* =====================================
-   CHAT INPUT
+   INPUT
 ===================================== */
 
 .user-chat-input{
+
+    flex-shrink:0;
 
     display:flex;
 
@@ -374,11 +384,10 @@
 
     padding:18px;
 
-    background:var(--panel);
-
     border-top:1px solid var(--border);
 
 }
+
 
 
 .user-chat-input input{
@@ -391,22 +400,14 @@
 
     border-radius:12px;
 
-    border:1px solid rgba(148,163,184,.2);
-
     background:rgba(30,41,59,.6);
+
+    border:1px solid rgba(148,163,184,.2);
 
     color:white;
 
-    outline:none;
-
 }
 
-
-.user-chat-input input:focus{
-
-    border-color:var(--primary);
-
-}
 
 
 .user-chat-input button{
@@ -425,22 +426,17 @@
         #0891b2
     );
 
-    font-weight:600;
-
-    transition:.25s ease;
-
-}
-
-.user-chat-input button:hover{
-
-    transform:translateY(-2px);
-
-    box-shadow:0 10px 22px rgba(34,211,238,.22);
+    font-weight:700;
 
 }
 
 
-.attach-btn{
+
+/* =====================================
+   ATTACH BUTTON
+===================================== */
+
+.user-attach-btn{
 
     width:42px;
 
@@ -448,36 +444,49 @@
 
     display:flex;
 
-    align-items:center;
-
     justify-content:center;
+
+    align-items:center;
 
     border-radius:12px;
 
-    cursor:pointer;
+    background:#1e293b;
 
     color:#94a3b8;
 
-    background:rgba(30,41,59,.6);
+}
 
-    border:1px solid rgba(148,163,184,.18);
+
+
+/* =====================================
+   CLOSED CONVERSATION
+===================================== */
+
+.user-conversation-closed{
+
+    height:70px;
+
+    flex-shrink:0;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:15px;
+
+    border-top:1px solid #334155;
 
 }
 
 
-.attach-btn:hover{
-
-    color:#22d3ee;
-
-    border-color:#22d3ee;
-
-}
 
 /* =====================================
    EMPTY CHAT
 ===================================== */
 
-.empty-chat{
+.user-empty-chat{
 
     flex:1;
 
@@ -493,97 +502,32 @@
 
     color:var(--muted);
 
-    text-align:center;
-
 }
 
-.empty-chat i{
-
-    font-size:64px;
-
-    color:var(--accent);
-
-}
-
-.empty-chat h3{
-
-    margin:0;
-
-    font-size:24px;
-
-    color:var(--text);
-
-}
-
-.empty-chat p{
-
-    margin:0;
-
-    max-width:320px;
-
-    line-height:1.6;
-
-}
 
 
 /* =====================================
    RESPONSIVE
 ===================================== */
 
-@media(max-width:1400px){
-
-    .user-ticket-meta{
-
-        grid-template-columns:repeat(3,minmax(0,1fr));
-
-    }
-
-}
-
-@media(max-width:1000px){
-
-    .user-ticket-meta{
-
-        grid-template-columns:repeat(2,minmax(0,1fr));
-
-    }
-
-}
-
-@media(max-width:800px){
+@media(max-width:700px){
 
     .user-messages-page{
 
         flex-direction:column;
 
-        height:auto;
-
     }
 
-    .user-ticket-meta{
 
-        grid-template-columns:1fr;
+    .user-messages-page > *:first-child{
 
-    }
+        width:100%;
 
-}
+        min-width:0;
 
-@keyframes fadeIn{
-
-    from{
-
-        opacity:0;
-
-        transform:translateY(4px);
-
-    }
-
-    to{
-
-        opacity:1;
-
-        transform:translateY(0);
+        flex:none;
 
     }
 
 }
+

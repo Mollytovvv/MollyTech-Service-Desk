@@ -9,6 +9,35 @@ const sendMessage = async (req, res) => {
   try {
     const { conversationId, text } = req.body;
 
+const conversation = await Conversation.findById(conversationId)
+  .populate("ticketId");
+
+if (!conversation) {
+  return res.status(404).json({
+    message:"Conversation not found"
+  });
+}
+
+
+// 🔒 BLOCK CLOSED CONVERSATIONS
+
+if (conversation.status === "closed") {
+  return res.status(403).json({
+    message:"This conversation is closed."
+  });
+}
+
+
+// 🔒 BLOCK DELETED TICKETS
+
+if (
+  conversation.ticketId?.deletedByUser === true
+) {
+  return res.status(403).json({
+    message:"This ticket has been deleted."
+  });
+}
+
     // ===============================
     // VALIDATION
     // ===============================
@@ -21,17 +50,6 @@ const sendMessage = async (req, res) => {
     if ((!text || !text.trim()) && !req.file) {
       return res.status(400).json({
         message: "Message or attachment is required",
-      });
-    }
-
-    // ===============================
-    // FIND CONVERSATION
-    // ===============================
-    const conversation = await Conversation.findById(conversationId);
-
-    if (!conversation) {
-      return res.status(404).json({
-        message: "Conversation not found",
       });
     }
 
@@ -116,6 +134,16 @@ const sendMessage = async (req, res) => {
         populatedMessage
       );
     }
+
+    io.emit(
+      "conversationUpdated",
+      {
+        conversationId,
+        lastMessage: conversation.lastMessage,
+        updatedAt: conversation.updatedAt,
+        senderRole: req.user.role
+      }
+    );
 
     // ===============================
     // RESPONSE
@@ -203,6 +231,7 @@ const sendMessage = async (req, res) => {
     // ===============================
     return res.json({
       count: messages.length,
+      conversation,
       ticket: conversation.ticketId,
       requester,
       messages,

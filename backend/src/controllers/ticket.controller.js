@@ -120,21 +120,17 @@ console.log("FORMATTED PHONE:", phoneNumber);
   }
 };
 
-module.exports = {
-  createTicket,
-};
-
   // ===============================
   // 📄 GET ALL TICKETS
   // ===============================
   const getTickets = async (req, res) => {
     try {
-  const tickets = await Ticket.find({
-      status: {
-          $nin: ["archived", "cancelled"]
-      }
-  })
-  .sort({ createdAt: -1 });
+  const query = Ticket.find({
+      "archivedBy.admin": false,
+      status: { $ne: "cancelled" }
+  });
+
+  const tickets = await query.sort({ createdAt: -1 });
 
   console.log(JSON.stringify(tickets, null, 2));
 
@@ -540,6 +536,30 @@ const getTicketsByStatus = async (req, res) => {
 };
 
 // ===============================
+// 📦 GET ADMIN ARCHIVED TICKETS
+// ===============================
+const getArchivedTickets = async (req, res) => {
+  try {
+
+    const tickets = await Ticket.find({
+      "archivedBy.admin": true,
+    }).sort({ updatedAt: -1 });
+
+    return res.json({
+      count: tickets.length,
+      tickets,
+    });
+
+  } catch (err) {
+
+    return res.status(500).json({
+      message: err.message,
+    });
+
+  }
+};
+
+// ===============================
 // 👨‍💻 MY ASSIGNED TICKETS
 // ===============================
   const getMyAssignedTickets = async (req, res) => {
@@ -609,7 +629,7 @@ const addTicketComment = async (req, res) => {
       ticketId: ticket._id,
     });
 
-    if (conversation) {
+    if (conversation && conversation.status !== "closed") {
       const existingMessages = await Message.countDocuments({
         conversationId: conversation._id,
       });
@@ -708,9 +728,22 @@ const archiveTickets = async (req, res) => {
       { _id: { $in: ticketIds } },
       {
         $set: {
-          status: "archived",
-          archivedAt: Date.now()
+          "archivedBy.admin": true,
         }
+      }
+    );
+
+    // ===============================
+    // 🔒 CLOSE ARCHIVED CONVERSATIONS
+    // ===============================
+    await Conversation.updateMany(
+      {
+        ticketId: {
+          $in: ticketIds,
+        },
+      },
+      {
+        status: "closed",
       }
     );
 
@@ -748,8 +781,7 @@ const archiveTickets = async (req, res) => {
         { _id: { $in: ticketIds } },
         {
           $set: {
-            status: "resolved",   // ✅ IMPORTANT FIX (NOT "open")
-            archivedAt: null
+              "archivedBy.admin": false,
           }
         }
       );
@@ -802,7 +834,7 @@ const archiveTickets = async (req, res) => {
         });
       }
 
-      ticket.status = "archived";
+      ticket.archivedBy.user = true;
       ticket.archivedAt = new Date();
 
       ticket.activityLogs.push({
@@ -879,12 +911,11 @@ const archiveTickets = async (req, res) => {
   // ===============================
   const getMyDashboard = async (req, res) => {
     try {
-      const tickets = await Ticket.find({
-        "submittedBy.userId": req.user.id,
-      status: {
-          $nin: ["archived"]
-      }
-      }).sort({ createdAt: -1 });
+  const tickets = await Ticket.find({
+      "submittedBy.userId": req.user.id,
+      "archivedBy.user": false,
+      deletedByUser: false,
+  }).sort({ createdAt: -1 });
 
       const stats = {
         total: tickets.length,
@@ -921,10 +952,11 @@ const archiveTickets = async (req, res) => {
         });
       }
 
-      const tickets = await Ticket.find({
-        "submittedBy.userId": req.user.id,
-        status: { $ne: "archived" },
-      }).sort({ createdAt: -1 });
+  const tickets = await Ticket.find({
+      "submittedBy.userId": req.user.id,
+      "archivedBy.user": false,
+      deletedByUser: false,
+  });
 
       return res.json({
         count: tickets.length,
@@ -951,10 +983,11 @@ const archiveTickets = async (req, res) => {
         });
       }
 
-      const tickets = await Ticket.find({
-        "submittedBy.userId": req.user.id,
-        status: "archived",
-      }).sort({ archivedAt: -1 });
+  const tickets = await Ticket.find({
+      "submittedBy.userId": req.user.id,
+      "archivedBy.user": true,
+      deletedByUser: false,
+  }).sort({ archivedAt: -1 });
 
       return res.json({
         count: tickets.length,
@@ -994,10 +1027,10 @@ const archiveTickets = async (req, res) => {
         });
       }
 
-      // Allow deleting cancelled OR archived tickets
+      // Allow deleting:
       if (
         ticket.status !== "cancelled" &&
-        ticket.status !== "archived"
+        !ticket.archivedBy.user
       ) {
         return res.status(400).json({
           message:
@@ -1005,12 +1038,29 @@ const archiveTickets = async (req, res) => {
         });
       }
 
-      await Ticket.findByIdAndDelete(req.params.id);
+      ticket.deletedByUser = true;
+      ticket.archivedBy.user = false;
 
-      // Remove conversation too
-      await Conversation.deleteOne({
-        ticketId: ticket._id,
+      ticket.activityLogs.push({
+        action: "Ticket Deleted",
+        performedBy: req.user.id,
+        details: "User removed the ticket from their records.",
       });
+
+      await ticket.save();
+
+
+      // ===============================
+      // 🔒 CLOSE CONVERSATION
+      // ===============================
+      await Conversation.findOneAndUpdate(
+        {
+          ticketId: ticket._id,
+        },
+        {
+          status: "closed",
+        }
+      );
 
       const io = req.app.get("io");
 
@@ -1051,15 +1101,13 @@ const archiveTickets = async (req, res) => {
         });
       }
 
-      // Only archived tickets
-      if (ticket.status !== "archived") {
+      if (!ticket.archivedBy.user) {
         return res.status(400).json({
-          message: "Only archived tickets can be restored.",
+          message: "Ticket is not archived.",
         });
       }
 
-      ticket.status = "resolved";
-      ticket.archivedAt = null;
+      ticket.archivedBy.user = false;
 
       ticket.activityLogs.push({
         action: "Ticket Restored",
@@ -1104,6 +1152,7 @@ module.exports = {
   deleteArchivedTickets,
   getTicketStats,
   getTicketsByStatus,
+  getArchivedTickets,   
   getMyAssignedTickets,
   addTicketComment,
   archiveTickets,
@@ -1112,7 +1161,7 @@ module.exports = {
   getMyTickets,
   cancelTicket,
   deleteMyTicket,
-  archiveMyTicket,      
+  archiveMyTicket,
   unarchiveMyTicket,
   getMyArchivedTickets,
 };
