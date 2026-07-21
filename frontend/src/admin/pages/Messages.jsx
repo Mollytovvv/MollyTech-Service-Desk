@@ -45,8 +45,10 @@ export default function Messages() {
   // AUTO SCROLL
   // =========================
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages, typingUsers]);
+    chatEndRef.current?.scrollIntoView({
+      behavior: "auto",
+    });
+  }, [messages]);
 
   // =========================
   // SOCKET REGISTER
@@ -207,16 +209,13 @@ export default function Messages() {
     setTicket(res.data.ticket || null);
     setRequester(res.data.requester || null);
 
-    if(res.data.conversation){
-      setSelectedConversation(res.data.conversation);
-    }
       } catch (err) {
         console.log("MESSAGE ERROR:", err);
       }
     };
 
     fetchMessages();
-  }, [selectedConversation, token]);
+  }, [selectedConversation?._id, token]);
 
   
   useEffect(() => {
@@ -303,22 +302,6 @@ export default function Messages() {
       socket.off("receiveMessage", handleReceiveMessage);
       socket.off("typing", handleTyping);
       socket.off("stopTyping", handleStopTyping);
-    };
-
-    return()=>{
-
-    socket.off(
-    "receiveMessage",
-    handleReceiveMessage
-    );
-
-
-    socket.off(
-    "conversationUpdated",
-    handleConversationUpdated
-    );
-
-
     };
   }, []);
 
@@ -784,8 +767,8 @@ export default function Messages() {
                       key={msg._id || i}
                       className={`message-bubble ${
                         isStaffMessage(msg)
-                          ? "user-msg"
-                          : "admin-msg"
+                          ? "admin-msg"
+                          : "user-msg"
                       }`}
                     >
                     {msg.text && <p>{msg.text}</p>}

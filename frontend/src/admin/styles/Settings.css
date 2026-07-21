@@ -1,0 +1,773 @@
+/* =====================================
+   SETTINGS PAGE
+   MollyTech Service Desk
+   Enterprise Admin Console
+===================================== */
+
+
+/* =========================
+   PAGE
+========================= */
+
+.settings-page{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:18px;
+
+    padding:20px;
+
+    width:100%;
+
+    color:var(--text);
+
+}
+
+
+
+/* =========================
+   HEADER
+========================= */
+
+.settings-header{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:5px;
+
+}
+
+
+.settings-header h1{
+
+    margin:0;
+
+    font-size:28px;
+
+    font-weight:700;
+
+}
+
+
+.settings-header p{
+
+    margin:0;
+
+    font-size:14px;
+
+    color:var(--muted);
+
+}
+
+
+
+/* =========================
+   WORKSPACE
+========================= */
+
+.settings-workspace{
+
+    display:grid;
+
+    grid-template-columns:minmax(0,1fr) 360px;
+
+    gap:20px;
+
+    align-items:start;
+
+}
+
+
+
+/* =========================
+   SETTINGS GRID
+========================= */
+
+.settings-grid{
+
+    display:grid;
+
+    grid-template-columns:repeat(2,minmax(0,1fr));
+
+    gap:16px;
+
+}
+
+
+
+/* =========================
+   CARD
+========================= */
+
+.settings-card{
+
+    min-height: 375px;
+
+    background:
+
+    rgba(15,23,42,.75);
+
+
+    backdrop-filter:
+
+    blur(12px);
+
+
+    border:
+
+    1px solid rgba(148,163,184,.10);
+
+
+    border-radius:16px;
+
+
+    overflow:hidden;
+
+
+    box-shadow:
+
+    0 10px 30px rgba(0,0,0,.18);
+
+
+    transition:.25s ease;
+
+}
+
+
+
+.settings-card:hover{
+
+    border-color:
+
+    rgba(34,211,238,.35);
+
+
+    box-shadow:
+
+    0 18px 40px rgba(0,0,0,.25);
+
+}
+
+
+/* =========================
+   CARD HEADER
+========================= */
+
+.settings-card-header{
+
+    height:52px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+
+    padding:0 16px;
+
+
+    border-bottom:
+
+    1px solid rgba(148,163,184,.12);
+
+}
+
+
+
+.settings-card-header i{
+
+    width:32px;
+
+    height:32px;
+
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+
+    border-radius:9px;
+
+
+    background:
+
+    linear-gradient(
+        135deg,
+        rgba(34,211,238,.18),
+        rgba(34,211,238,.05)
+    );
+
+
+    border:
+
+    1px solid rgba(34,211,238,.15);
+
+
+    color:var(--accent);
+
+}
+
+
+
+.settings-card-header h2{
+
+    margin:0;
+
+    font-size:16px;
+
+    font-weight:650;
+
+}
+
+
+
+/* =========================
+   CARD BODY
+========================= */
+
+.settings-card-body{
+
+    display:flex;
+
+    flex-direction:column;
+
+    height:calc(100% - 52px);
+
+    padding:16px;
+
+}
+
+
+
+/* =========================
+   PROFILE
+========================= */
+
+.profile-summary{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:14px;
+
+
+    margin-bottom:16px;
+
+}
+
+
+
+.profile-logo{
+
+    width:56px;
+
+    height:56px;
+
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+
+    border-radius:14px;
+
+
+    background:
+
+    rgba(34,211,238,.1);
+
+
+    border:
+
+    1px solid rgba(34,211,238,.2);
+
+}
+
+
+
+.profile-logo i{
+
+    font-size:23px;
+
+    color:var(--accent);
+
+}
+
+
+
+.profile-details h3{
+
+    margin:0;
+
+    font-size:16px;
+
+}
+
+
+
+.profile-details p{
+
+    margin:4px 0 0;
+
+    font-size:13px;
+
+    color:var(--muted);
+
+}
+
+
+
+/* =========================
+   FORM
+========================= */
+
+.settings-form{
+
+    display:flex;
+
+    flex-direction:column;
+
+    flex:1;
+
+    gap:12px;
+
+}
+
+
+
+.settings-field{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:6px;
+
+}
+
+
+
+.settings-field label{
+
+    font-size:12px;
+
+    font-weight:600;
+
+    color:var(--muted);
+
+}
+
+
+
+.settings-field input{
+
+    height:38px;
+
+
+    padding:0 12px;
+
+
+    border-radius:10px;
+
+
+    background:
+
+    rgba(2,6,23,.55);
+
+
+    border:
+
+    1px solid rgba(148,163,184,.14);
+
+
+    color:var(--text);
+
+
+    outline:none;
+
+}
+
+.settings-card::after{
+
+    content:"";
+
+
+    position:absolute;
+
+
+    inset:0;
+
+
+    pointer-events:none;
+
+
+    background:
+
+    radial-gradient(
+        circle at top right,
+        rgba(34,211,238,.08),
+        transparent 35%
+    );
+
+
+    opacity:0;
+
+
+    transition:.25s ease;
+
+}
+
+
+.settings-card:hover::after{
+
+    opacity:1;
+
+}
+
+
+.settings-field input:focus{
+
+    border-color:var(--accent);
+
+
+    box-shadow:
+
+    0 0 0 3px rgba(34,211,238,.1);
+
+}
+
+
+
+/* =========================
+   ROLE
+========================= */
+
+.settings-role{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:12px;
+
+    border-radius:10px;
+
+    background:rgba(15,23,42,.65);
+
+    border:1px solid rgba(148,163,184,.12);
+
+}
+
+
+
+.settings-role span{
+
+    font-size:12px;
+
+    color:var(--muted);
+
+}
+
+
+
+.settings-role strong{
+
+    font-size:13px;
+
+    color:var(--accent);
+
+}
+
+/* =========================
+   BUTTON
+========================= */
+
+.settings-save-btn{
+
+    width:130px;
+
+    height:38px;
+
+    margin-top:auto;
+
+    margin-left:auto;
+
+    border:none;
+
+    border-radius:10px;
+
+    cursor:pointer;
+
+    font-size:13px;
+
+    font-weight:700;
+
+    color:#fff;
+
+    background:linear-gradient(
+        135deg,
+        #22d3ee,
+        #0891b2
+    );
+
+    transition:.2s ease;
+
+}
+
+.settings-save-btn:hover{
+
+    transform:translateY(-1px);
+
+}
+
+/* =========================
+   READ-ONLY VALUE
+========================= */
+
+.settings-value{
+
+    display:flex;
+
+    align-items:center;
+
+    height:38px;
+
+    padding:0 12px;
+
+    border-radius:10px;
+
+    background:rgba(2,6,23,.55);
+
+    border:1px solid rgba(148,163,184,.14);
+
+    color:var(--text);
+
+    font-size:13px;
+
+}
+
+/* =========================
+   ABOUT PANEL
+========================= */
+
+.settings-about{
+
+    min-height:100%;
+
+
+    background:
+
+    rgba(15,23,42,.85);
+
+
+    backdrop-filter:
+
+    blur(16px);
+
+
+    border:
+
+    1px solid rgba(148,163,184,.12);
+
+    box-shadow:
+
+    0 12px 35px rgba(0,0,0,.25);
+
+
+    border-radius:16px;
+
+
+    padding:18px;
+
+
+    position:relative;
+
+}
+
+
+
+.settings-about::before{
+
+    content:"";
+
+
+    position:absolute;
+
+
+    left:-11px;
+
+
+    top:20px;
+
+
+    height:calc(100% - 40px);
+
+
+    width:1px;
+
+
+    background:
+
+    rgba(148,163,184,.15);
+
+}
+
+
+
+.about-header{
+
+    display:flex;
+
+    align-items:center;
+
+
+    gap:10px;
+
+
+    margin-bottom:20px;
+
+}
+
+
+
+.about-header i{
+
+    color:var(--accent);
+
+}
+
+
+
+.about-header h2{
+
+    margin:0;
+
+    font-size:17px;
+
+}
+
+
+
+.about-content h3{
+
+    margin:0 0 12px;
+
+
+    font-size:18px;
+
+}
+
+
+
+.about-content p{
+
+    margin:8px 0;
+
+
+    font-size:13px;
+
+
+    line-height:1.6;
+
+
+    color:var(--muted);
+
+}
+
+
+
+.about-item{
+
+    display:flex;
+
+    justify-content:space-between;
+
+
+    padding:11px 0;
+
+
+    border-bottom:
+
+    1px solid rgba(148,163,184,.1);
+
+}
+
+
+
+.about-item span{
+
+    font-size:13px;
+
+    color:var(--muted);
+
+}
+
+
+
+.about-item strong{
+
+    font-size:13px;
+
+    color:var(--text);
+
+}
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:1100px){
+
+    .settings-workspace{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .settings-about::before{
+
+        display:none;
+
+    }
+
+}
+
+
+
+@media(max-width:750px){
+
+    .settings-grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+
+    .settings-page{
+
+        padding:14px;
+
+    }
+
+
+    .settings-header h1{
+
+        font-size:24px;
+
+    }
+
+}

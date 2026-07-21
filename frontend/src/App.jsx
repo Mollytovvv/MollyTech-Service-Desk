@@ -6,6 +6,7 @@ import Dashboard from "./admin/pages/Dashboard";
 import TicketCenter from "./admin/pages/TicketCenter";
 import Records from "./admin/pages/Records";
 import Messages from "./admin/pages/Messages";
+import Settings from "./admin/pages/Settings";
 
 import UserDashboard from "./user/pages/UserDashboard";
 import UserTicketCenter from "./user/pages/UserTicketCenter";
@@ -62,6 +63,11 @@ function App() {
           <Route
             path="/messages"
             element={<Messages />}
+          />
+
+          <Route
+            path="/settings"
+            element={<Settings />}
           />
         </Route>
 
