@@ -73,11 +73,9 @@
 
     display:grid;
 
-    grid-template-columns:minmax(0,1fr) 360px;
+    grid-template-columns:minmax(0,1fr) 400px;
 
     gap:20px;
-
-    align-items:start;
 
 }
 
@@ -105,35 +103,30 @@
 
 .settings-card{
 
-    min-height: 375px;
+    position:relative;
 
-    background:
+    display:flex;
 
-    rgba(15,23,42,.75);
+    flex-direction:column;
 
+    min-height:375px;
 
-    backdrop-filter:
+    background:rgba(15,23,42,.75);
 
-    blur(12px);
+    backdrop-filter:blur(12px);
 
-
-    border:
-
-    1px solid rgba(148,163,184,.10);
-
+    border:1px solid rgba(148,163,184,.10);
 
     border-radius:16px;
 
-
     overflow:hidden;
 
+    box-shadow:0 10px 30px rgba(0,0,0,.18);
 
-    box-shadow:
-
-    0 10px 30px rgba(0,0,0,.18);
-
-
-    transition:.25s ease;
+    transition:
+        border-color .25s ease,
+        box-shadow .25s ease,
+        transform .25s ease;
 
 }
 
@@ -141,14 +134,12 @@
 
 .settings-card:hover{
 
-    border-color:
+    transform:translateY(-3px);
 
-    rgba(34,211,238,.35);
-
+    border-color:rgba(34,211,238,.30);
 
     box-shadow:
-
-    0 18px 40px rgba(0,0,0,.25);
+        0 22px 45px rgba(0,0,0,.28);
 
 }
 
@@ -371,29 +362,24 @@
 
 .settings-field input{
 
-    height:38px;
+    height:40px;
 
-
-    padding:0 12px;
-
+    padding:0 14px;
 
     border-radius:10px;
 
+    background:rgba(2,6,23,.55);
 
-    background:
-
-    rgba(2,6,23,.55);
-
-
-    border:
-
-    1px solid rgba(148,163,184,.14);
-
+    border:1px solid rgba(148,163,184,.14);
 
     color:var(--text);
 
-
     outline:none;
+
+    transition:
+        border-color .2s,
+        box-shadow .2s,
+        background .2s;
 
 }
 
@@ -496,9 +482,11 @@
 
 .settings-save-btn{
 
-    width:130px;
+    min-width:150px;
 
-    height:38px;
+    height:40px;
+
+    padding:0 22px;
 
     margin-top:auto;
 
@@ -512,7 +500,9 @@
 
     font-size:13px;
 
-    font-weight:700;
+    font-weight:600;
+
+    letter-spacing:.2px;
 
     color:#fff;
 
@@ -522,13 +512,18 @@
         #0891b2
     );
 
-    transition:.2s ease;
+    transition:
+        transform .2s,
+        box-shadow .2s;
 
 }
 
 .settings-save-btn:hover{
 
-    transform:translateY(-1px);
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 10px 25px rgba(34,211,238,.28);
 
 }
 
@@ -542,19 +537,23 @@
 
     align-items:center;
 
-    height:38px;
+    justify-content:space-between;
 
-    padding:0 12px;
+    height:40px;
+
+    padding:0 14px;
 
     border-radius:10px;
 
-    background:rgba(2,6,23,.55);
+    background:rgba(255,255,255,.03);
 
-    border:1px solid rgba(148,163,184,.14);
+    border:1px solid rgba(148,163,184,.12);
 
-    color:var(--text);
+    color:rgba(255,255,255,.88);
 
     font-size:13px;
+
+    font-weight:500;
 
 }
 
@@ -694,13 +693,11 @@
 
     justify-content:space-between;
 
+    align-items:center;
 
-    padding:11px 0;
+    padding:13px 0;
 
-
-    border-bottom:
-
-    1px solid rgba(148,163,184,.1);
+    border-bottom:1px solid rgba(148,163,184,.08);
 
 }
 
@@ -724,6 +721,55 @@
 
 }
 
+/* =========================
+   SECURITY
+========================= */
+
+.security-description{
+
+    margin:0 0 18px;
+
+    font-size:16px;
+
+    line-height:1.6;
+
+    color:var(--muted);
+
+}
+
+.password-input{
+    position:relative;
+    display:flex;
+    align-items:center;
+}
+
+
+.password-input input{
+    width:100%;
+    padding-right:45px;
+}
+
+
+.password-input i{
+
+    position:absolute;
+
+    right:15px;
+
+    cursor:pointer;
+
+    color:#94a3b8;
+
+    transition:0.2s ease;
+
+}
+
+
+.password-input i:hover{
+
+    color:#22d3ee;
+
+}
 
 /* =========================
    RESPONSIVE

@@ -4,13 +4,17 @@ const userSchema = new mongoose.Schema(
   {
     firstName: {
       type: String,
-      required: true,
+      required: function () {
+        return this.role === "user" || this.role === "technician";
+      },
       trim: true,
     },
 
     lastName: {
       type: String,
-      required: true,
+      required: function () {
+        return this.role === "user" || this.role === "technician";
+      },
       trim: true,
     },
 
