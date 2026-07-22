@@ -589,6 +589,12 @@ const getArchivedTickets = async (req, res) => {
 // ===============================
 const addTicketComment = async (req, res) => {
   try {
+
+    console.log("🔥 ADD COMMENT HIT");
+    console.log("BODY:", req.body);
+    console.log("TICKET ID:", req.params.id);
+    console.log("USER:", req.user);
+  
     const { id } = req.params;
     const { message } = req.body;
 
@@ -622,42 +628,51 @@ const addTicketComment = async (req, res) => {
       message,
     });
 
-    // ===============================
-    // 💬 MIRROR FIRST SUPPORT NOTE TO CHAT
-    // ===============================
-    const conversation = await Conversation.findOne({
-      ticketId: ticket._id,
+  // ===============================
+  // 💬 MIRROR SUPPORT NOTE TO CHAT
+  // ===============================
+  const conversation = await Conversation.findOne({
+    ticketId: ticket._id,
+  });
+
+  if (conversation && conversation.status !== "closed") {
+
+    const chatMessage = await Message.create({
+      conversationId: conversation._id,
+      sender: req.user.id,
+      senderRole: req.user.role || "admin",
+      text: message,
     });
 
-    if (conversation && conversation.status !== "closed") {
-      const existingMessages = await Message.countDocuments({
+
+    conversation.lastMessage = message;
+    conversation.updatedAt = new Date();
+
+    await conversation.save();
+
+
+    const io = req.app.get("io");
+
+
+    if (io) {
+
+      // Update open chat window
+      io.to(conversation._id.toString()).emit(
+        "receiveMessage",
+        chatMessage
+      );
+
+
+      // Update conversation sidebar
+      io.emit("conversationUpdated", {
         conversationId: conversation._id,
+        lastMessage: message,
+        updatedAt: new Date(),
       });
 
-      // Only mirror if this is the FIRST message
-      if (existingMessages === 0) {
-        const chatMessage = await Message.create({
-          conversationId: conversation._id,
-          sender: req.user.id,
-          senderRole: req.user.role || "admin",
-          text: message,
-        });
-
-        conversation.lastMessage = message;
-        conversation.updatedAt = new Date();
-        await conversation.save();
-
-        // Real-time update
-        const io = req.app.get("io");
-
-        if (io) {
-          io.to(conversation._id.toString()).emit(
-            "receiveMessage",
-            chatMessage
-          );
-        }
-      }
     }
+
+  }
 
     // 📜 LOG ACTIVITY
     ticket.activityLogs.push({
@@ -666,18 +681,18 @@ const addTicketComment = async (req, res) => {
       details: message,
     });
 
-    await ticket.save();
+    const updatedTicket = await ticket.save();
 
     // ===============================
     // REAL-TIME UPDATE
     // ===============================
     const io = req.app.get("io");
 
-    io.emit("ticketUpdated", ticket);
+    io.emit("ticketUpdated", updatedTicket);
 
     return res.json({
       message: "Comment added successfully",
-      ticket,
+      ticket: updatedTicket,
     });
 
   } catch (err) {

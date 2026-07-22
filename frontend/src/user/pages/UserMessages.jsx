@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import UserConversationList from "../components/messages/UserConversationList";
 import socket from "../../socket/socket";
 
@@ -16,6 +17,7 @@ import "../styles/UserMessages.css";
 
 export default function UserMessages() {
   const { token, user } = useAuth();
+  const { showToast } = useToast();
 
   const [conversations, setConversations] = useState([]);
   const [archivedConversations, setArchivedConversations] = useState([]);
@@ -613,16 +615,24 @@ export default function UserMessages() {
   };
 
   const handleArchiveConversation = async (conversationId) => {
+    
     try {
-      await api.patch(
-        `/conversations/${conversationId}/archive`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  const res = await api.patch(
+    `/conversations/${conversationId}/archive`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  console.log("ARCHIVE RESPONSE:", res.data);
+
+  showToast(
+    "success",
+    "Conversation archived successfully"
+  );
 
       const conversation = conversations.find(
         (c) => c._id === conversationId
@@ -642,22 +652,37 @@ export default function UserMessages() {
       if (selectedConversation?._id === conversationId) {
         setSelectedConversation(null);
       }
-    } catch (err) {
-      console.log(err);
-    }
+    } 
+
+  catch (err) {
+    console.log(err);
+
+    showToast(
+      "error",
+      "Failed to archive conversation"
+    );
+  }
+
   };
 
   const handleUnarchiveConversation = async (conversationId) => {
     try {
-      await api.patch(
-        `/conversations/${conversationId}/unarchive`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+  const res = await api.patch(
+    `/conversations/${conversationId}/unarchive`,
+    {},
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  console.log("RESTORE RESPONSE:", res.data);
+
+  showToast(
+    "success",
+    "Conversation restored successfully"
+  );
 
       const conversation = archivedConversations.find(
         (c) => c._id === conversationId
@@ -673,9 +698,17 @@ export default function UserMessages() {
         { ...conversation, isArchived: false },
         ...prev,
       ]);
-    } catch (err) {
-      console.log(err);
-    }
+    } 
+
+  catch (err) {
+    console.log(err);
+
+    showToast(
+      "error",
+      "Failed to restore conversation"
+    );
+  }
+
   };
 
   return (
