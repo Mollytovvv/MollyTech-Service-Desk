@@ -7,11 +7,31 @@ const roleMiddleware = require("../middleware/role.middleware");
 const {
   register,
   login,
+  changePassword,
   getUsers,
 } = require("../controllers/auth.controller");
 
 // ===============================
-// GET ALL USERS (ADMIN)
+// 🧾 REGISTER
+// ===============================
+router.post("/register", register);
+
+// ===============================
+// 🔐 LOGIN
+// ===============================
+router.post("/login", login);
+
+// ===============================
+// 🔑 CHANGE PASSWORD
+// ===============================
+router.patch(
+  "/change-password",
+  authMiddleware,
+  changePassword
+);
+
+// ===============================
+// 👥 GET ALL USERS (ADMIN)
 // ===============================
 router.get(
   "/users",
@@ -19,8 +39,5 @@ router.get(
   roleMiddleware("admin"),
   getUsers
 );
-
-router.post("/register", register);
-router.post("/login", login);
 
 module.exports = router;
