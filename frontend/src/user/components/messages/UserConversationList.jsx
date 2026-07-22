@@ -70,7 +70,7 @@ export default function UserConversationList({
 
   const [menuOpen, setMenuOpen] = useState(null);
   const [confirmAction, setConfirmAction] = useState(null); 
-  const menuRef = useRef(null);
+  const menuRef = useRef({});
 
   // =========================
   // CLOSE DROPDOWN
@@ -80,12 +80,16 @@ export default function UserConversationList({
 
       const handleClickOutside = (e) => {
 
-          if (
-              menuRef.current &&
-              !menuRef.current.contains(e.target)
-          ) {
-              setMenuOpen(null);
-          }
+      const activeMenu =
+          menuOpen &&
+          menuRef.current[menuOpen];
+
+      if (
+          activeMenu &&
+          !activeMenu.contains(e.target)
+      ) {
+          setMenuOpen(null);
+      }
 
       };
 
@@ -109,6 +113,14 @@ export default function UserConversationList({
         : conversations;
 
     const query = search.toLowerCase();
+
+    console.log(
+  "RENDER CONVERSATIONS:",
+  source.map(c => ({
+    id:c._id,
+    title:c.ticketId?.title
+  }))
+);
 
     return source.filter((conversation) => {
       if (conversation.ticketId?.status === "cancelled") {
@@ -269,10 +281,12 @@ export default function UserConversationList({
                           )}
                       </span>
 
-                        <div
-                            className="conversation-menu-wrapper"
-                            ref={menuRef}
-                        >
+                      <div
+                          className="conversation-menu-wrapper"
+                          ref={(el) =>
+                              (menuRef.current[conversation._id] = el)
+                          }
+                      >
 
                           <button
                               className="conversation-menu-btn"
@@ -444,7 +458,7 @@ export default function UserConversationList({
 
                     <p>
                         {confirmAction.type === "archive"
-                            ? `Are you sure you want to archive "${confirmAction.title}"?`
+                            ? `Are you sure you want to archive "${confirmAction.title}"? This will hide the conversation from your active messages but will not close the ticket.`
                             : `Are you sure you want to restore "${confirmAction.title}" back to active conversations?`}
                     </p>
 
@@ -463,7 +477,9 @@ export default function UserConversationList({
                                     ? "danger-confirm"
                                     : "restore-confirm"
                             }
-                            onClick={() => {
+                            onClick={(e) => {
+
+                                e.stopPropagation();
 
                                 if (confirmAction.type === "archive") {
                                     onArchive(confirmAction.id);
