@@ -14,6 +14,20 @@ const Notification = require("../models/Notification");
 // ===============================
 const createTicket = async (req, res) => {
   try {
+
+const user = await User.findById(
+    req.user.id
+);
+
+
+if(!user){
+
+    return res.status(404).json({
+        message:"User not found"
+    });
+
+}
+
 console.log("BODY:", req.body);
 
 const rawPhone =
@@ -47,32 +61,78 @@ console.log("FORMATTED PHONE:", phoneNumber);
       ticketId = `MT-${String(lastNumber + 1).padStart(6, "0")}`;
     }
 
-    // =========================
-    // 1. CREATE TICKET
-    // =========================
-    const ticket = await Ticket.create({
-      ticketId,
-      title: req.body.title,
-      description: req.body.description,
-      category: req.body.category,
-      priority: req.body.priority,
-      email: req.body.email,
-      phoneNumber,
+    const currentUser = await User.findById(req.user.id);
 
+    if(!user){
+
+        return res.status(404).json({
+            message:"User not found"
+        });
+
+    }
+
+  // =========================
+  // 1. CREATE TICKET
+  // =========================
+  const ticket = await Ticket.create({
+
+      ticketId,
+
+      title: req.body.title,
+
+      description: req.body.description,
+
+      category: req.body.category,
+
+      priority: req.body.priority,
+
+
+      // Snapshot current contact information
+      email: currentUser.email,
+
+      phoneNumber: currentUser.phone,
+
+
+      // Snapshot user identity
       submittedBy: {
-        userId: req.user.id,
-        firstName: req.user.firstName,
-        lastName: req.user.lastName,
+
+          userId: currentUser._id,
+
+          firstName: currentUser.firstName,
+
+          lastName: currentUser.lastName,
+
       },
 
+
       activityLogs: [
-        {
-          action: "Ticket Created",
-          performedBy: req.user?.id || "system",
-          details: "Ticket was created",
-        },
+
+          {
+              action: "Ticket Created",
+
+              performedBy: currentUser._id,
+
+              details: "Ticket was created",
+
+          },
+
       ],
-    });
+
+  });
+
+    // ===============================
+    // 🔥 REALTIME NEW TICKET EVENT
+    // ===============================
+    const io = req.app.get("io");
+
+    if (io) {
+
+        io.emit(
+            "newTicket",
+            ticket
+        );
+
+    }
 
     // =========================
     // 2. CREATE CONVERSATION
@@ -103,12 +163,9 @@ console.log("FORMATTED PHONE:", phoneNumber);
     // =========================
     // CREATE ADMIN NOTIFICATIONS
     // =========================
-
     const admins = await User.find({
       role: "admin",
     });
-
-    const io = req.app.get("io");
 
     // Notify every admin
     for (const admin of admins) {
@@ -144,12 +201,6 @@ console.log("FORMATTED PHONE:", phoneNumber);
       );
 
     }
-
-    // =========================
-    // REAL-TIME NEW TICKET
-    // =========================
-
-    io.emit("newTicket", ticket);
 
     // =========================
     // 3. RESPONSE

@@ -162,12 +162,16 @@ const authRoutes = require("./src/routes/auth.routes");
 const messageRoutes = require("./src/routes/message.routes");
 const conversationRoutes = require("./src/routes/conversation.routes");
 const notificationRoutes = require("./src/routes/notification.routes");
+const dashboardRoutes = require("./src/routes/dashboard.routes");
+const userRoutes = require("./src/routes/user.routes");
 
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/conversations", conversationRoutes);
 app.use("/api/notifications", notificationRoutes);
+app.use("/api/dashboard", dashboardRoutes);
+app.use("/api/users", userRoutes);
 
 // ===============================
 // HEALTH CHECK

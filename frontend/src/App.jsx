@@ -12,6 +12,7 @@ import UserDashboard from "./user/pages/UserDashboard";
 import UserTicketCenter from "./user/pages/UserTicketCenter";
 import UserArchives from "./user/pages/UserArchives";
 import UserMessages from "./user/pages/UserMessages";
+import UserSettings from "./user/pages/UserSettings";
 
 import DashboardLayout from "./admin/layouts/DashboardLayout";
 import UserDashboardLayout from "./user/layouts/UserDashboardLayout";
@@ -100,6 +101,11 @@ function App() {
           <Route
             path="/user/messages"
             element={<UserMessages />}
+          />
+
+          <Route
+            path="/user/settings"
+            element={<UserSettings />}
           />
 
           {/* Future Pages */}
