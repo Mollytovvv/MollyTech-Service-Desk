@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FiX,
   FiInfo,
@@ -18,22 +18,77 @@ import { useToast } from "../../context/ToastContext";
 import api from "../../api/axios";
 import "../styles/CreateTicketModal.css";
 
-export default function CreateTicketModal({ onClose }) {
+export default function CreateTicketModal({
+    onClose,
+    onTicketCreated
+}) {
+
   const { user } = useAuth();
   const { showToast } = useToast();
 
   const DESCRIPTION_LIMIT = 500;
 
   const [formData, setFormData] = useState({
-    title: "",
-    email: user?.email || "",
-    phoneNumber: "",
-    category: "",
-    priority: "low",
-    description: "",
+
+      title: "",
+
+      email: "",
+
+      phoneNumber: "",
+
+      category: "",
+
+      priority: "low",
+
+      description: "",
+
   });
 
   const [loading, setLoading] = useState(false);
+
+  // ===============================
+  // FETCH USER PROFILE
+  // ===============================
+
+  useEffect(()=>{
+
+      const fetchProfile = async()=>{
+
+          try{
+
+              const res = await api.get(
+                  "/users/me"
+              );
+
+
+              setFormData(prev=>({
+
+                  ...prev,
+
+                  email: res.data.email || "",
+
+                  phoneNumber: res.data.phone || ""
+
+              }));
+
+
+          }
+          catch(err){
+
+              console.error(
+                  "Failed to load user profile",
+                  err
+              );
+
+          }
+
+      };
+
+
+      fetchProfile();
+
+
+  },[]);
 
   // ===============================
   // HANDLE INPUT CHANGE
@@ -56,16 +111,31 @@ export default function CreateTicketModal({ onClose }) {
     try {
       setLoading(true);
 
-      const response = await api.post("/tickets", formData);
+  const response = await api.post(
+      "/tickets",
+      {
+          title: formData.title,
+          category: formData.category,
+          priority: formData.priority,
+          description: formData.description,
+      }
+  );
 
       console.log("Ticket Created:", response.data);
 
       showToast(
-        "success",
-        "Ticket created successfully"
+          "success",
+          "Ticket created successfully"
       );
 
+
+      if(onTicketCreated){
+          onTicketCreated();
+      }
+
+
       onClose();
+      
     } catch (error) {
       console.log(
         "CREATE TICKET ERROR:",
@@ -188,15 +258,15 @@ export default function CreateTicketModal({ onClose }) {
                   Network
                 </option>
 
-                <option value="email">
-                  Email
+                <option value="bug">
+                    Bug
                 </option>
 
                 <option value="account">
                   Account
                 </option>
 
-                <option value="others">
+                <option value="other">
                   Others
                 </option>
               </select>
@@ -244,13 +314,12 @@ export default function CreateTicketModal({ onClose }) {
               </label>
 
               <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                placeholder="Enter your email"
-                disabled={loading}
-                required
+                  type="email"
+                  name="email"
+                  value={formData.email}
+                  readOnly
+                  disabled={loading}
+                  required
               />
             </div>
 
@@ -260,14 +329,31 @@ export default function CreateTicketModal({ onClose }) {
                 Phone Number
               </label>
 
-              <input
-                type="text"
-                name="phoneNumber"
-                value={formData.phoneNumber}
-                onChange={handleChange}
-                placeholder="09XXXXXXXXX"
-                disabled={loading}
-              />
+              <div className="phone-input-wrapper">
+
+                  <span className="phone-prefix">
+                      +63
+                  </span>
+
+
+                  <input
+                      type="text"
+                      name="phoneNumber"
+                      value={
+                          formData.phoneNumber
+                          ?
+                          formData.phoneNumber.replace(
+                              /(\d{3})(\d{3})(\d{4})/,
+                              "$1 $2 $3"
+                          )
+                          :
+                          ""
+                      }
+                      readOnly
+                      disabled={loading}
+                  />
+
+              </div>
             </div>
           </div>
 

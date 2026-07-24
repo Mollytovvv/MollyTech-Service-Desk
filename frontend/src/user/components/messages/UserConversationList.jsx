@@ -72,6 +72,9 @@ export default function UserConversationList({
   const [confirmAction, setConfirmAction] = useState(null); 
   const menuRef = useRef({});
 
+  const sidebarRef = useRef(null);
+  const [showScrollButton, setShowScrollButton] = useState(false);
+
   // =========================
   // CLOSE DROPDOWN
   // =========================
@@ -105,6 +108,62 @@ export default function UserConversationList({
           );
 
   }, []);
+
+  // =========================
+  // SCROLL TO BOTTOM BUTTON
+  // =========================
+
+  useEffect(() => {
+
+    const sidebar = sidebarRef.current;
+
+    if(!sidebar) return;
+
+
+    const handleScroll = () => {
+
+      const distanceFromBottom =
+        sidebar.scrollHeight -
+        sidebar.scrollTop -
+        sidebar.clientHeight;
+
+
+      setShowScrollButton(
+        distanceFromBottom > 250
+      );
+
+    };
+
+
+    sidebar.addEventListener(
+      "scroll",
+      handleScroll
+    );
+
+
+    return () => {
+
+      sidebar.removeEventListener(
+        "scroll",
+        handleScroll
+      );
+
+    };
+
+
+  }, []);
+
+  const scrollToBottom = () => {
+
+    sidebarRef.current?.scrollTo({
+
+      top: sidebarRef.current.scrollHeight,
+
+      behavior:"smooth",
+
+    });
+
+  };
 
   const filteredConversations = useMemo(() => {
     const source =
@@ -211,7 +270,10 @@ export default function UserConversationList({
 
       {/* ================= LIST ================= */}
 
-      <div className="conversation-list">
+        <div
+          className="conversation-list"
+          ref={sidebarRef}
+        >
 
         {filteredConversations.length === 0 ? (
 
@@ -436,6 +498,17 @@ export default function UserConversationList({
         )}
 
       </div>
+
+      {showScrollButton && (
+
+      <button
+        className="conversation-scroll-btn"
+        onClick={scrollToBottom}
+      >
+        <i className="fa-solid fa-arrow-down"></i>
+      </button>
+
+      )}
 
         {confirmAction && (
             <div className="conversation-confirm-overlay">

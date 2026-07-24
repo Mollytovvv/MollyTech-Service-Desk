@@ -1,5 +1,8 @@
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../context/AuthContext";
+import api from "../../api/axios";
+import socket from "../../socket/socket";
 import NotificationBell from "../../components/notifications/NotificationBell";
 
 import logo from "../../assets/mollytech_logo.jpg";
@@ -9,7 +12,6 @@ import {
   FiFileText,
   FiArchive,
   FiMessageSquare,
-  FiUser,
   FiSettings,
   FiLogOut,
 } from "react-icons/fi";
@@ -18,9 +20,90 @@ import "../styles/UserDashboardLayout.css";
 
 const UserDashboardLayout = () => {
 
-  const { logout } = useAuth();
+  const { logout, token, user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [messageCount, setMessageCount] = useState(0);
+
+  // ===============================
+  // 🔔 MESSAGE SIDEBAR COUNT
+  // ===============================
+  const fetchMessageCount = async () => {
+
+    try {
+
+      const res = await api.get(
+        "/dashboard/user-message-count",
+        {
+          headers:{
+            Authorization:`Bearer ${token}`
+          }
+        }
+      );
+
+
+      setMessageCount(
+        res.data.messageCount || 0
+      );
+
+
+    } catch(err){
+
+      console.log(
+        "MESSAGE COUNT ERROR:",
+        err
+      );
+
+    }
+
+  };
+
+  useEffect(() => {
+
+    if(!token) return;
+
+    fetchMessageCount();
+
+  }, [token]);
+
+  useEffect(() => {
+
+
+    if(!user?._id) return;
+
+
+    socket.connect();
+
+    socket.emit(
+      "register",
+      user._id
+    );
+
+
+    const updateMessages = () => {
+
+      fetchMessageCount();
+
+    };
+
+
+    socket.on(
+      "conversationUpdated",
+      updateMessages
+    );
+
+
+    return () => {
+
+      socket.off(
+        "conversationUpdated",
+        updateMessages
+      );
+
+    };
+
+
+  }, [user]);
 
   // ================= PAGE HEADER =================
 
@@ -45,15 +128,11 @@ const UserDashboardLayout = () => {
       description: "Communicate directly with the IT support team.",
     },
 
-    "/user/profile": {
-      title: "Profile",
-      description: "Manage your personal information.",
-    },
-
     "/user/settings": {
       title: "Settings",
-      description: "Customize your account preferences.",
+      description: "Manage your account information and preferences.",
     },
+
   };
 
   const currentPage = pageInfo[location.pathname] || {
@@ -141,23 +220,25 @@ const UserDashboardLayout = () => {
                 isActive ? "active" : ""
               }
             >
+
               <FiMessageSquare className="icon" />
-              Messages
+
+              <span>
+                Messages
+              </span>
+
+
+              {messageCount > 0 && (
+                <span className="sidebar-badge">
+                  {messageCount}
+                </span>
+              )}
+
             </NavLink>
 
             <p className="nav-title">
               ACCOUNT
             </p>
-
-            <NavLink
-              to="/user/profile"
-              className={({ isActive }) =>
-                isActive ? "active" : ""
-              }
-            >
-              <FiUser className="icon" />
-              Profile
-            </NavLink>
 
             <NavLink
               to="/user/settings"

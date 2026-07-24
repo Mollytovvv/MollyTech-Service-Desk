@@ -339,6 +339,83 @@
     cursor:not-allowed;
 }
 
+.phone-input-wrapper{
+
+    display:flex;
+
+    align-items:center;
+
+    width:100%;
+
+    background:rgba(15,23,42,0.8);
+
+    border:1px solid rgba(103,232,249,0.15);
+
+    border-radius:10px;
+
+    overflow:hidden;
+
+    transition:.25s ease;
+
+}
+
+
+.phone-input-wrapper:focus-within{
+
+    border-color:#64748b;
+
+    box-shadow:
+    0 0 0 3px rgba(100,116,139,.10);
+
+}
+
+
+.phone-prefix{
+
+    display:flex;
+
+    align-items:center;
+
+    padding:12px 14px;
+
+    font-weight:600;
+
+    font-size:14px;
+
+    background:rgba(56,189,248,.08);
+
+    border-right:1px solid rgba(103,232,249,.15);
+
+}
+
+
+
+.phone-input-wrapper input{
+
+    flex:1;
+
+    border:none;
+
+    background:transparent;
+
+    color:#e2e8f0;
+
+    padding:12px 14px;
+
+    outline:none;
+
+}
+
+
+
+.phone-input-wrapper input:disabled{
+
+    cursor:not-allowed;
+
+    opacity:.9;
+
+}
+
 /* =====================================
    ANIMATION
 ===================================== */

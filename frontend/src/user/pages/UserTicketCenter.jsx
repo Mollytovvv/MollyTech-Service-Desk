@@ -729,12 +729,15 @@ export default function UserTicketCenter() {
       {/* CREATE MODAL */}
 
       {showCreateModal && (
-        <CreateTicketModal
-          onClose={() => {
-            setShowCreateModal(false);
-            fetchTickets();
-          }}
-        />
+          <CreateTicketModal
+              onClose={() => {
+                  setShowCreateModal(false);
+              }}
+
+              onTicketCreated={() => {
+                  fetchTickets();
+              }}
+          />
       )}
 
       {/* EDIT MODAL */}

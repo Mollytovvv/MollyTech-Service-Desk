@@ -1,5 +1,8 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
+import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
+import socket from "../../socket/socket";
 import "../styles/DashboardLayout.css";
 import NotificationBell from "../../components/notifications/NotificationBell";
 import logo from "../../assets/mollytech_logo.jpg";
@@ -14,9 +17,129 @@ import {
 } from "react-icons/fi";
 
 export default function DashboardLayout() {
-  const { logout } = useAuth();
+
+  const { logout, token, user } = useAuth();
+
+  const [ticketCount, setTicketCount] = useState(0);
+  const [messageCount, setMessageCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
+
+  // ===============================
+  // 🔔 SIDEBAR COUNTS
+  // ===============================
+  const fetchSidebarCounts = async () => {
+
+    try {
+
+      const res = await api.get(
+        "/dashboard/sidebar-counts",
+        {
+          headers:{
+            Authorization:`Bearer ${token}`
+          }
+        }
+      );
+
+
+      setTicketCount(
+        res.data.ticketCount || 0
+      );
+
+
+      setMessageCount(
+        res.data.messageCount || 0
+      );
+
+
+    } catch(err){
+
+      console.log(
+        "SIDEBAR COUNT ERROR:",
+        err
+      );
+
+    }
+
+  };
+
+
+  useEffect(() => {
+
+    if(!token) return;
+
+    fetchSidebarCounts();
+
+  }, [token]);
+
+  // ===============================
+  // 🔥 REALTIME SIDEBAR COUNTS
+  // ===============================
+  useEffect(() => {
+
+
+    const refreshSidebarCounts = (data) => {
+
+      console.log(
+        "🔥 SIDEBAR COUNT UPDATE:",
+        data
+      );
+
+      fetchSidebarCounts();
+
+    };
+
+
+    socket.on(
+      "conversationUpdated",
+      refreshSidebarCounts
+    );
+
+
+    socket.on(
+      "newTicket",
+      refreshSidebarCounts
+    );
+
+
+    return () => {
+
+
+      socket.off(
+        "conversationUpdated",
+        refreshSidebarCounts
+      );
+
+
+      socket.off(
+        "ticketUpdated",
+        refreshSidebarCounts
+      );
+
+
+    };
+
+
+  }, []);
+
+  // ===============================
+  // 🔌 SOCKET CONNECTION
+  // ===============================
+  useEffect(() => {
+
+    if(!user?._id) return;
+
+
+    socket.connect();
+
+
+    socket.emit(
+      "register",
+      user._id
+    );
+
+
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -74,8 +197,17 @@ export default function DashboardLayout() {
             className={isActive("/ticket-center") ? "active" : ""}
             onClick={() => navigate("/ticket-center")}
           >
-            <FiList className="icon" />
+          <FiList className="icon" />
+
+          <span>
             Ticket Center
+          </span>
+
+          {ticketCount > 0 && (
+            <span className="sidebar-badge">
+              {ticketCount}
+            </span>
+          )}
           </button>
 
           <p className="nav-title">DATA</p>
@@ -95,8 +227,17 @@ export default function DashboardLayout() {
             className={isActive("/messages") ? "active" : ""}
             onClick={() => navigate("/messages")}
           >
-            <FiMessageSquare className="icon" />
+          <FiMessageSquare className="icon" />
+
+          <span>
             Messages
+          </span>
+
+          {messageCount > 0 && (
+            <span className="sidebar-badge">
+              {messageCount}
+            </span>
+          )}
           </button>
 
           <p className="nav-title">SYSTEM</p>
