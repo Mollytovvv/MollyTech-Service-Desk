@@ -1,6 +1,8 @@
 const path = require("path");
 const Message = require("../models/Message");
 const Conversation = require("../models/Conversation");
+const Notification = require("../models/Notification");
+const User = require("../models/User");
 
 // ===============================
 // 💬 SEND MESSAGE
@@ -123,27 +125,135 @@ if (
 
     console.log("Conversation saved.");
 
+    console.log(
+      "Participants:",
+      conversation.participants
+    );
+
     // ===============================
-    // SOCKET.IO
+    // 🔔 CREATE MESSAGE NOTIFICATIONS
     // ===============================
+
     const io = req.app.get("io");
 
-    if (io) {
-      io.to(conversationId).emit(
-        "receiveMessage",
-        populatedMessage
-      );
+    // USER -> Notify all support staff
+    if (req.user.role === "user") {
+
+      const staff = await User.find({
+        role: {
+          $in: ["admin", "technician"],
+        },
+      });
+
+      for (const member of staff) {
+
+        const notification =
+          await Notification.create({
+
+            recipient: member._id,
+
+            sender: req.user.id,
+
+            type: "new_message",
+
+            title: "New User Message",
+
+            message: `${req.user.firstName} ${req.user.lastName} sent a new message regarding Ticket ${conversation.ticketId.ticketId}.`,
+
+            ticketId: conversation.ticketId,
+
+            conversationId: conversation._id,
+
+          });
+
+        const populatedNotification =
+          await Notification.findById(notification._id)
+            .populate(
+              "sender",
+              "_id firstName lastName role"
+            )
+            .populate(
+              "ticketId",
+              "ticketId title status"
+            );
+
+        io.to(member._id.toString()).emit(
+          "notificationCreated",
+          populatedNotification
+        );
+
+      }
+
     }
 
-    io.emit(
-      "conversationUpdated",
-      {
-        conversationId,
-        lastMessage: conversation.lastMessage,
-        updatedAt: conversation.updatedAt,
-        senderRole: req.user.role
+    // ADMIN / TECHNICIAN -> Notify ticket owner
+    else {
+
+      const requester =
+        conversation.participants.find(
+          (participant) =>
+            participant.role === "user"
+        );
+
+      if (requester) {
+
+        const notification =
+          await Notification.create({
+
+            recipient: requester.userId,
+
+            sender: req.user.id,
+
+            type: "new_message",
+
+            title: "New Reply",
+
+            message: "A support team member replied to your ticket.",
+
+            ticketId: conversation.ticketId,
+
+            conversationId: conversation._id,
+
+          });
+
+        const populatedNotification =
+          await Notification.findById(notification._id)
+            .populate(
+              "sender",
+              "_id firstName lastName role"
+            )
+            .populate(
+              "ticketId",
+              "ticketId title status"
+            );
+
+        io.to(requester.userId.toString()).emit(
+          "notificationCreated",
+          populatedNotification
+        );
+
       }
+
+    }
+
+  // ===============================
+  // SOCKET.IO
+  // ===============================
+  if (io) {
+    io.to(conversationId).emit(
+      "receiveMessage",
+      populatedMessage
     );
+
+    io.emit("conversationUpdated", {
+      conversationId,
+      lastMessage: conversation.lastMessage,
+      updatedAt: conversation.updatedAt,
+      senderRole: req.user.role,
+      adminUnread: conversation.adminUnread,
+      userUnread: conversation.userUnread,
+    });
+  }
 
     // ===============================
     // RESPONSE
@@ -201,6 +311,21 @@ if (
     }
 
     await conversation.save();
+
+    // ===============================
+    // UPDATE SIDEBAR IN REALTIME
+    // ===============================
+    const io = req.app.get("io");
+
+    if (io) {
+      io.emit("conversationUpdated", {
+        conversationId: conversation._id,
+        lastMessage: conversation.lastMessage,
+        updatedAt: conversation.updatedAt,
+        adminUnread: conversation.adminUnread,
+        userUnread: conversation.userUnread,
+      });
+    }
 
     // ===============================
     // REQUESTER INFO

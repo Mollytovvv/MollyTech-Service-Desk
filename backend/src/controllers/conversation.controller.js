@@ -86,10 +86,8 @@ const getConversations = async (req, res) => {
 
       requester: requesterParticipant?.userId || null,
 
-      unread:
-        req.user.role === "admin"
-          ? conversation.adminUnread
-          : conversation.userUnread,
+      adminUnread: conversation.adminUnread,
+      userUnread: conversation.userUnread,
 
       isArchived: conversation.archivedBy?.some(
         id => id.toString() === userId

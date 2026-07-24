@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
@@ -41,8 +42,12 @@ export default function UserMessages() {
   const typingTimeout = useRef(null);
   const fileInputRef = useRef(null);
 
+  const hasOpenedNotification = useRef(false);
+
   const BACKEND_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  const [searchParams] = useSearchParams();
 
   // =========================
   // AUTO SCROLL
@@ -112,6 +117,33 @@ export default function UserMessages() {
   }, [token]);
 
   // =========================
+  // OPEN CONVERSATION FROM NOTIFICATION
+  // =========================
+  useEffect(() => {
+
+    if (hasOpenedNotification.current) return;
+
+    if (!conversations.length) return;
+
+    const conversationId =
+      searchParams.get("conversation");
+
+    if (!conversationId) return;
+
+    const conversation =
+      conversations.find(
+        (c) => c._id === conversationId
+      );
+
+    if (!conversation) return;
+
+    hasOpenedNotification.current = true;
+
+    setSelectedConversation(conversation);
+
+  }, [conversations]);
+
+  // =========================
   // FETCH MESSAGES
   // =========================
 
@@ -139,9 +171,25 @@ export default function UserMessages() {
           senderRole: m.senderRole || m.sender?.role,
         }));
 
-        setMessages(normalized);
-        setTicket(res.data.ticket || null);
-        setConversationStatus(res.data.status || "active");
+      setMessages(normalized);
+      setTicket(res.data.ticket || null);
+      setConversationStatus(res.data.status || "active");
+
+      // Remove unread dot immediately
+      setConversations((prev) =>
+        prev.map((conversation) => {
+          if (conversation._id !== selectedConversation._id) {
+            return conversation;
+          }
+
+          return {
+            ...conversation,
+            userUnread: false,
+          };
+        })
+      );
+
+        
       } catch (err) {
         console.log("USER MESSAGE ERROR:", err);
       }
@@ -167,26 +215,31 @@ export default function UserMessages() {
   // =========================
   // CONVERSATION UPDATED
   // =========================
+  const handleConversationUpdated = (data) => {
 
-  const handleConversationUpdated = (data)=>{
+    setConversations((prev) => {
 
-    setConversations((prev)=>
-      prev.map((conversation)=>{
+      const updated = prev.map((conversation) => {
 
-        if(
-          conversation._id !== data.conversationId
-        ){
+        if (conversation._id !== data.conversationId) {
           return conversation;
         }
 
         return {
           ...conversation,
-          lastMessage:data.lastMessage,
-          updatedAt:data.updatedAt
+          lastMessage: data.lastMessage,
+          updatedAt: data.updatedAt,
+          adminUnread: data.adminUnread,
+          userUnread: data.userUnread,
         };
 
-      })
-    );
+      });
+
+      return updated.sort(
+        (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+      );
+
+    });
 
   };
   

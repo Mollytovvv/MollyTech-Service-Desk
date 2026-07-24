@@ -1,0 +1,743 @@
+/* =====================================
+   NOTIFICATION BELL
+   MollyTech Service Desk
+===================================== */
+
+
+/* ===============================
+   WRAPPER
+=============================== */
+
+.notification-wrapper {
+
+    position: relative;
+
+}
+
+
+
+/* ===============================
+   BELL BUTTON
+=============================== */
+
+.notification-bell {
+
+    position: relative;
+
+    width: 42px;
+    height: 42px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:12px;
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    background:#111827;
+
+    color:#e5e7eb;
+
+    cursor:pointer;
+
+    transition:0.25s ease;
+
+}
+
+
+.notification-bell:hover {
+
+    background:#172554;
+
+    color:#22d3ee;
+
+    border-color:#22d3ee;
+
+}
+
+
+
+/* ICON */
+
+.notification-bell i {
+
+    font-size:18px;
+
+}
+
+
+
+/* ===============================
+   BADGE
+=============================== */
+
+.notification-badge {
+
+    position:absolute;
+
+    top:-5px;
+    right:-5px;
+
+
+    min-width:18px;
+    height:18px;
+
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+
+    padding:0 5px;
+
+
+    border-radius:999px;
+
+
+    background:#06b6d4;
+
+    color:#020617;
+
+
+    font-size:11px;
+
+    font-weight:700;
+
+
+    border:2px solid #0f172a;
+
+}
+
+
+
+/* ===============================
+   DROPDOWN
+=============================== */
+
+.notification-dropdown {
+
+    position:absolute;
+
+    right:0;
+
+    top:52px;
+
+
+    width:340px;
+
+    max-height:420px;
+
+
+    background:#0f172a;
+
+
+    border:1px solid rgba(255,255,255,0.08);
+
+
+    border-radius:16px;
+
+
+    box-shadow:
+    0 20px 40px rgba(0,0,0,0.35);
+
+
+    overflow:hidden;
+
+
+    z-index:999;
+
+}
+
+
+
+/* ===============================
+   HEADER
+=============================== */
+
+.notification-header {
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+
+    padding:16px;
+
+
+    border-bottom:
+    1px solid rgba(255,255,255,0.08);
+
+}
+
+
+
+.notification-header h3 {
+
+    margin:0;
+
+    font-size:16px;
+
+    color:#f8fafc;
+
+}
+
+
+
+/* MARK ALL */
+
+.mark-all-btn {
+
+    border:none;
+
+    background:none;
+
+    color:#22d3ee;
+
+    font-size:12px;
+
+    cursor:pointer;
+
+}
+
+
+
+.mark-all-btn:hover {
+
+    text-decoration:underline;
+
+}
+
+
+
+/* ===============================
+   LIST
+=============================== */
+
+.notification-list {
+
+    max-height:360px;
+
+    overflow-y:auto;
+
+}
+
+
+
+/* SCROLLBAR */
+
+.notification-list::-webkit-scrollbar {
+
+    width:6px;
+
+}
+
+
+.notification-list::-webkit-scrollbar-thumb {
+
+    background:#334155;
+
+    border-radius:10px;
+
+}
+
+
+
+/* ===============================
+   ITEM
+=============================== */
+
+.notification-item {
+
+    padding:14px 16px;
+
+
+    border-bottom:
+    1px solid rgba(255,255,255,0.06);
+
+
+    cursor:pointer;
+
+
+    transition:0.2s ease;
+
+}
+
+
+
+.notification-item:hover {
+
+    background:#172554;
+
+}
+
+
+
+/* UNREAD */
+
+.notification-item:not(.read) {
+
+    background:
+    rgba(6,182,212,0.08);
+
+}
+
+
+
+/* READ */
+
+.notification-item.read {
+
+    opacity:0.65;
+
+}
+
+
+
+
+.notification-item h4 {
+
+    margin:0 0 6px;
+
+
+    font-size:14px;
+
+
+    color:#f8fafc;
+
+}
+
+
+
+.notification-item p {
+
+    margin:0 0 8px;
+
+
+    font-size:13px;
+
+
+    color:#94a3b8;
+
+
+    line-height:1.4;
+
+}
+
+
+
+.notification-item small {
+
+    font-size:11px;
+
+    color:#64748b;
+
+}
+
+
+
+/* ===============================
+   EMPTY STATE
+=============================== */
+
+.empty-notification {
+
+    padding:30px;
+
+    text-align:center;
+
+
+    color:#64748b;
+
+    font-size:14px;
+
+}
+
+/* =====================================
+   MOLLYTECH NOTIFICATION BELL
+===================================== */
+
+
+.notification-wrapper{
+
+    position:relative;
+
+}
+
+
+/* ===============================
+   BELL BUTTON
+=============================== */
+
+.notification-bell{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:12px;
+
+    border:1px solid rgba(255,255,255,0.08);
+
+    background:#111827;
+
+    color:#22d3ee;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    cursor:pointer;
+
+    transition:0.25s ease;
+
+}
+
+
+.notification-bell:hover{
+
+    background:#162033;
+
+    transform:translateY(-2px);
+
+}
+
+
+
+/* ===============================
+   ICON
+=============================== */
+
+.notification-bell i{
+
+    font-size:18px;
+
+}
+
+
+
+/* ===============================
+   BADGE
+=============================== */
+
+.notification-badge{
+
+    position:absolute;
+
+    top:-5px;
+
+    right:-5px;
+
+
+    min-width:18px;
+
+    height:18px;
+
+
+    padding:0 5px;
+
+
+    border-radius:20px;
+
+
+    background:#06b6d4;
+
+    color:white;
+
+
+    font-size:11px;
+
+    font-weight:700;
+
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+
+    border:2px solid #0f172a;
+
+}
+
+
+
+/* ===============================
+   DROPDOWN
+=============================== */
+
+
+.notification-dropdown{
+
+    position:absolute;
+
+    right:0;
+
+    top:55px;
+
+
+    width:340px;
+
+
+    background:#111827;
+
+
+    border:1px solid rgba(255,255,255,0.08);
+
+
+    border-radius:16px;
+
+
+    box-shadow:
+    0 20px 40px rgba(0,0,0,.35);
+
+
+    overflow:hidden;
+
+
+    z-index:999;
+
+}
+
+
+
+/* ===============================
+   HEADER
+=============================== */
+
+
+.notification-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+
+    padding:16px;
+
+
+    border-bottom:1px solid rgba(255,255,255,0.08);
+
+}
+
+
+.notification-header h3{
+
+    margin:0;
+
+    color:#f8fafc;
+
+    font-size:15px;
+
+}
+
+
+
+.notification-header button{
+
+    background:none;
+
+    border:none;
+
+    color:#22d3ee;
+
+    cursor:pointer;
+
+    font-size:12px;
+
+}
+
+
+
+/* ===============================
+   LIST
+=============================== */
+
+
+.notification-list{
+
+    max-height:350px;
+
+    overflow-y:auto;
+
+}
+
+
+
+/* ===============================
+   ITEM
+=============================== */
+
+
+.notification-item{
+
+    padding:14px 16px;
+
+
+    border-bottom:1px solid rgba(255,255,255,0.06);
+
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+
+.notification-item:hover{
+
+    background:#172033;
+
+}
+
+
+.notification-item.read{
+
+    opacity:.55;
+
+}
+
+
+
+.notification-item h4{
+
+    margin:0 0 5px;
+
+    color:#f8fafc;
+
+    font-size:14px;
+
+}
+
+
+.notification-item p{
+
+    margin:0;
+
+    color:#94a3b8;
+
+    font-size:13px;
+
+}
+
+
+
+.notification-item small{
+
+    display:block;
+
+    margin-top:8px;
+
+    color:#64748b;
+
+    font-size:11px;
+
+}
+
+/* ===============================
+   NOTIFICATION ITEM LAYOUT
+=============================== */
+
+.notification-item{
+
+    display:flex;
+
+    gap:12px;
+
+    align-items:flex-start;
+
+}
+
+
+/* ===============================
+   ICON
+=============================== */
+
+.notification-icon{
+
+    width:36px;
+
+    height:36px;
+
+    min-width:36px;
+
+    border-radius:10px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    background:#172554;
+
+    color:#22d3ee;
+
+    font-size:15px;
+
+}
+
+
+/* ===============================
+   CONTENT
+=============================== */
+
+.notification-content{
+
+    flex:1;
+
+}
+
+
+.notification-content h4{
+
+    margin:0 0 5px;
+
+}
+
+
+.notification-content p{
+
+    margin:0;
+
+    font-size:13px;
+
+    color:#94a3b8;
+
+}
+
+
+.notification-content small{
+
+    display:block;
+
+    margin-top:8px;
+
+    font-size:11px;
+
+    color:#64748b;
+
+}
+
+
+/* ===============================
+   EMPTY STATE
+=============================== */
+
+
+.empty-notification{
+
+    padding:25px;
+
+    text-align:center;
+
+    color:#64748b;
+
+}

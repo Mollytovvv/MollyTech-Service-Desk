@@ -600,3 +600,17 @@
     overflow-y:auto;
 
 }
+
+/* =====================================
+   TOPBAR ACTIONS
+===================================== */
+
+.topbar-actions{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+}
