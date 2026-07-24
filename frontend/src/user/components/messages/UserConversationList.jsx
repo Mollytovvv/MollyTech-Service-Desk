@@ -138,9 +138,9 @@ export default function UserConversationList({
           ?.toLowerCase()
           .includes(query);
 
-      if (filter === "unread") {
-        return conversation.unread;
-      }
+    if (filter === "unread") {
+      return conversation.userUnread;
+    }
 
       return matchesSearch;
     });
@@ -248,9 +248,9 @@ export default function UserConversationList({
                                   "Untitled Ticket"}
                           </span>
 
-                          {conversation.unread && (
-                              <span className="conversation-unread-dot"></span>
-                          )}
+                              {conversation.userUnread && (
+                                  <span className="conversation-unread-dot"></span>
+                              )}
 
                       </div>
 

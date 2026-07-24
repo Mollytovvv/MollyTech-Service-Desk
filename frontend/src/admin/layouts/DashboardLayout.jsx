@@ -1,6 +1,7 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import "../styles/DashboardLayout.css";
+import NotificationBell from "../../components/notifications/NotificationBell";
 import logo from "../../assets/mollytech_logo.jpg";
 import {
   FiHome,
@@ -134,6 +135,7 @@ export default function DashboardLayout() {
           <div className="page-info">
 
             <div className="title-wrap">
+
               <h1 className="page-title-text">
                 {getPageTitle()}
               </h1>
@@ -141,12 +143,26 @@ export default function DashboardLayout() {
               <div className="page-meta-text">
                 Welcome back, manage your system efficiently
               </div>
+
             </div>
 
-            <div className="status-pill">
-              <span className="dot-online"></span>
-              Admin System Online
+
+            <div className="topbar-actions">
+
+              <NotificationBell />
+
+
+              <div className="status-pill">
+
+                <span className="dot-online"></span>
+
+                Admin System Online
+
+              </div>
+
+
             </div>
+
 
           </div>
         </header>

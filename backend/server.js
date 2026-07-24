@@ -39,19 +39,31 @@ const onlineUsers = new Map();
 io.on("connection", (socket) => {
   console.log("🟢 User connected:", socket.id);
 
-  // ===============================
-  // REGISTER USER
-  // ===============================
-  socket.on("register", (userId) => {
-    if (!userId) return;
+// ===============================
+// 👤 REGISTER USER
+// ===============================
+socket.on("register", (userId) => {
 
-    onlineUsers.set(userId, socket.id);
-    socket.userId = userId;
+  if (!userId) return;
 
-    io.emit("onlineUsers", Array.from(onlineUsers.keys()));
+  // Save user ID on socket
+  socket.userId = userId;
 
-    console.log("👤 Registered user:", userId);
-  });
+  // Store online user
+  onlineUsers.set(userId, socket.id);
+
+  // Join personal notification room
+  socket.join(userId);
+
+  // Broadcast online users list
+  io.emit(
+    "onlineUsers",
+    Array.from(onlineUsers.keys())
+  );
+
+  console.log("👤 Registered user:", userId);
+
+});
 
   // ===============================
   // JOIN CONVERSATION ROOM
@@ -149,11 +161,13 @@ const ticketRoutes = require("./src/routes/ticket.routes");
 const authRoutes = require("./src/routes/auth.routes");
 const messageRoutes = require("./src/routes/message.routes");
 const conversationRoutes = require("./src/routes/conversation.routes");
+const notificationRoutes = require("./src/routes/notification.routes");
 
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/api/conversations", conversationRoutes);
+app.use("/api/notifications", notificationRoutes);
 
 // ===============================
 // HEALTH CHECK

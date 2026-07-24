@@ -2,10 +2,12 @@
 // 📌 TICKET CONTROLLER - SERVICE DESK SYSTEM
 // ===============================
 
+const User = require("../models/User");
 const Ticket = require("../models/Ticket");
 const Conversation = require("../models/Conversation");
 const formatPHNumber = require("../utils/formatPHNumber");
 const Message = require("../models/Message");
+const Notification = require("../models/Notification");
 
 // ===============================
 // 🧾 CREATE TICKET + CONVERSATION
@@ -99,9 +101,53 @@ console.log("FORMATTED PHONE:", phoneNumber);
     console.log("🔥 CREATED CONVERSATION:", conversation._id);
 
     // =========================
-    // REAL-TIME TICKET EVENT
+    // CREATE ADMIN NOTIFICATIONS
     // =========================
+
+    const admins = await User.find({
+      role: "admin",
+    });
+
     const io = req.app.get("io");
+
+    // Notify every admin
+    for (const admin of admins) {
+
+    const notification = await Notification.create({
+      recipient: admin._id,
+      sender: req.user.id,
+      type: "new_ticket",
+      title: "New Ticket Submitted",
+      message: `${req.user.firstName} submitted "${ticket.title}"`,
+      ticketId: ticket._id,
+      conversationId: conversation._id,
+    });
+
+      const populatedNotification =
+        await Notification.findById(notification._id)
+          .populate(
+            "sender",
+            "_id firstName lastName role"
+          )
+          .populate(
+            "ticketId",
+            "ticketId title status"
+          )
+          .populate(
+            "conversationId",
+            "_id"
+          );
+
+      io.to(admin._id.toString()).emit(
+        "notificationCreated",
+        populatedNotification
+      );
+
+    }
+
+    // =========================
+    // REAL-TIME NEW TICKET
+    // =========================
 
     io.emit("newTicket", ticket);
 
@@ -327,7 +373,7 @@ const assignTicket = async (req, res) => {
       },
       {
         new: true,
-        runValidators: false, // 🔥 THIS IS THE KEY FIX
+        runValidators: false, 
       }
     );
 
@@ -335,9 +381,54 @@ const assignTicket = async (req, res) => {
       return res.status(404).json({ message: "Ticket not found" });
     }
 
+    // ===============================
+    // CREATE USER NOTIFICATION
+    // ===============================
+
+    const notification =
+      await Notification.create({
+        recipient:
+          updatedTicket.submittedBy.userId,
+        sender: req.user.id,
+        type: "ticket_assigned",
+        title: "Ticket Assigned",
+        message: `Your ticket "${updatedTicket.title}" has been assigned.`,
+        ticketId: updatedTicket._id,
+      });
+
+    // ===============================
+    // POPULATE NOTIFICATION
+    // ===============================
+
+    const populatedNotification =
+      await Notification.findById(
+        notification._id
+      )
+        .populate(
+          "sender",
+          "_id firstName lastName role"
+        )
+        .populate(
+          "ticketId",
+          "ticketId title status"
+        );
+
+    // ===============================
+    // REAL-TIME EVENTS
+    // ===============================
+
     const io = req.app.get("io");
 
+    // Update tickets
     io.emit("ticketUpdated", updatedTicket);
+
+    // Send notification
+    io.to(
+      updatedTicket.submittedBy.userId.toString()
+    ).emit(
+      "notificationCreated",
+      populatedNotification
+    );
 
     return res.json({
       message: "Ticket assigned successfully",
@@ -380,8 +471,49 @@ const resolveTicket = async (req, res) => {
 
     const updatedTicket = await ticket.save();
 
-
     const io = req.app.get("io");
+
+// ===============================
+// 🔔 NOTIFY USER TICKET RESOLVED
+// ===============================
+
+const notification = await Notification.create({
+
+  recipient: ticket.submittedBy.userId,
+
+  sender: req.user.id,
+
+  type: "ticket_resolved",
+
+  title: "Ticket Resolved",
+
+  message: `Your ticket "${ticket.title}" has been resolved.`,
+
+  ticketId: ticket._id,
+
+});
+
+const populatedNotification =
+  await Notification.findById(notification._id)
+    .populate(
+      "sender",
+      "_id firstName lastName role"
+    )
+    .populate(
+      "ticketId",
+      "ticketId title status"
+    );
+
+
+if(io){
+
+  io.to(ticket.submittedBy.userId.toString())
+    .emit(
+      "notificationCreated",
+      populatedNotification
+    );
+
+}
 
     io.emit("ticketUpdated", updatedTicket);
 

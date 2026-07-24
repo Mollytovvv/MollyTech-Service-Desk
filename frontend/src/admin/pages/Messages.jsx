@@ -1,4 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+
+import { useSearchParams } from "react-router-dom";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import "../styles/Messages.css";
@@ -37,9 +43,59 @@ export default function Messages() {
   const chatEndRef = useRef(null);
   const typingTimeout = useRef(null);
   const fileInputRef = useRef(null);
+
+  const hasOpenedNotification = useRef(false);
   
   const BACKEND_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+  const [searchParams] = useSearchParams();
+
+  // =========================
+  // FETCH CONVERSATIONS
+  // =========================
+  const fetchConversations = async () => {
+
+    try {
+
+      const url =
+        filter === "archives"
+          ? "/conversations?archived=true"
+          : "/conversations";
+
+
+      const res = await api.get(url, {
+        headers:{
+          Authorization:`Bearer ${token}`
+        }
+      });
+
+
+      console.log(
+        "FETCH CONVERSATIONS:",
+        res.data.conversations
+      );
+
+
+      setConversations(
+        res.data.conversations || []
+      );
+
+
+    } catch(err){
+
+      console.log(
+        "CONVERSATION ERROR:",
+        err
+      );
+
+    } finally {
+
+      setLoading(false);
+
+    }
+
+  };
 
   // =========================
   // AUTO SCROLL
@@ -64,34 +120,39 @@ export default function Messages() {
   // FETCH CONVERSATIONS
   // =========================
   useEffect(() => {
+
     if (!token) return;
 
-    const fetchConversations = async () => {
-      try {
-
-    const url =
-      filter === "archives"
-        ? "/conversations?archived=true"
-        : "/conversations";
-
-    const res = await api.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    console.log("First conversation:", res.data.conversations[0]);
-
-        setConversations(res.data.conversations || []);
-      } catch (err) {
-        console.log("CONVERSATION ERROR:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchConversations();
-    }, [token, filter]);
+
+  }, [token, filter]);
+
+  // =========================
+  // OPEN CONVERSATION FROM NOTIFICATION
+  // =========================
+  useEffect(() => {
+
+    if (hasOpenedNotification.current) return;
+
+    if (!conversations.length) return;
+
+    const conversationId =
+      searchParams.get("conversation");
+
+    if (!conversationId) return;
+
+    const conversation =
+      conversations.find(
+        (c) => c._id === conversationId
+      );
+
+    if (!conversation) return;
+
+    hasOpenedNotification.current = true;
+
+    setSelectedConversation(conversation);
+
+  }, [conversations]);
 
   // =========================
   // ARCHIVE CONVERSATIONS
@@ -207,7 +268,36 @@ export default function Messages() {
     setMessages(normalized);
 
     setTicket(res.data.ticket || null);
+
     setRequester(res.data.requester || null);
+
+    // Remove unread dot immediately
+    setConversations((prev) =>
+      prev.map((conversation) => {
+        if (conversation._id !== selectedConversation._id) {
+          return conversation;
+        }
+
+        return {
+          ...conversation,
+          adminUnread: false,
+        };
+      })
+    );
+
+    setConversations((prev) =>
+      prev.map((conversation) => {
+        if (conversation._id !== selectedConversation._id) {
+          return conversation;
+        }
+
+        return {
+          ...conversation,
+          adminUnread: false,
+          userUnread: false,
+        };
+      })
+    );
 
       } catch (err) {
         console.log("MESSAGE ERROR:", err);
@@ -232,40 +322,71 @@ export default function Messages() {
   // SOCKET LISTENERS
   // =========================
   useEffect(() => {
+
     const handleReceiveMessage = (message) => {
-    const normalized = {
-      ...message,
-      senderId: message.sender?._id || message.sender,
-      senderRole: message.senderRole || message.sender?.role,
-    };
+
+      const normalized = {
+        ...message,
+        senderId: message.sender?._id || message.sender,
+        senderRole: message.senderRole || message.sender?.role,
+      };
+
 
       setMessages((prev) => {
-        const exists = prev.some((m) => m._id === normalized._id);
+
+        const exists = prev.some(
+          (m) => m._id === normalized._id
+        );
+
         if (exists) return prev;
+
         return [...prev, normalized];
+
       });
+
     };
 
+
+    // 🔥 NEW TICKET CREATED
+    const handleNewTicket = () => {
+
+      console.log("🔥 NEW TICKET RECEIVED");
+
+      fetchConversations();
+
+    };
+
+
     const handleTyping = ({ conversationId, userId }) => {
+
       setTypingUsers((prev) => ({
         ...prev,
         [conversationId]: userId,
       }));
+
     };
+
 
     const handleStopTyping = ({ conversationId }) => {
+
       setTypingUsers((prev) => {
+
         const copy = { ...prev };
+
         delete copy[conversationId];
+
         return copy;
+
       });
+
     };
 
-    const handleConversationUpdated = (data)=>{
 
-      setConversations((prev)=>{
+    const handleConversationUpdated = (data) => {
 
-        const updated = prev.map((conversation)=>{
+      setConversations((prev) => {
+
+        const updated = prev.map((conversation) => {
 
           if(
             conversation._id !== data.conversationId
@@ -275,9 +396,11 @@ export default function Messages() {
 
 
           return {
-            ...conversation,
-            lastMessage:data.lastMessage,
-            updatedAt:data.updatedAt
+              ...conversation,
+              lastMessage:data.lastMessage,
+              updatedAt:data.updatedAt,
+              adminUnread:data.adminUnread,
+              userUnread:data.userUnread
           };
 
         });
@@ -285,24 +408,79 @@ export default function Messages() {
 
         return updated.sort(
           (a,b)=>
-          new Date(b.updatedAt) -
-          new Date(a.updatedAt)
+            new Date(b.updatedAt) -
+            new Date(a.updatedAt)
         );
 
       });
 
     };
 
-    socket.on("receiveMessage", handleReceiveMessage);
-    socket.on("typing", handleTyping);
-    socket.on("stopTyping", handleStopTyping);
-    socket.on("conversationUpdated", handleConversationUpdated);
+
+    socket.on(
+      "receiveMessage",
+      handleReceiveMessage
+    );
+
+
+    socket.on(
+      "newTicket",
+      handleNewTicket
+    );
+
+
+    socket.on(
+      "typing",
+      handleTyping
+    );
+
+
+    socket.on(
+      "stopTyping",
+      handleStopTyping
+    );
+
+
+    socket.on(
+      "conversationUpdated",
+      handleConversationUpdated
+    );
+
 
     return () => {
-      socket.off("receiveMessage", handleReceiveMessage);
-      socket.off("typing", handleTyping);
-      socket.off("stopTyping", handleStopTyping);
+
+      socket.off(
+        "receiveMessage",
+        handleReceiveMessage
+      );
+
+
+      socket.off(
+        "newTicket",
+        handleNewTicket
+      );
+
+
+      socket.off(
+        "typing",
+        handleTyping
+      );
+
+
+      socket.off(
+        "stopTyping",
+        handleStopTyping
+      );
+
+
+      socket.off(
+        "conversationUpdated",
+        handleConversationUpdated
+      );
+
     };
+
+
   }, []);
 
   // =========================

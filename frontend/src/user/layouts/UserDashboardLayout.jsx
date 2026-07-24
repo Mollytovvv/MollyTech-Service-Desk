@@ -1,5 +1,6 @@
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
+import NotificationBell from "../../components/notifications/NotificationBell";
 
 import logo from "../../assets/mollytech_logo.jpg";
 
@@ -208,9 +209,18 @@ const UserDashboardLayout = () => {
 
             </div>
 
-            <div className="status-pill">
-              <span className="dot-online"></span>
-              User Portal Online
+            <div className="topbar-actions">
+
+              <NotificationBell />
+
+              <div className="status-pill">
+
+                <span className="dot-online"></span>
+
+                User Portal Online
+
+              </div>
+
             </div>
 
           </div>
