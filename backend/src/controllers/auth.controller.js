@@ -11,39 +11,55 @@ const jwt = require("jsonwebtoken");
 // 🧾 REGISTER USER
 // ===============================
 const register = async (req,res)=>{
-console.log("REGISTER BODY:", req.body);
+
+    console.log("REGISTER BODY:", req.body);
 
     try{
 
         const {
-          firstName,
-          lastName,
-          email,
-          password,
+            firstName,
+            lastName,
+            email,
+            phone,
+            password,
         } = req.body;
 
-        if (
-          !firstName ||
-          !lastName ||
-          !email ||
-          !password
-        ) {
-          return res.status(400).json({
-            message: "All fields are required",
-          });
+
+
+        if(
+            !firstName ||
+            !lastName ||
+            !email ||
+            !phone ||
+            !password
+        ){
+
+            return res.status(400).json({
+
+                message:"All fields are required"
+
+            });
+
         }
 
 
-        const existingUser = await User.findOne({email});
+
+        const existingUser = await User.findOne({
+            email
+        });
+
 
 
         if(existingUser){
 
             return res.status(400).json({
+
                 message:"Email already exists"
+
             });
 
         }
+
 
 
         const hashedPassword = await bcrypt.hash(
@@ -52,27 +68,42 @@ console.log("REGISTER BODY:", req.body);
         );
 
 
+
         const user = await User.create({
-          firstName,
-          lastName,
-          email,
-          password: hashedPassword,
-          role: "user",
+
+            firstName,
+
+            lastName,
+
+            email,
+
+            phone,
+
+            password:hashedPassword,
+
+            role:"user",
+
+            status:"pending"
+
         });
+
 
 
         res.status(201).json({
 
-            message:"User registered successfully",
-            user
+            message:
+            "Registration submitted. Waiting for administrator approval."
 
         });
+
 
 
     }catch(err){
 
         res.status(500).json({
+
             message:err.message
+
         });
 
     }
@@ -110,7 +141,31 @@ const login = async(req,res)=>{
 
         }
 
+        // ===============================
+        // ACCOUNT APPROVAL CHECK
+        // ===============================
 
+        if(
+            user.role === "user" &&
+            user.status !== "approved"
+        ){
+
+            return res.status(403).json({
+
+                message:
+                user.status === "rejected"
+
+                ?
+
+                "Your account registration was declined."
+
+                :
+
+                "Your account is still waiting for administrator approval."
+
+            });
+
+        }
 
         const isMatch = await bcrypt.compare(
             password,
@@ -136,7 +191,8 @@ const login = async(req,res)=>{
                 firstName:user.firstName,
                 lastName:user.lastName,
                 email:user.email,
-                role:user.role
+                role:user.role,
+                status:user.status
             },
 
             process.env.JWT_SECRET,
@@ -158,10 +214,16 @@ const login = async(req,res)=>{
             user:{
 
                 _id:user._id,
+
                 firstName:user.firstName,
+
                 lastName:user.lastName,
+
                 email:user.email,
-                role:user.role
+
+                role:user.role,
+
+                status:user.status
 
             }
 

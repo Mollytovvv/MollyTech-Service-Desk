@@ -13,7 +13,8 @@ import {
   FiBarChart2,
   FiSettings,
   FiLogOut,
-  FiMessageSquare
+  FiMessageSquare,
+  FiUserCheck
 } from "react-icons/fi";
 
 export default function DashboardLayout() {
@@ -151,15 +152,29 @@ export default function DashboardLayout() {
     location.pathname.startsWith(path + "/");
 
   const getPageTitle = () => {
-    const path = location.pathname;
 
-    if (path.startsWith("/dashboard")) return "Dashboard";
-    if (path.startsWith("/ticket-center")) return "Ticket Center";
-    if (path.startsWith("/records")) return "Records";
-    if (path.startsWith("/reports")) return "Reports";
-    if (path.startsWith("/settings")) return "Settings";
+      const path = location.pathname;
 
-    return "Service Desk";
+      if (path.startsWith("/dashboard"))
+          return "Dashboard";
+
+      if (path.startsWith("/ticket-center"))
+          return "Ticket Center";
+
+      if (path.startsWith("/records"))
+          return "Records";
+
+      if (path.startsWith("/messages"))
+          return "Messages";
+
+      if (path.startsWith("/access-requests"))
+          return "Access Requests";
+
+      if (path.startsWith("/settings"))
+          return "Settings";
+
+      return "Service Desk";
+
   };
 
   return (
@@ -249,6 +264,16 @@ export default function DashboardLayout() {
             <FiBarChart2 className="icon" />
             Reports
           </button>
+
+
+          <button
+            className={isActive("/access-requests") ? "active" : ""}
+            onClick={() => navigate("/access-requests")}
+          >
+            <FiUserCheck className="icon" />
+            Access Requests
+          </button>
+
 
           <button
             className={isActive("/settings") ? "active" : ""}
