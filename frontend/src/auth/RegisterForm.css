@@ -1,0 +1,403 @@
+/* =====================================
+   REGISTER FORM
+   MollyTech Service Desk
+===================================== */
+
+
+/* =========================
+   HEADER
+========================= */
+
+.register-header{
+
+    text-align:center;
+
+    margin-bottom:24px;
+
+}
+
+
+.register-header h3{
+
+    margin:0;
+
+    color:white;
+
+    font-size:24px;
+
+    font-weight:700;
+
+}
+
+
+.register-header p{
+
+    margin-top:8px;
+
+    color:#94a3b8;
+
+    font-size:14px;
+
+}
+
+
+
+/* =========================
+   FORM
+========================= */
+
+.register-form{
+
+    width:100%;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:16px;
+
+}
+
+
+
+/* =========================
+   ROW
+========================= */
+
+.register-row{
+
+    display:grid;
+
+    grid-template-columns:
+    minmax(0,1fr)
+    minmax(0,1fr);
+
+    gap:14px;
+
+}
+
+
+
+/* =========================
+   FIELD
+========================= */
+
+.register-field{
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:7px;
+
+}
+
+
+.register-field label{
+
+    color:#94a3b8;
+
+    font-size:13px;
+
+    font-weight:600;
+
+}
+
+
+
+/* =========================
+   INPUT
+========================= */
+
+.register-input{
+
+    width:100%;
+
+    box-sizing:border-box;
+
+    height:46px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:12px;
+
+    padding:0 14px;
+
+    border-radius:12px;
+
+    background:rgba(2,6,23,.55);
+
+    border:1px solid rgba(148,163,184,.15);
+
+    transition:
+    border-color .2s,
+    box-shadow .2s;
+
+}
+
+
+
+.register-input:focus-within{
+
+    border-color:#22d3ee;
+
+    box-shadow:
+
+    0 0 0 3px rgba(34,211,238,.10);
+
+}
+
+
+
+.register-input svg{
+
+    color:#22d3ee;
+
+    font-size:18px;
+
+    flex-shrink:0;
+
+}
+
+
+
+.register-input input{
+
+    min-width:0;
+
+    flex:1;
+
+    height:100%;
+
+    border:none;
+
+    outline:none;
+
+    background:transparent;
+
+    color:white;
+
+    font-size:14px;
+
+}
+
+
+
+.register-input input::placeholder{
+
+    color:#64748b;
+
+}
+
+
+
+/* =========================
+   PASSWORD TOGGLE
+========================= */
+
+.register-input .password-toggle{
+
+    background:none;
+
+    border:none;
+
+    color:#94a3b8;
+
+    cursor:pointer;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+}
+
+
+.register-input .password-toggle:hover{
+
+    color:#22d3ee;
+
+}
+
+
+
+/* =========================
+   BUTTON
+========================= */
+
+.register-btn{
+
+    height:48px;
+
+    margin-top:8px;
+
+    border:none;
+
+    border-radius:12px;
+
+    cursor:pointer;
+
+    color:white;
+
+    font-size:14px;
+
+    font-weight:600;
+
+
+    background:
+
+    linear-gradient(
+
+        135deg,
+
+        #22d3ee,
+
+        #0891b2
+
+    );
+
+
+    transition:
+
+    transform .2s,
+
+    box-shadow .2s;
+
+}
+
+
+
+.register-btn:hover:not(:disabled){
+
+    transform:translateY(-2px);
+
+
+    box-shadow:
+
+    0 10px 30px rgba(34,211,238,.30);
+
+}
+
+
+
+.register-btn:disabled{
+
+    opacity:.7;
+
+    cursor:not-allowed;
+
+}
+
+
+
+/* =========================
+   LOGIN LINK
+========================= */
+
+.login-link{
+
+    margin-top:22px;
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:6px;
+
+    font-size:14px;
+
+    color:#94a3b8;
+
+}
+
+
+
+.login-link button{
+
+    background:none;
+
+    border:none;
+
+    padding:0;
+
+    cursor:pointer;
+
+    color:#22d3ee;
+
+    font-weight:600;
+
+}
+
+
+.login-link button:hover{
+
+    text-decoration:underline;
+
+}
+
+/* =========================
+   BACK BUTTON
+========================= */
+
+.back-login-btn{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:8px;
+
+    margin-bottom:18px;
+
+    background:none;
+
+    border:none;
+
+    cursor:pointer;
+
+    color:#94a3b8;
+
+    font-size:13px;
+
+    font-weight:600;
+
+    transition:.2s;
+
+}
+
+
+.back-login-btn svg{
+
+    font-size:16px;
+
+}
+
+
+.back-login-btn:hover{
+
+    color:#22d3ee;
+
+    transform:translateX(-3px);
+
+}
+
+.phone-prefix{
+    color:#64748b;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:600px){
+
+    .register-row{
+
+        grid-template-columns:1fr;
+
+    }
+
+}

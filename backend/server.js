@@ -164,6 +164,7 @@ const conversationRoutes = require("./src/routes/conversation.routes");
 const notificationRoutes = require("./src/routes/notification.routes");
 const dashboardRoutes = require("./src/routes/dashboard.routes");
 const userRoutes = require("./src/routes/user.routes");
+const approvalRoutes = require("./src/routes/approval.routes");
 
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/auth", authRoutes);
@@ -172,6 +173,7 @@ app.use("/api/conversations", conversationRoutes);
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/approvals", approvalRoutes);
 
 // ===============================
 // HEALTH CHECK
