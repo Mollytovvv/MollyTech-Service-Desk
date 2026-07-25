@@ -262,7 +262,32 @@ const changePassword = async(req,res)=>{
 
         }
 
+        const isSamePassword = await bcrypt.compare(
+            newPassword,
+            user.password
+        );
 
+        if (isSamePassword) {
+
+            return res.status(400).json({
+
+                message:
+                    "New password must be different from your current password"
+
+            });
+
+        }
+
+        if (newPassword.length < 8) {
+
+            return res.status(400).json({
+
+                message:
+                    "Password must be at least 8 characters"
+
+            });
+
+        }
 
         user.password = await bcrypt.hash(
             newPassword,
