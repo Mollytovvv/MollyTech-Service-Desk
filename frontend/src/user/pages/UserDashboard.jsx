@@ -15,7 +15,7 @@ import {
 } from "react-icons/fi";
 
 export default function UserDashboard() {
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const navigate = useNavigate();
 
   const [dashboard, setDashboard] = useState({
@@ -103,9 +103,9 @@ export default function UserDashboard() {
 
         <div>
 
-          <h2>
-            Welcome back, Ralph 👋
-          </h2>
+        <h2>
+            Welcome back, {user?.firstName} {user?.lastName} 👋
+        </h2>
 
 
           <p>
