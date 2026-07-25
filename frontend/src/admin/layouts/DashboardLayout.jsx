@@ -152,29 +152,26 @@ export default function DashboardLayout() {
     location.pathname.startsWith(path + "/");
 
   const getPageTitle = () => {
+    const path = location.pathname;
 
-      const path = location.pathname;
+    if (path.startsWith("/dashboard")) return "Dashboard";
 
-      if (path.startsWith("/dashboard"))
-          return "Dashboard";
+    if (path.startsWith("/ticket-center")) 
+      return "Ticket Center";
 
-      if (path.startsWith("/ticket-center"))
-          return "Ticket Center";
+    if (path.startsWith("/records")) 
+      return "Records";
 
-      if (path.startsWith("/records"))
-          return "Records";
+    if (path.startsWith("/reports")) 
+      return "Reports";
 
-      if (path.startsWith("/messages"))
-          return "Messages";
+    if (path.startsWith("/settings")) 
+      return "Settings";
 
-      if (path.startsWith("/access-requests"))
-          return "Access Requests";
+    if (path.startsWith("/access-requests")) 
+      return "Access Requests";
 
-      if (path.startsWith("/settings"))
-          return "Settings";
-
-      return "Service Desk";
-
+    return "Service Desk";
   };
 
   return (
