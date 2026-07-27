@@ -1109,33 +1109,79 @@ const archiveTickets = async (req, res) => {
   // ===============================
   const getMyDashboard = async (req, res) => {
     try {
-  const tickets = await Ticket.find({
-      "submittedBy.userId": req.user.id,
-      "archivedBy.user": false,
-      deletedByUser: false,
-  }).sort({ createdAt: -1 });
+
+      const tickets = await Ticket.find({
+        "submittedBy.userId": req.user.id,
+        "archivedBy.user": false,
+        deletedByUser: false,
+      }).sort({ createdAt: -1 });
+
+
+
+      const messages = await Message.countDocuments({
+        sender: req.user.id
+      });
+
+
 
       const stats = {
+
         total: tickets.length,
-        pending: tickets.filter(t => t.status === "pending").length,
-        in_progress: tickets.filter(t => t.status === "in_progress").length,
-        resolved: tickets.filter(t => t.status === "resolved").length,
-        closed: tickets.filter(t => t.status === "closed").length,
+
+        pending: tickets.filter(
+          t => t.status === "pending"
+        ).length,
+
+
+        in_progress: tickets.filter(
+          t => t.status === "in_progress"
+        ).length,
+
+
+        messages: messages,
+
+
+        resolved: tickets.filter(
+          t => t.status === "resolved"
+        ).length,
+
+
+        closed: tickets.filter(
+          t => t.status === "closed"
+        ).length,
+
       };
+
+
 
       const recentTickets = tickets.slice(0, 5);
 
+
+
       return res.json({
+
         stats,
+
         recentTickets,
+
       });
+
+
 
     } catch (err) {
-      console.log("USER DASHBOARD ERROR:", err);
+
+      console.log(
+        "USER DASHBOARD ERROR:",
+        err
+      );
+
 
       return res.status(500).json({
+
         message: err.message,
+
       });
+
     }
   };
 

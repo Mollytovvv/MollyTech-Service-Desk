@@ -173,7 +173,7 @@ export default function CreateTicketModal({
   return (
     <div
       className="modal-overlay"
-      onClick={onClose}
+      onClick={!loading ? onClose : undefined}
     >
       <div
         className="create-ticket-modal"

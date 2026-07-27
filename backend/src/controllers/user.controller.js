@@ -240,11 +240,13 @@ const approveUser = async(req,res)=>{
 
         user.rejectedReason = "";
 
-
-
         await user.save();
 
+        const io = req.app.get("io");
 
+        if (io) {
+            io.emit("userUpdated", user);
+        }
 
         res.json({
 
@@ -327,11 +329,21 @@ const rejectUser = async(req,res)=>{
 
         user.approvedAt = null;
 
-
-
         await user.save();
 
+        const io = req.app.get("io");
 
+        if (io) {
+            io.emit("userUpdated", user);
+        }
+
+        res.json({
+            message: "User rejected successfully",
+            user: {
+                id: user._id,
+                status: user.status
+            }
+        });
 
         res.json({
 

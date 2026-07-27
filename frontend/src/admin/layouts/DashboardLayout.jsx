@@ -6,6 +6,7 @@ import socket from "../../socket/socket";
 import "../styles/DashboardLayout.css";
 import NotificationBell from "../../components/notifications/NotificationBell";
 import logo from "../../assets/mollytech_logo.jpg";
+
 import {
   FiHome,
   FiList,
@@ -14,7 +15,8 @@ import {
   FiSettings,
   FiLogOut,
   FiMessageSquare,
-  FiUserCheck
+  FiUserCheck,
+  FiBell
 } from "react-icons/fi";
 
 export default function DashboardLayout() {
@@ -174,8 +176,11 @@ export default function DashboardLayout() {
     if (path.startsWith("/records")) 
       return "Records";
 
-    if (path.startsWith("/reports")) 
-      return "Reports";
+    if (path.startsWith("/messages"))
+      return "Messages";
+
+    if (path.startsWith("/announcements"))
+      return "Announcements";
 
     if (path.startsWith("/settings")) 
       return "Settings";
@@ -245,6 +250,20 @@ export default function DashboardLayout() {
           </button>
 
           {/* 🔥 NEW SECTION */}
+          <p className="nav-title">CONTENT</p>
+
+          <button
+            className={isActive("/announcements") ? "active" : ""}
+            onClick={() => navigate("/announcements")}
+          >
+            <FiBell className="icon" />
+
+            <span>
+              Announcements
+            </span>
+          </button>
+
+          {/* 🔥 NEW SECTION */}
           <p className="nav-title">COMMUNICATION</p>
 
           <button
@@ -265,15 +284,6 @@ export default function DashboardLayout() {
           </button>
 
           <p className="nav-title">SYSTEM</p>
-
-          <button
-            className={isActive("/reports") ? "active" : ""}
-            onClick={() => navigate("/reports")}
-          >
-            <FiBarChart2 className="icon" />
-            Reports
-          </button>
-
 
           <button
             className={isActive("/access-requests") ? "active" : ""}

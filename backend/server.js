@@ -187,6 +187,7 @@ const notificationRoutes = require("./src/routes/notification.routes");
 const dashboardRoutes = require("./src/routes/dashboard.routes");
 const userRoutes = require("./src/routes/user.routes");
 const approvalRoutes = require("./src/routes/approval.routes");
+const announcementRoutes = require("./src/routes/announcement.routes");
 
 app.use("/api/tickets", ticketRoutes);
 app.use("/api/auth", authRoutes);
@@ -196,6 +197,7 @@ app.use("/api/notifications", notificationRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/approvals", approvalRoutes);
+app.use("/api/announcements", announcementRoutes);
 
 // ===============================
 // HEALTH CHECK

@@ -1,16 +1,23 @@
 import { FaUsers, FaTicketAlt, FaClock, FaCheckCircle } from "react-icons/fa";
 import "../styles/TopCards.css";
 
-export default function TopCards({ tickets = [] }) {
+export default function TopCards({
+    tickets = [],
+    totalUsers = 0
+}) {
 
   const totalTickets = tickets.length;
-  const pending = tickets.filter(t => t.status === "open").length;
+  const pending = tickets.filter(
+      t =>
+          t.status === "open" ||
+          t.status === "pending"
+  ).length;
   const resolved = tickets.filter(t => t.status === "resolved").length;
 
   const kpis = [
     {
       label: "Total Users",
-      value: "--",
+      value: totalUsers,
       icon: <FaUsers />,
       type: "users"
     },

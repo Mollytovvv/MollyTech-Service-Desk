@@ -175,6 +175,17 @@ const register = async (req,res)=>{
             );
 
             io.to("admins").emit("accessRequestUpdated");
+            
+            io.emit("newUser", {
+                _id: user._id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                email: user.email,
+                phone: user.phone,
+                role: user.role,
+                status: user.status,
+                createdAt: user.createdAt
+            });
 
             console.log(
                 "New access request emitted:",
