@@ -306,7 +306,58 @@
 
 }
 
+/* =====================================
+   DECLINE REASON INPUT
+   ===================================== */
 
+.decline-reason{
+
+    width:100%;
+
+    min-height:90px;
+
+    margin-top:18px;
+
+    padding:14px 16px;
+
+    border-radius:12px;
+
+    border:1px solid rgba(255,255,255,0.12);
+
+    background:#0b1628;
+
+    color:#e8f1ff;
+
+    font-size:14px;
+
+    resize:none;
+
+    outline:none;
+
+    transition:0.25s ease;
+
+    font-family:inherit;
+
+}
+
+
+
+.decline-reason::placeholder{
+
+    color:#71809a;
+
+}
+
+
+
+.decline-reason:focus{
+
+    border-color:#00eaff;
+
+    box-shadow:
+    0 0 0 3px rgba(0,234,255,0.12);
+
+}
 
 /* =========================
    EMPTY

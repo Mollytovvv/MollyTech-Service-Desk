@@ -58,60 +58,75 @@ export default function RegisterForm({setMode}){
 
         e.preventDefault();
 
+        console.log("REGISTER START");
+
+        if(password !== confirmPassword){
+
+            return showToast(
+                "warning",
+                "Passwords do not match."
+            );
+
+        }
+
+
         setLoading(true);
 
 
         try{
 
+            console.log("SENDING REQUEST");
 
-            if(password !== confirmPassword){
 
-                return showToast(
-                    "warning",
-                    "Passwords do not match."
-                );
-
-            }
-
-            
-
-            await api.post(
+            const res = await api.post(
                 "/auth/register",
                 {
-
                     firstName,
-
                     lastName,
-
                     email,
-
                     phone:`+63${phone.replace(/\s/g,"")}`,
-
                     password
-
                 }
             );
 
+
+            console.log(
+                "REGISTER RESPONSE:",
+                res.data
+            );
+
+
+            showToast(
+                "success",
+                "Registration submitted. Waiting for administrator approval."
+            );
+
+
             setShowApproval(true);
+
+
         }
 
         catch(err){
 
+            console.log(
+                "REGISTER ERROR:",
+                err.response?.data || err
+            );
+
 
             showToast(
-
                 "error",
-
                 err.response?.data?.message ||
-
                 "Registration failed."
-
             );
 
 
         }
 
         finally{
+
+            console.log("FINALLY RUNNING");
 
             setLoading(false);
 

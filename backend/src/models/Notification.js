@@ -25,6 +25,7 @@ const notificationSchema = new mongoose.Schema(
         "new_message",
         "account_approved",
         "account_rejected",
+        "access_request",
         "system",
       ],
       required: true,

@@ -23,6 +23,7 @@ export default function DashboardLayout() {
 
   const [ticketCount, setTicketCount] = useState(0);
   const [messageCount, setMessageCount] = useState(0);
+  const [accessRequestCount, setAccessRequestCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -52,6 +53,9 @@ export default function DashboardLayout() {
         res.data.messageCount || 0
       );
 
+      setAccessRequestCount(
+        res.data.accessRequestCount || 0
+      );
 
     } catch(err){
 
@@ -96,27 +100,35 @@ export default function DashboardLayout() {
       refreshSidebarCounts
     );
 
-
     socket.on(
       "newTicket",
       refreshSidebarCounts
     );
 
+    socket.on("accessRequestUpdated", () => {
+
+        console.log("accessRequestUpdated received");
+
+        refreshSidebarCounts();
+
+    });
 
     return () => {
 
+        socket.off(
+          "conversationUpdated",
+          refreshSidebarCounts
+        );
 
-      socket.off(
-        "conversationUpdated",
-        refreshSidebarCounts
-      );
+        socket.off(
+          "newTicket",
+          refreshSidebarCounts
+        );
 
-
-      socket.off(
-        "ticketUpdated",
-        refreshSidebarCounts
-      );
-
+        socket.off(
+          "accessRequestUpdated",
+          refreshSidebarCounts
+        );
 
     };
 
@@ -268,7 +280,16 @@ export default function DashboardLayout() {
             onClick={() => navigate("/access-requests")}
           >
             <FiUserCheck className="icon" />
-            Access Requests
+
+            <span>
+              Access Requests
+            </span>
+
+            {accessRequestCount > 0 && (
+              <span className="sidebar-badge">
+                {accessRequestCount}
+              </span>
+            )}
           </button>
 
 

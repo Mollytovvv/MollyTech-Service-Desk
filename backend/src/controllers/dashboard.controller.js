@@ -1,58 +1,74 @@
 const Conversation = require("../models/Conversation");
 const Ticket = require("../models/Ticket");
+const User = require("../models/User");
 
 
-// ===============================
-// 📊 GET SIDEBAR COUNTS
-// ===============================
-const getSidebarCounts = async (req, res) => {
+  // ===============================
+  // 📊 GET SIDEBAR COUNTS
+  // ===============================
+  const getSidebarCounts = async (req, res) => {
 
-  try {
+    try {
 
-    // ===============================
-    // 💬 MESSAGE COUNT
-    // ===============================
-    const messageCount =
-      await Conversation.countDocuments({
-        adminUnread: true,
+      // ===============================
+      // 💬 MESSAGE COUNT
+      // ===============================
+      const messageCount =
+        await Conversation.countDocuments({
+          adminUnread: true,
+        });
+
+
+      // ===============================
+      // 🎫 TICKET COUNT
+      // ===============================
+      const ticketCount =
+        await Ticket.countDocuments({
+          status: {
+            $ne: "resolved",
+          },
+        });
+
+
+      // ===============================
+      // 👤 ACCESS REQUEST COUNT
+      // ===============================
+      const accessRequestCount =
+        await User.countDocuments({
+
+          role: "user",
+
+          status: "pending",
+
+        });
+
+
+      return res.json({
+
+        ticketCount,
+
+        messageCount,
+
+        accessRequestCount,
+
       });
 
 
-    // ===============================
-    // 🎫 TICKET COUNT
-    // ===============================
-    const ticketCount =
-      await Ticket.countDocuments({
-        status: {
-          $ne: "resolved",
-        },
+    } catch(err){
+
+      console.log(
+        "SIDEBAR COUNT ERROR:",
+        err
+      );
+
+
+      return res.status(500).json({
+        message: err.message,
       });
 
+    }
 
-    return res.json({
-
-      ticketCount,
-
-      messageCount,
-
-    });
-
-
-  } catch(err){
-
-    console.log(
-      "SIDEBAR COUNT ERROR:",
-      err
-    );
-
-
-    return res.status(500).json({
-      message: err.message,
-    });
-
-  }
-
-};
+  };
 
     // ===============================
     // 📩 GET USER MESSAGE COUNT

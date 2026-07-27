@@ -122,6 +122,20 @@ const handleNotificationClick = (notification) => {
 
 
     // ===============================
+    // 👤 NEW ACCESS REQUEST
+    // ADMIN ONLY
+    // ===============================
+    case "access_request":
+
+      if(user.role === "admin"){
+
+        navigate("/access-requests");
+
+      }
+
+      break;
+      
+    // ===============================
     // DEFAULT
     // UNKNOWN NOTIFICATION TYPE
     // ===============================
@@ -161,6 +175,30 @@ const getNotificationIcon = (type) => {
 
     case "new_message":
       return "fa-message";
+
+
+    // ===============================
+    // 👤 ACCESS REQUEST
+    // ADMIN ONLY
+    // ===============================
+    case "access_request":
+      return "fa-user-clock";
+
+
+    // ===============================
+    // ACCOUNT STATUS
+    // ===============================
+    case "account_approved":
+      return "fa-user-check";
+
+
+    case "account_rejected":
+      return "fa-user-xmark";
+
+
+    case "system":
+      return "fa-circle-info";
+
 
     default:
       return "fa-bell";

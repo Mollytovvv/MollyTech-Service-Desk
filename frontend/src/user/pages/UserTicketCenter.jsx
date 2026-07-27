@@ -456,7 +456,24 @@ export default function UserTicketCenter() {
 
               <div className="ticket-field">
                 <span className="ticket-label">Phone</span>
-                <span>{ticket.phoneNumber || "N/A"}</span>
+
+                <span>
+                  {ticket.phoneNumber
+                    ? (() => {
+                        const phone = ticket.phoneNumber.replace(/\D/g, "");
+
+                        const local =
+                          phone.startsWith("63")
+                            ? phone.slice(2)
+                            : phone;
+
+                        return `+63 ${local.replace(
+                          /(\d{3})(\d{3})(\d{4})/,
+                          "$1 $2 $3"
+                        )}`;
+                      })()
+                    : "N/A"}
+                </span>
               </div>
 
             </div>

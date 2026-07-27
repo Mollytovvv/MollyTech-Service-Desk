@@ -5,6 +5,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const Notification = require("../models/Notification");
 
 
 // ===============================
@@ -87,7 +88,106 @@ const register = async (req,res)=>{
 
         });
 
+        // ===============================
+        // CREATE ACCESS REQUEST NOTIFICATION
+        // ===============================
 
+        const admin = await User.findOne({
+            role:"admin"
+        });
+
+
+        if(admin){
+
+            const notification =
+                await Notification.create({
+
+                    recipient: admin._id,
+
+                    sender: user._id,
+
+                    type:"access_request",
+
+                    title:"New Access Request",
+
+                    message:
+                    `${user.firstName} ${user.lastName} submitted an account registration request.`
+
+                });
+
+        // ===============================
+        // REALTIME NOTIFICATION EMIT
+        // ===============================
+
+        const populatedNotification =
+            await Notification.findById(
+                notification._id
+            )
+            .populate(
+                "sender",
+                "_id firstName lastName role"
+            );
+
+
+        const io = req.app.get("io");
+
+
+        if(io){
+
+            io.to(admin._id.toString())
+            .emit(
+                "notificationCreated",
+                populatedNotification
+            );
+
+
+            console.log(
+                "Admin notification sent:",
+                admin.email
+            );
+
+            }
+
+        }
+
+        // ===============================
+        // REALTIME ACCESS REQUEST
+        // ===============================
+
+        const io = req.app.get("io");
+
+        console.log(
+            "SOCKET IO:",
+            !!io
+        );
+
+
+        if(io){
+
+            io.to("admins").emit(
+                "newAccessRequest",
+                {
+                    userId:user._id,
+                    firstName:user.firstName,
+                    lastName:user.lastName,
+                    email:user.email
+                }
+            );
+
+            io.to("admins").emit("accessRequestUpdated");
+
+            console.log(
+                "New access request emitted:",
+                user.email
+            );
+
+        }
+
+
+
+        // ===============================
+        // SEND RESPONSE TO FRONTEND
+        // ===============================
 
         res.status(201).json({
 
@@ -100,6 +200,12 @@ const register = async (req,res)=>{
 
     }catch(err){
 
+        console.error(
+            "REGISTER ERROR:",
+            err
+        );
+
+
         res.status(500).json({
 
             message:err.message
@@ -109,7 +215,6 @@ const register = async (req,res)=>{
     }
 
 };
-
 
 
 // ===============================
