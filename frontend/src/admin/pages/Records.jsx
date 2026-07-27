@@ -362,8 +362,10 @@ export default function Records() {
 
                 <td className="center">#{t._id?.slice(-6)}</td>
 
-                <td className={`priority ${t.priority} center`}>
-                    {t.priority?.toUpperCase()}
+                <td className="center">
+                    <span className={`priority-badge ${t.priority}`}>
+                        {t.priority?.toUpperCase()}
+                    </span>
                 </td>
 
                 <td className="center">{t.category || "N/A"}</td>

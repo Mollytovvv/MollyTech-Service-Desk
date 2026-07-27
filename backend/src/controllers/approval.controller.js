@@ -3,10 +3,7 @@
 // MollyTech Service Desk
 // ===============================
 
-
 const User = require("../models/User");
-
-
 
 // ===============================
 // GET PENDING USERS
@@ -17,9 +14,9 @@ const getPendingUsers = async (req, res) => {
 
         const users = await User.find({
 
-            role: "user",
+            role:"user",
 
-            status: "pending"
+            status:"pending"
 
         })
 
@@ -35,12 +32,11 @@ const getPendingUsers = async (req, res) => {
 
         res.json({
 
-            count: users.length,
+            count:users.length,
 
             users
 
         });
-
 
     }
     catch(err){
@@ -61,20 +57,16 @@ const getPendingUsers = async (req, res) => {
 
 };
 
-
-
-
 // ===============================
 // APPROVE USER
 // ===============================
-const approveUser = async (req,res)=>{
+const approveUser = async(req,res)=>{
 
     try{
 
         const user = await User.findById(
             req.params.id
         );
-
 
         if(!user){
 
@@ -86,59 +78,79 @@ const approveUser = async (req,res)=>{
 
         }
 
-// ===============================
-// VALIDATE USER ACCOUNT
-// ===============================
+        // ===============================
+        // VALIDATE ACCOUNT
+        // ===============================
 
-if(user.role !== "user"){
+        if(user.role !== "user"){
 
-    return res.status(400).json({
+            return res.status(400).json({
 
-        message:"Only user registrations can be approved"
+                message:"Only user registrations can be approved"
 
-    });
+            });
 
-}
+        }
 
+        if(user.status === "approved"){
 
-if(user.status === "approved"){
+            return res.status(400).json({
 
-    return res.status(400).json({
+                message:"User is already approved"
 
-        message:"User is already approved"
+            });
 
-    });
-
-}
+        }
 
         user.status = "approved";
 
         user.approvedAt = new Date();
 
-        user.declinedAt = null;
+        user.rejectedAt = null;
 
-        user.declinedReason = "";
-
-
+        user.rejectedReason = "";
 
         await user.save();
 
+        // ===============================
+        // REALTIME ACCESS REQUEST UPDATE
+        // ===============================
+        const io = req.app.get("io");
 
+        if(io){
+
+            io.emit(
+                "accessRequestUpdated",
+                {
+
+                    action:"approved",
+
+                    userId:user._id
+
+                }
+            );
+
+        }
 
         res.json({
 
             message:"User approved successfully",
 
             user:{
+
                 id:user._id,
+
                 firstName:user.firstName,
+
                 lastName:user.lastName,
+
                 email:user.email,
+
                 status:user.status
+
             }
 
         });
-
 
     }
     catch(err){
@@ -147,7 +159,6 @@ if(user.status === "approved"){
             "Approve user error:",
             err
         );
-
 
         res.status(500).json({
 
@@ -159,9 +170,6 @@ if(user.status === "approved"){
 
 };
 
-
-
-
 // ===============================
 // DECLINE USER
 // ===============================
@@ -169,17 +177,14 @@ const declineUser = async(req,res)=>{
 
     try{
 
-
         const {
             reason
         } = req.body;
 
 
-
         const user = await User.findById(
             req.params.id
         );
-
 
         if(!user){
 
@@ -191,82 +196,102 @@ const declineUser = async(req,res)=>{
 
         }
 
-// ===============================
-// VALIDATE USER ACCOUNT
-// ===============================
+        // ===============================
+        // VALIDATE ACCOUNT
+        // ===============================
 
-if(user.role !== "user"){
+        if(user.role !== "user"){
 
-    return res.status(400).json({
+            return res.status(400).json({
 
-        message:"Only user registrations can be declined"
+                message:"Only user registrations can be rejected"
 
-    });
+            });
 
-}
+        }
 
+        if(user.status === "rejected"){
 
-if(user.status === "declined"){
+            return res.status(400).json({
 
-    return res.status(400).json({
+                message:"User is already rejected"
 
-        message:"User is already declined"
+            });
 
-    });
+        }
 
-}
+        user.status = "rejected";
 
-        user.status = "declined";
-
-        user.declinedAt = new Date();
+        user.rejectedAt = new Date();
 
         user.approvedAt = null;
 
-        user.declinedReason = reason || "No reason provided";
-
-
+        user.rejectedReason =
+            reason || "No reason provided";
 
         await user.save();
 
+        // ===============================
+        // REALTIME ACCESS REQUEST UPDATE
+        // ===============================
 
+        const io = req.app.get("io");
+
+        if(io){
+
+            io.emit(
+                "accessRequestUpdated",
+                {
+
+                    action:"rejected",
+
+                    userId:user._id
+
+                }
+            );
+
+        }
 
         res.json({
 
-            message:"User declined successfully",
+            message:"User rejected successfully",
 
             user:{
+
                 id:user._id,
+
                 firstName:user.firstName,
+
                 lastName:user.lastName,
+
                 email:user.email,
+
                 status:user.status,
-                declinedReason:user.declinedReason
+
+                rejectedReason:user.rejectedReason
+
             }
 
         });
-
-
 
     }
     catch(err){
 
         console.error(
-            "Decline user error:",
+            "Reject user error:",
             err
         );
 
 
         res.status(500).json({
 
-            message:"Failed to decline user"
+            message:"Failed to reject user"
 
         });
 
     }
 
 };
-
-
 
 
 // ===============================

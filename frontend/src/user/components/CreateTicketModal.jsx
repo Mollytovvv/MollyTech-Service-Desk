@@ -67,7 +67,9 @@ export default function CreateTicketModal({
 
                   email: res.data.email || "",
 
-                  phoneNumber: res.data.phone || ""
+                  phoneNumber: (res.data.phone || "")
+                    .replace(/^(\+63|63)/, "")
+                    .replace(/^0/, "")
 
               }));
 
@@ -93,12 +95,27 @@ export default function CreateTicketModal({
   // ===============================
   // HANDLE INPUT CHANGE
   // ===============================
-
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+
+      const { name, value } = e.target;
+
+      if (name === "phoneNumber") {
+
+          const numbersOnly = value.replace(/\D/g, "");
+
+          setFormData(prev => ({
+              ...prev,
+              phoneNumber: numbersOnly.slice(0, 10)
+          }));
+
+          return;
+      }
+
+      setFormData(prev => ({
+          ...prev,
+          [name]: value
+      }));
+
   };
 
   // ===============================
@@ -317,7 +334,7 @@ export default function CreateTicketModal({
                   type="email"
                   name="email"
                   value={formData.email}
-                  readOnly
+                  onChange={handleChange}
                   disabled={loading}
                   required
               />
@@ -335,22 +352,20 @@ export default function CreateTicketModal({
                       +63
                   </span>
 
-
                   <input
                       type="text"
                       name="phoneNumber"
                       value={
-                          formData.phoneNumber
-                          ?
                           formData.phoneNumber.replace(
-                              /(\d{3})(\d{3})(\d{4})/,
-                              "$1 $2 $3"
+                              /(\d{3})(\d{3})(\d{0,4})/,
+                              (_, a, b, c) =>
+                                  c ? `${a} ${b} ${c}` : `${a} ${b}`
                           )
-                          :
-                          ""
                       }
-                      readOnly
+                      onChange={handleChange}
                       disabled={loading}
+                      placeholder="923 832 1211"
+                      maxLength={12}
                   />
 
               </div>

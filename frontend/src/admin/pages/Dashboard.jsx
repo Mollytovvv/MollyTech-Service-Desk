@@ -80,6 +80,8 @@ export default function Dashboard() {
 
         setTickets(ticketRes.data.tickets ?? []);
         setUsers(userRes.data.users ?? []);
+        console.log(userRes.data.users);
+
       } catch (err) {
         console.log(err.response?.data || err.message);
       }
@@ -104,6 +106,7 @@ export default function Dashboard() {
   // =========================
   const [feedFilter, setFeedFilter] = useState("all");
   const [statsFilter, setStatsFilter] = useState("month");
+  const [userFilter, setUserFilter] = useState("all");
   const now = new Date();
 
   const filteredTickets = tickets.filter((t) => {
@@ -159,7 +162,21 @@ export default function Dashboard() {
     createdAt: t.createdAt,
   }));
 
-  const recentUsers = users.slice(0, 5);
+  const recentUsers = users
+    .filter((u) => {
+      if (u.role !== "user") return false;
+
+      if (userFilter === "all") return true;
+
+      if (userFilter === "approved")
+        return u.status === "approved";
+
+      if (userFilter === "pending")
+        return u.status === "pending";
+
+      return true;
+    })
+    .slice(0, 5);
 
   const getMonthlyStats = () => {
     const stats = {};
@@ -340,43 +357,115 @@ export default function Dashboard() {
 
         {/* RIGHT */}
         <aside className="panel-card">
-          <div className="panel-header">
+
+        <div className="panel-header panel-header-row">
+
+          <div>
             <h2>
               <FiUsers className="title-icon" />
               Recently Registered
             </h2>
-            <p>Latest user signups</p>
+
+            <p>Newest registered accounts</p>
           </div>
+
+          <div className="user-filter">
+
+            <button
+              className={userFilter === "all" ? "active" : ""}
+              onClick={() => setUserFilter("all")}
+            >
+              All
+            </button>
+
+            <button
+              className={userFilter === "approved" ? "active" : ""}
+              onClick={() => setUserFilter("approved")}
+            >
+              Approved
+            </button>
+
+            <button
+              className={userFilter === "pending" ? "active" : ""}
+              onClick={() => setUserFilter("pending")}
+            >
+              Pending
+            </button>
+
+          </div>
+
+        </div>
 
           <div className="stream">
             {recentUsers.length === 0 ? (
               <span className="muted">No users yet</span>
             ) : (
               recentUsers.map((u, index) => (
-                <div key={u._id} className="user-item">
-
+                <div
+                  key={u._id}
+                  className="user-item"
+                >
                   <div className="user-left">
+
                     <div className="user-avatar">
-                    {(u.name || u.email || "U").charAt(0).toUpperCase()}
+                      {(u.firstName || "U")
+                        .charAt(0)
+                        .toUpperCase()}
                     </div>
 
                     <div className="user-text">
-                    <h4>{u.name}</h4>
-                      <p>{u.email}</p>
+
+                      <h4>
+                        {u.firstName} {u.lastName}
+                      </h4>
+
+                      <span className="user-email">
+                        {u.email}
+                      </span>
+
+                      <span className="user-date">
+                        Joined{" "}
+                        {u.createdAt
+                          ? new Date(u.createdAt).toLocaleDateString([], {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          : "N/A"}
+                      </span>
+
                     </div>
+
                   </div>
 
-                  <div className="user-meta">
-                    <span className="user-badge">#{index + 1}</span>
+                  <div className="user-right">
+
+                  <span
+                    className={`user-status ${
+                      u.status === "approved"
+                        ? "approved"
+                        : "pending"
+                    }`}
+                  >
+                    {u.status === "approved"
+                      ? "APPROVED"
+                      : "PENDING"}
+                  </span>
+
+                    <span className="user-badge">
+                      #{index + 1}
+                    </span>
+
                   </div>
 
                 </div>
               ))
             )}
           </div>
+
         </aside>
 
-      </div>
+        </div>
 
       {/* ANALYTICS */}
       <section className="analytics">

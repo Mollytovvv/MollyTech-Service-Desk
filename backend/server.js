@@ -9,61 +9,83 @@ const { Server } = require("socket.io");
 const connectDB = require("./src/config/db");
 
 
-// ===============================
-// APP + SERVER INIT
-// ===============================
-const app = express();
-const server = http.createServer(app);
+  // ===============================
+  // APP + SERVER INIT
+  // ===============================
+  const app = express();
+  const server = http.createServer(app);
 
-// ===============================
-// SOCKET.IO SETUP
-// ===============================
-const io = new Server(server, {
-  cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"],
-  },
-});
+  // ===============================
+  // SOCKET.IO SETUP
+  // ===============================
+  const io = new Server(server, {
+    cors: {
+      origin: "http://localhost:5173",
+      methods: ["GET", "POST"],
+    },
+  });
 
-// attach io to express (for controllers)
-app.set("io", io);
+  // attach io to express (for controllers)
+  app.set("io", io);
 
-// ===============================
-// ONLINE USERS STORE
-// ===============================
-const onlineUsers = new Map();
+  // ===============================
+  // ONLINE USERS STORE
+  // ===============================
+  const onlineUsers = new Map();
 
-// ===============================
-// SOCKET EVENTS
-// ===============================
-io.on("connection", (socket) => {
-  console.log("🟢 User connected:", socket.id);
+  // ===============================
+  // SOCKET EVENTS
+  // ===============================
+  io.on("connection", (socket) => {
+    console.log("🟢 User connected:", socket.id);
 
-// ===============================
-// 👤 REGISTER USER
-// ===============================
-socket.on("register", (userId) => {
+  // ===============================
+  // 👤 REGISTER USER
+  // ===============================
+  socket.on("register", (userId) => {
 
-  if (!userId) return;
+    if (!userId) return;
 
-  // Save user ID on socket
-  socket.userId = userId;
 
-  // Store online user
-  onlineUsers.set(userId, socket.id);
+    // Save user ID on socket
+    socket.userId = userId;
 
-  // Join personal notification room
-  socket.join(userId);
 
-  // Broadcast online users list
-  io.emit(
-    "onlineUsers",
-    Array.from(onlineUsers.keys())
-  );
+    // Store online user
+    onlineUsers.set(userId, socket.id);
 
-  console.log("👤 Registered user:", userId);
 
-});
+
+    // ===============================
+    // PERSONAL USER ROOM
+    // ===============================
+
+    socket.join(userId);
+
+
+
+    // ===============================
+    // ADMIN NOTIFICATION ROOM
+    // ===============================
+
+    socket.join("admins");
+
+
+
+    // Broadcast online users list
+    io.emit(
+      "onlineUsers",
+      Array.from(onlineUsers.keys())
+    );
+
+
+    console.log(
+      "👤 Registered user:",
+      userId
+    );
+
+
+  });
 
   // ===============================
   // JOIN CONVERSATION ROOM
