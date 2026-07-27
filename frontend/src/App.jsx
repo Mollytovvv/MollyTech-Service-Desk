@@ -8,6 +8,7 @@ import Records from "./admin/pages/Records";
 import Messages from "./admin/pages/Messages";
 import Settings from "./admin/pages/Settings";
 import AccessRequests from "./admin/pages/AccessRequests";
+import Announcements from "./admin/pages/Announcements";
 
 import UserDashboard from "./user/pages/UserDashboard";
 import UserTicketCenter from "./user/pages/UserTicketCenter";
@@ -65,6 +66,11 @@ function App() {
           <Route
             path="/messages"
             element={<Messages />}
+          />
+
+          <Route
+            path="/announcements"
+            element={<Announcements />}
           />
 
           <Route

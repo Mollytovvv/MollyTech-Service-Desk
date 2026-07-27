@@ -87,19 +87,72 @@ export default function Dashboard() {
       }
     };
 
-    fetchData();
-
     const handleNewTicket = (ticket) => {
-      setTickets((prev) => [ticket, ...prev]);
+        setTickets((prev) => [ticket, ...prev]);
     };
 
+    const handleTicketUpdated = (updatedTicket) => {
+
+        setTickets((prev) =>
+            prev.map((ticket) =>
+                ticket._id === updatedTicket._id
+                    ? updatedTicket
+                    : ticket
+            )
+        );
+
+    };
+
+    const handleNewUser = (user) => {
+
+        setUsers((prev) => {
+
+            const exists = prev.some(
+                existingUser =>
+                    existingUser._id === user._id
+            );
+
+            if (exists) {
+                return prev;
+            }
+
+            return [
+                user,
+                ...prev
+            ];
+
+        });
+
+    };
+
+    const handleUserUpdated = (updatedUser) => {
+        setUsers((prev) =>
+            prev.map((user) =>
+                user._id === updatedUser._id
+                    ? updatedUser
+                    : user
+            )
+        );
+    };
+
+
     socket.on("newTicket", handleNewTicket);
+    socket.on("ticketUpdated", handleTicketUpdated);
+    socket.on("newUser", handleNewUser);
+    socket.on("userUpdated", handleUserUpdated);
+
+    fetchData();
 
     return () => {
-      socket.off("newTicket", handleNewTicket);
+    socket.off("newTicket", handleNewTicket);
+    socket.off("ticketUpdated", handleTicketUpdated);
+
+    socket.off("newUser", handleNewUser);
+    socket.off("userUpdated", handleUserUpdated);
     };
 
   }, [token]);
+
 
   // =========================
   // ACITVITY FEED
@@ -198,13 +251,24 @@ export default function Dashboard() {
     }));
   };
 
+
   const chartData = getMonthlyStats();
   console.log("Chart Data:", chartData);
 
   return (
     <div className="dashboard">
 
-      <TopCards tickets={tickets} />
+    <TopCards
+        tickets={tickets}
+        users={users}
+        totalUsers={
+            users.filter(
+                user =>
+                    user.role === "user" &&
+                    user.status === "approved"
+            ).length
+        }
+    />
 
       {/* MAIN WORKSPACE */}
       <div className="workspace">
