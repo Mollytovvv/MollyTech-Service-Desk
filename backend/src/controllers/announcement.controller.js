@@ -1,4 +1,6 @@
 const Announcement = require("../models/Announcement");
+const Notification = require("../models/Notification");
+const User = require("../models/User");
 
 // ===============================
 // CREATE ANNOUNCEMENT
@@ -33,11 +35,80 @@ const createAnnouncement = async (req, res) => {
 
     });
 
+    // ===============================
+    // CREATE USER NOTIFICATIONS
+    // ===============================
+
+    const users = await User.find({
+      role: "user",
+    }).select("_id");
+
+
+    const notifications = await Notification.insertMany(
+
+      users.map((user)=>({
+
+        recipient:user._id,
+
+        sender:req.user.id,
+
+        type:"announcement",
+
+        title:"New Announcement",
+
+        message:title,
+
+      }))
+
+    );
+
+
+    // ===============================
+    // REALTIME EVENTS
+    // ===============================
+
+    const io = req.app.get("io");
+
+
+    if(io){
+
+      // ===============================
+      // 🔔 USER NOTIFICATION BELL
+      // ===============================
+
+      notifications.forEach((notification)=>{
+
+        io.to(
+          notification.recipient.toString()
+        )
+        .emit(
+          "notificationCreated",
+          {
+            ...notification.toObject(),
+            isRead:false,
+          }
+        );
+
+      });
+
+
+      // ===============================
+      // 📢 USER DASHBOARD ANNOUNCEMENTS
+      // ===============================
+
+      io.emit(
+        "announcementCreated",
+        announcement
+      );
+
+    }
+
+
     return res.status(201).json({
 
-      message: "Announcement created successfully.",
+        message: "Announcement created successfully.",
 
-      announcement,
+        announcement,
 
     });
 
@@ -63,24 +134,29 @@ const createAnnouncement = async (req, res) => {
 const getAnnouncements = async (req, res) => {
   try {
 
-    const announcements = await Announcement.find({
+    const query =
+      req.user.role === "admin"
+        ? {}
+        : {
+            active: true,
+          };
 
-      active: true,
 
-    })
+    const announcements = await Announcement.find(query)
 
-    .populate(
-      "createdBy",
-      "firstName lastName"
-    )
+      .populate(
+        "createdBy",
+        "firstName lastName"
+      )
 
-    .sort({
+      .sort({
 
-      pinned: -1,
+        pinned: -1,
 
-      createdAt: -1,
+        createdAt: -1,
 
-    });
+      });
+
 
     return res.json({
 
@@ -88,12 +164,14 @@ const getAnnouncements = async (req, res) => {
 
     });
 
+
   } catch (err) {
 
     console.log(
       "GET ANNOUNCEMENTS ERROR:",
       err
     );
+
 
     return res.status(500).json({
 
@@ -181,13 +259,25 @@ const updateAnnouncement = async (req, res) => {
 
     }
 
-    return res.json({
+  const io = req.app.get("io");
+
+  if(io){
+
+  io.emit(
+    "announcementUpdated",
+    announcement
+  );
+
+  }
+
+
+  return res.json({
 
       message: "Announcement updated successfully.",
 
       announcement,
 
-    });
+  });
 
   } catch (err) {
 
@@ -225,11 +315,23 @@ const deleteAnnouncement = async (req, res) => {
 
     }
 
-    return res.json({
+  const io = req.app.get("io");
+
+  if(io){
+
+  io.emit(
+    "announcementDeleted",
+    announcement._id
+  );
+
+  }
+
+
+  return res.json({
 
       message: "Announcement deleted successfully.",
 
-    });
+  });
 
   } catch (err) {
 
@@ -271,7 +373,19 @@ const togglePinned = async (req, res) => {
 
     await announcement.save();
 
-    return res.json({
+  const io = req.app.get("io");
+
+  if(io){
+
+  io.emit(
+    "announcementUpdated",
+    announcement
+  );
+
+  }
+
+
+  return res.json({
 
       message: announcement.pinned
         ? "Announcement pinned."
@@ -279,7 +393,7 @@ const togglePinned = async (req, res) => {
 
       announcement,
 
-    });
+  });
 
   } catch (err) {
 
@@ -321,7 +435,19 @@ const toggleActive = async (req, res) => {
 
     await announcement.save();
 
-    return res.json({
+  const io = req.app.get("io");
+
+  if(io){
+
+  io.emit(
+    "announcementUpdated",
+    announcement
+  );
+
+  }
+
+
+  return res.json({
 
       message: announcement.active
         ? "Announcement activated."
@@ -329,7 +455,7 @@ const toggleActive = async (req, res) => {
 
       announcement,
 
-    });
+  });
 
   } catch (err) {
 

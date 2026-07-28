@@ -12,17 +12,14 @@ const {
   toggleActive,
 } = require("../controllers/announcement.controller");
 
-const {
-  protect,
-  adminOnly,
-} = require("../middleware/authMiddleware");
+const authMiddleware = require("../middleware/auth.middleware");
 
 // ===============================
 // GET ALL ANNOUNCEMENTS
 // ===============================
 router.get(
   "/",
-  protect,
+  authMiddleware,
   getAnnouncements
 );
 
@@ -31,7 +28,7 @@ router.get(
 // ===============================
 router.get(
   "/:id",
-  protect,
+  authMiddleware,
   getAnnouncementById
 );
 
@@ -40,8 +37,7 @@ router.get(
 // ===============================
 router.post(
   "/",
-  protect,
-  adminOnly,
+  authMiddleware,
   createAnnouncement
 );
 
@@ -50,8 +46,7 @@ router.post(
 // ===============================
 router.patch(
   "/:id",
-  protect,
-  adminOnly,
+  authMiddleware,
   updateAnnouncement
 );
 
@@ -60,8 +55,7 @@ router.patch(
 // ===============================
 router.delete(
   "/:id",
-  protect,
-  adminOnly,
+  authMiddleware,
   deleteAnnouncement
 );
 
@@ -70,8 +64,7 @@ router.delete(
 // ===============================
 router.patch(
   "/:id/pin",
-  protect,
-  adminOnly,
+  authMiddleware,
   togglePinned
 );
 
@@ -80,8 +73,7 @@ router.patch(
 // ===============================
 router.patch(
   "/:id/active",
-  protect,
-  adminOnly,
+  authMiddleware,
   toggleActive
 );
 

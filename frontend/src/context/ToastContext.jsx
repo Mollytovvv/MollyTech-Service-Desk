@@ -13,11 +13,11 @@ export function ToastProvider({ children }) {
         ...prev,
         fading: true,
       }));
-    }, 2500);
+    }, 3500);
 
     setTimeout(() => {
       setToast(null);
-    }, 3000);
+    }, 4000);
   };
 
   return (

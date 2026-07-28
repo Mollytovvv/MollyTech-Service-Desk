@@ -1073,7 +1073,9 @@ const archiveTickets = async (req, res) => {
         });
       }
 
+
       const { ticketIds } = req.body;
+
 
       if (!ticketIds || !Array.isArray(ticketIds)) {
         return res.status(400).json({
@@ -1081,26 +1083,52 @@ const archiveTickets = async (req, res) => {
         });
       }
 
-      await Ticket.deleteMany({
-        _id: { $in: ticketIds },
-        status: "archived",
+
+      const result = await Ticket.deleteMany({
+
+        _id:{
+          $in: ticketIds
+        },
+
+        "archivedBy.admin": true
+
       });
+
 
       const io = req.app.get("io");
 
-      io.emit("ticketUpdated");
+      if(io){
+
+        io.emit(
+          "ticketUpdated"
+        );
+
+      }
+
 
       return res.json({
-        message: "Tickets deleted successfully",
-        deletedCount: ticketIds.length,
+
+        message:"Tickets deleted successfully",
+
+        deletedCount: result.deletedCount,
+
       });
 
-    } catch (err) {
-      console.log("DELETE ERROR:", err);
+
+    } catch(err){
+
+      console.log(
+        "DELETE ERROR:",
+        err
+      );
+
 
       return res.status(500).json({
-        message: err.message,
+
+        message:err.message,
+
       });
+
     }
   };
 
