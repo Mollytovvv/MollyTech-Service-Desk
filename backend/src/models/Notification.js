@@ -27,6 +27,7 @@ const notificationSchema = new mongoose.Schema(
         "account_rejected",
         "access_request",
         "system",
+        "announcement",
       ],
       required: true,
     },

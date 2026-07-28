@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   FiBell,
   FiFolder,
@@ -18,60 +19,391 @@ import CreateTicketModal from "../components/CreateTicketModal";
 import "../styles/UserDashboard.css";
 
 export default function UserDashboard() {
+
   const { token, user } = useAuth();
+
   const navigate = useNavigate();
 
+
   const [showCreateTicket, setShowCreateTicket] = useState(false);
+
   const [loading, setLoading] = useState(true);
 
+
+  const [announcements, setAnnouncements] = useState([]);
+
+
   const [dashboard, setDashboard] = useState({
+
     stats: {
-      total: 0,
-      pending: 0,
-      messages: 0,
-      resolved: 0,
+
+      total:0,
+
+      pending:0,
+
+      messages:0,
+
+      resolved:0,
+
     },
-    recentTickets: [],
+
+    recentTickets:[],
+
   });
 
-  const fetchDashboard = async () => {
-    try {
-      const res = await api.get("/tickets/my/dashboard", {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+
+
+  // =====================================
+  // FETCH DASHBOARD
+  // =====================================
+
+  const fetchDashboard = async()=>{
+
+    try{
+
+      const res = await api.get(
+
+        "/tickets/my/dashboard",
+
+        {
+
+          headers:{
+
+            Authorization:`Bearer ${token}`,
+
+          },
+
+        }
+
+      );
+
 
       setDashboard(res.data);
-    } catch (err) {
-      console.log(err.response?.data || err.message);
-    } finally {
-      setLoading(false);
+
+
     }
+
+    catch(err){
+
+      console.log(
+        err.response?.data || err.message
+      );
+
+    }
+
+    finally{
+
+      setLoading(false);
+
+    }
+
   };
 
-  useEffect(() => {
-    if (!token) return;
+
+
+  // =====================================
+  // FETCH ANNOUNCEMENTS
+  // =====================================
+
+  const fetchAnnouncements = async()=>{
+
+    try{
+
+      const res = await api.get(
+
+        "/announcements",
+
+        {
+
+          headers:{
+
+            Authorization:`Bearer ${token}`,
+
+          },
+
+        }
+
+      );
+
+
+      const activeAnnouncements =
+
+        (res.data.announcements || [])
+
+        .filter(
+
+          (announcement)=>
+
+            announcement.active
+
+        )
+
+        .sort(
+
+          (a,b)=>
+
+            Number(b.pinned) -
+            Number(a.pinned)
+
+            ||
+
+            new Date(b.createdAt) -
+            new Date(a.createdAt)
+
+        );
+
+
+      setAnnouncements(
+        activeAnnouncements
+      );
+
+
+    }
+
+    catch(err){
+
+      console.log(
+        err.response?.data || err.message
+      );
+
+    }
+
+  };
+
+  // =====================================
+  // INITIAL LOAD
+  // =====================================
+
+  useEffect(()=>{
+
+    if(!token) return;
+
 
     fetchDashboard();
-  }, [token]);
 
-  useEffect(() => {
-    if (!user) return;
+    fetchAnnouncements();
 
-    socket.on("ticketUpdated", fetchDashboard);
 
-    return () => {
-      socket.off("ticketUpdated", fetchDashboard);
-    };
-  }, [user]);
+  },[token]);
 
-  if (loading) {
-    return (
-      <div className="user-dashboard loading">
-        Loading dashboard...
-      </div>
+
+
+  // =====================================
+  // SOCKET REAL TIME
+  // =====================================
+
+  useEffect(()=>{
+
+
+    if(!user) return;
+
+
+
+    // Existing ticket updates
+
+    socket.on(
+
+      "ticketUpdated",
+
+      fetchDashboard
+
     );
+
+
+
+    // New announcement
+
+    socket.on(
+
+      "announcementCreated",
+
+      (announcement)=>{
+
+
+        if(!announcement.active)
+          return;
+
+
+
+        setAnnouncements(prev=>{
+
+
+          const updated = [
+
+            announcement,
+
+            ...prev,
+
+          ];
+
+
+
+          return updated.sort(
+
+            (a,b)=>
+
+              Number(b.pinned) -
+              Number(a.pinned)
+
+              ||
+
+              new Date(b.createdAt)
+              -
+              new Date(a.createdAt)
+
+          );
+
+
+        });
+
+
+      }
+
+    );
+
+
+
+    // Announcement updated
+
+    socket.on(
+
+      "announcementUpdated",
+
+      (announcement)=>{
+
+
+        setAnnouncements(prev=>{
+
+
+          const filtered = prev.filter(
+
+            item=>
+
+              item._id !== announcement._id
+
+          );
+
+
+
+          if(!announcement.active){
+
+            return filtered;
+
+          }
+
+
+
+          return [
+
+            announcement,
+
+            ...filtered,
+
+          ].sort(
+
+            (a,b)=>
+
+              Number(b.pinned) -
+              Number(a.pinned)
+
+              ||
+
+              new Date(b.createdAt)
+              -
+              new Date(a.createdAt)
+
+          );
+
+
+        });
+
+
+      }
+
+    );
+
+
+
+    // Announcement deleted
+
+    socket.on(
+
+      "announcementDeleted",
+
+      (id)=>{
+
+
+        setAnnouncements(prev=>
+
+          prev.filter(
+
+            item=>
+
+              item._id !== id
+
+          )
+
+        );
+
+
+      }
+
+    );
+
+
+
+    return()=>{
+
+
+      socket.off(
+
+        "ticketUpdated",
+
+        fetchDashboard
+
+      );
+
+
+      socket.off(
+
+        "announcementCreated"
+
+      );
+
+
+      socket.off(
+
+        "announcementUpdated"
+
+      );
+
+
+      socket.off(
+
+        "announcementDeleted"
+
+      );
+
+
+    };
+
+
+  },[user]);
+
+
+
+  if(loading){
+
+    return(
+
+      <div className="user-dashboard loading">
+
+        Loading dashboard...
+
+      </div>
+
+    );
+
   }
 
   return (
@@ -230,20 +562,84 @@ export default function UserDashboard() {
 
       {/* ANNOUNCEMENTS */}
       <section className="panel-card announcements">
+
         <div className="panel-header">
           <h2>Announcements</h2>
         </div>
 
-        <div className="announcement-item">
-          <FiBell />
 
-          <div>
-            <h4>System Maintenance</h4>
-            <p>
-              Scheduled maintenance updates will appear here.
-            </p>
-          </div>
+        <div className="announcement-list">
+
+          {announcements.length === 0 ? (
+
+            <div className="empty-state">
+
+              <FiBell />
+
+              <h3>
+                No announcements
+              </h3>
+
+              <p>
+                There are no announcements available right now.
+              </p>
+
+            </div>
+
+          ) : (
+
+            announcements.map((announcement) => (
+
+              <div
+                key={announcement._id}
+                className="announcement-item"
+              >
+
+                <div className="announcement-icon">
+
+                  <FiBell />
+
+                </div>
+
+
+                <div className="announcement-content">
+
+                  <h4>
+                    {announcement.title}
+                  </h4>
+
+                  <p>
+                    {announcement.content}
+                  </p>
+
+
+                  <span className="announcement-date">
+
+                    {new Date(
+                      announcement.createdAt
+                    ).toLocaleDateString([], {
+
+                      month:"short",
+
+                      day:"numeric",
+
+                      year:"numeric",
+
+                    })}
+
+                  </span>
+
+                </div>
+
+
+              </div>
+
+            ))
+
+          )}
+
         </div>
+
       </section>
 
       {showCreateTicket && (

@@ -1,360 +1,577 @@
 import { useEffect, useState } from "react";
+
 import api from "../../../api/axios";
+
 import { useAuth } from "../../../context/AuthContext";
 import { useToast } from "../../../context/ToastContext";
 
 import {
-  FiX,
-  FiSave,
-  FiBell,
+
+    FiBell,
+    FiSave,
+    FiX,
+    FiBookmark,
+
 } from "react-icons/fi";
 
 import "../../styles/AnnouncementModal.css";
 
 export default function AnnouncementModal({
-  announcement,
-  onClose,
-  onSaved,
-}) {
 
-  const { token } = useAuth();
+    announcement,
 
-  const { showToast } = useToast();
+    onClose,
 
-  const [title, setTitle] = useState("");
+    onSaved,
 
-  const [content, setContent] = useState("");
+}){
 
-  const [type, setType] = useState("info");
+    const { token } = useAuth();
 
-  const [pinned, setPinned] = useState(false);
+    const { showToast } = useToast();
 
-  const [saving, setSaving] = useState(false);
+    const [title,setTitle] = useState("");
 
-  // =========================
-  // LOAD EDIT DATA
-  // =========================
+    const [content,setContent] = useState("");
 
-  useEffect(() => {
+    const [pinned,setPinned] = useState(false);
 
-    if (!announcement) return;
+    const [saving,setSaving] = useState(false);
 
-    setTitle(
-      announcement.title || ""
-    );
+    // =====================================
+    // LOAD EDIT DATA
+    // =====================================
 
-    setContent(
-      announcement.content || ""
-    );
+    useEffect(()=>{
 
-    setType(
-      announcement.type || "info"
-    );
+        if(!announcement) return;
 
-    setPinned(
-      announcement.pinned || false
-    );
-
-  }, [announcement]);
-
-  // =========================
-  // SAVE
-  // =========================
-
-  const handleSave = async () => {
-
-    if (!title.trim()) {
-
-      showToast(
-        "error",
-        "Title is required."
-      );
-
-      return;
-
-    }
-
-    if (!content.trim()) {
-
-      showToast(
-        "error",
-        "Content is required."
-      );
-
-      return;
-
-    }
-
-    try {
-
-      setSaving(true);
-
-      const payload = {
-
-        title,
-
-        content,
-
-        type,
-
-        pinned,
-
-      };
-
-      if (announcement) {
-
-        await api.patch(
-
-          `/announcements/${announcement._id}`,
-
-          payload,
-
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-
+        setTitle(
+            announcement.title || ""
         );
 
-        showToast(
-          "success",
-          "Announcement updated."
+        setContent(
+            announcement.content || ""
         );
 
-      } else {
-
-        await api.post(
-
-          "/announcements",
-
-          payload,
-
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-
+        setPinned(
+            announcement.pinned || false
         );
 
-        showToast(
-          "success",
-          "Announcement published."
-        );
+    },[announcement]);
 
-      }
+    // =====================================
+    // SAVE
+    // =====================================
 
-      onSaved();
+    const handleSave = async()=>{
 
-    } catch (err) {
+        if(!title.trim()){
 
-      console.log(err);
+            showToast(
+                "error",
+                "Title is required."
+            );
 
-      showToast(
-        "error",
-        err.response?.data?.message ||
-        "Something went wrong."
-      );
+            return;
 
-    } finally {
+        }
 
-      setSaving(false);
+        if(!content.trim()){
 
-    }
+            showToast(
+                "error",
+                "Content is required."
+            );
 
-  };
+            return;
 
-  return (
+        }
 
-    <div
-      className="announcement-modal-overlay"
-      onClick={onClose}
-    >
+        try{
 
-      <div
-        className="announcement-modal"
-        onClick={(e)=>e.stopPropagation()}
-      >
+            setSaving(true);
 
-        <div className="announcement-modal-header">
+            const payload={
 
-          <div className="announcement-modal-title">
+                title,
 
-            <FiBell />
+                content,
 
-            <div>
+                pinned,
 
-              <h2>
+            };
 
-                {announcement
-                  ? "Edit Announcement"
-                  : "Create Announcement"}
+            if(announcement){
 
-              </h2>
+                await api.patch(
 
-              <p>
+                    `/announcements/${announcement._id}`,
 
-                Publish announcements
-                for all users.
+                    payload,
 
-              </p>
+                    {
+
+                        headers:{
+
+                            Authorization:`Bearer ${token}`,
+
+                        },
+
+                    }
+
+                );
+
+                showToast(
+
+                    "success",
+
+                    "Announcement updated."
+
+                );
+
+            }
+
+            else{
+
+                await api.post(
+
+                    "/announcements",
+
+                    payload,
+
+                    {
+
+                        headers:{
+
+                            Authorization:`Bearer ${token}`,
+
+                        },
+
+                    }
+
+                );
+
+                showToast(
+
+                    "success",
+
+                    "Announcement published."
+
+                );
+
+            }
+
+            onSaved();
+
+        }
+
+        catch(err){
+
+            console.log(err);
+
+            showToast(
+
+                "error",
+
+                err.response?.data?.message ||
+
+                "Something went wrong."
+
+            );
+
+        }
+
+        finally{
+
+            setSaving(false);
+
+        }
+
+    };
+
+    return(
+
+        <div
+
+            className="announcement-modal-overlay"
+
+            onClick={onClose}
+
+        >
+
+            <div
+
+                className="announcement-modal"
+
+                onClick={(e)=>e.stopPropagation()}
+
+            >
+
+                {/* ============================== */}
+
+                {/* HEADER */}
+
+                {/* ============================== */}
+
+                <div className="announcement-modal-header">
+
+                    <div className="announcement-modal-title">
+
+                        <div className="announcement-icon">
+
+                            <FiBell />
+
+                        </div>
+
+                        <div>
+
+                            <h2>
+
+                                {
+
+                                    announcement
+
+                                    ? "Edit Announcement"
+
+                                    : "Create Announcement"
+
+                                }
+
+                            </h2>
+
+                            <p>
+
+                                Publish important company updates,
+
+                                maintenance notices and announcements
+
+                                visible to every user.
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                    <button
+
+                        className="modal-close"
+
+                        onClick={onClose}
+
+                    >
+
+                        <FiX />
+
+                    </button>
+
+                </div>
+
+                {/* ============================== */}
+
+                {/* BODY */}
+
+                {/* ============================== */}
+
+                <div className="announcement-modal-content">
+
+                    {/* ========================== */}
+
+                    {/* LEFT */}
+
+                    {/* ========================== */}
+
+                    <div className="announcement-form">
+
+                        <div className="form-group">
+
+                            <label>
+
+                                Announcement Title
+
+                            </label>
+
+                            <input
+
+                                type="text"
+
+                                maxLength={80}
+
+                                placeholder="Enter announcement title..."
+
+                                value={title}
+
+                                onChange={(e)=>
+
+                                    setTitle(
+
+                                        e.target.value
+
+                                    )
+
+                                }
+
+                            />
+
+                            <div className="field-counter">
+
+                                {title.length}/80
+
+                            </div>
+
+                        </div>
+
+                        <div className="form-group">
+
+                            <label>
+
+                                Announcement Content
+
+                            </label>
+
+                            <textarea
+
+                                rows={10}
+
+                                maxLength={1000}
+
+                                placeholder="Write your announcement..."
+
+                                value={content}
+
+                                onChange={(e)=>
+
+                                    setContent(
+
+                                        e.target.value
+
+                                    )
+
+                                }
+
+                            />
+
+                            <div className="field-counter">
+
+                                {content.length}/1000
+
+                            </div>
+
+                        </div>
+
+                        {/* ========================== */}
+
+                        {/* PIN */}
+
+                        {/* ========================== */}
+
+                        <div className="pin-setting">
+
+                            <div>
+
+                                <h4>
+
+                                    <FiBookmark />
+
+                                    Pin Announcement
+
+                                </h4>
+
+                                <p>
+
+                                    Keep this announcement at
+
+                                    the top of the announcement
+
+                                    feed for all users.
+
+                                </p>
+
+                            </div>
+
+                            <button
+
+                                type="button"
+
+                                className={
+
+                                    pinned
+
+                                    ? "pin-toggle active"
+
+                                    : "pin-toggle"
+
+                                }
+
+                                onClick={()=>
+
+                                    setPinned(
+
+                                        !pinned
+
+                                    )
+
+                                }
+
+                            >
+
+                                <span></span>
+
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                    {/* ========================== */}
+
+                    {/* RIGHT */}
+
+                    {/* ========================== */}
+
+                    <div className="announcement-preview">
+
+                        <div className="preview-card">
+
+                            <div className="preview-header">
+
+                                <FiBell />
+
+                                <span>
+
+                                    Live Preview
+
+                                </span>
+
+                            </div>
+
+                            <div className="preview-body">
+
+                                <h3>
+
+                                    {title.trim()
+                                        ? title
+                                        : "Announcement Title"}
+
+                                </h3>
+
+                                <div className="preview-badges">
+
+                                    <span className="preview-status">
+
+                                        Visible
+
+                                    </span>
+
+                                    {pinned && (
+
+                                        <span className="preview-pinned">
+
+                                            <FiBookmark />
+
+                                            Pinned
+
+                                        </span>
+
+                                    )}
+
+                                </div>
+
+                                <p>
+
+                                    {content.trim()
+                                        ? content
+                                        : "Your announcement preview will appear here as you type. This gives you an idea of how it will look before publishing."}
+
+                                </p>
+
+                            </div>
+
+                            <div className="preview-footer">
+
+                                <span>
+
+                                    {new Date().toLocaleDateString([],{
+
+                                        month:"long",
+
+                                        day:"numeric",
+
+                                        year:"numeric",
+
+                                    })}
+
+                                </span>
+
+                                <span>
+
+                                    MollyTech Service Desk
+
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                {/* ================================= */}
+
+                {/* FOOTER */}
+
+                {/* ================================= */}
+
+                <div className="announcement-modal-footer">
+
+                    <button
+
+                        className="cancel-btn"
+
+                        onClick={onClose}
+
+                    >
+
+                        Cancel
+
+                    </button>
+
+                    <button
+
+                        className="save-btn"
+
+                        onClick={handleSave}
+
+                        disabled={saving}
+
+                    >
+
+                        <FiSave />
+
+                        {
+
+                            saving
+
+                                ? "Publishing..."
+
+                                : announcement
+
+                                    ? "Save Changes"
+
+                                    : "Publish Announcement"
+
+                        }
+
+                    </button>
+
+                </div>
 
             </div>
 
-          </div>
-
-          <button
-            className="modal-close"
-            onClick={onClose}
-          >
-
-            <FiX />
-
-          </button>
-
         </div>
 
-        <div className="announcement-modal-body">
-
-          <div className="form-group">
-
-            <label>
-
-              Title
-
-            </label>
-
-            <input
-              type="text"
-              placeholder="Announcement title"
-              value={title}
-              onChange={(e)=>
-                setTitle(
-                  e.target.value
-                )
-              }
-            />
-
-          </div>
-
-          <div className="form-group">
-
-            <label>
-
-              Type
-
-            </label>
-
-            <select
-              value={type}
-              onChange={(e)=>
-                setType(
-                  e.target.value
-                )
-              }
-            >
-
-              <option value="info">
-
-                Information
-
-              </option>
-
-              <option value="maintenance">
-
-                Maintenance
-
-              </option>
-
-              <option value="warning">
-
-                Warning
-
-              </option>
-
-              <option value="success">
-
-                Success
-
-              </option>
-
-            </select>
-
-          </div>
-
-          <div className="form-group">
-
-            <label>
-
-              Content
-
-            </label>
-
-            <textarea
-              rows={6}
-              placeholder="Write your announcement..."
-              value={content}
-              onChange={(e)=>
-                setContent(
-                  e.target.value
-                )
-              }
-            />
-
-          </div>
-
-          <label className="announcement-checkbox">
-
-            <input
-              type="checkbox"
-              checked={pinned}
-              onChange={(e)=>
-                setPinned(
-                  e.target.checked
-                )
-              }
-            />
-
-            Pin this announcement
-
-          </label>
-
-        </div>
-
-        <div className="announcement-modal-footer">
-
-          <button
-            className="cancel-btn"
-            onClick={onClose}
-          >
-
-            Cancel
-
-          </button>
-
-          <button
-            className="save-btn"
-            onClick={handleSave}
-            disabled={saving}
-          >
-
-            <FiSave />
-
-            {saving
-              ? "Saving..."
-              : announcement
-              ? "Save Changes"
-              : "Publish"}
-
-          </button>
-
-        </div>
-
-      </div>
-
-    </div>
-
-  );
+    );
 
 }

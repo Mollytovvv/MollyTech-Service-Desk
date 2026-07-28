@@ -1,620 +1,805 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import api from "../../api/axios";
 import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 import AnnouncementModal from "../components/announcements/AnnouncementModal";
 
 import {
-  FiPlus,
-  FiSearch,
-  FiEdit2,
-  FiTrash2,
-  FiEye,
-  FiEyeOff,
-  FiBookmark,
-  FiBookmark as FiPinned,
-  FiBell,
+    FiBell,
+    FiPlus,
+    FiSearch,
+    FiRefreshCw,
+    FiEdit2,
+    FiTrash2,
+    FiEye,
+    FiEyeOff,
+    FiBookmark,
+    FiGrid,
+    FiCheckCircle,
+    FiSlash,
+    FiStar,
 } from "react-icons/fi";
 
 import "../styles/Announcements.css";
 
 export default function Announcements() {
 
-  const { token } = useAuth();
+    const { token } = useAuth();
 
-  const { showToast } = useToast();
+    const { showToast } = useToast();
 
-  const [announcements, setAnnouncements] = useState([]);
+    const [announcements, setAnnouncements] = useState([]);
 
-  const [loading, setLoading] = useState(true);
+    const [deleteAnnouncement, setDeleteAnnouncement] = useState(null);
 
-  const [search, setSearch] = useState("");
+    const [loading, setLoading] = useState(true);
 
-  const [filter, setFilter] = useState("all");
+    const [search, setSearch] = useState("");
 
-  const [showModal, setShowModal] = useState(false);
+    const [filter, setFilter] = useState("all");
 
-  const [editingAnnouncement, setEditingAnnouncement] =
-    useState(null);
+    const [showModal, setShowModal] = useState(false);
 
-  // =========================
-  // FETCH ANNOUNCEMENTS
-  // =========================
+    const [editingAnnouncement, setEditingAnnouncement] = useState(null);
 
-  const fetchAnnouncements = async () => {
+    // ==========================================
+    // FETCH
+    // ==========================================
 
-    try {
+    const fetchAnnouncements = async () => {
 
-      const res = await api.get(
-        "/announcements",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+        try {
+
+            setLoading(true);
+
+            const res = await api.get(
+                "/announcements",
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+            );
+
+            setAnnouncements(
+                res.data.announcements || []
+            );
+
+        } catch (err) {
+
+            console.log(err);
+
+            showToast(
+                "error",
+                "Failed to load announcements."
+            );
+
+        } finally {
+
+            setLoading(false);
+
         }
-      );
 
-      setAnnouncements(
-        res.data.announcements || []
-      );
+    };
 
-    } catch (err) {
+    useEffect(() => {
 
-      console.log(err);
+        if (!token) return;
 
-      showToast(
-        "error",
-        "Failed to load announcements."
-      );
+        fetchAnnouncements();
 
-    } finally {
+    }, [token]);
 
-      setLoading(false);
+    // ==========================================
+    // DELETE
+    // ==========================================
 
-    }
+    const handleDelete = async (id) => {
 
-  };
+        try {
 
-  useEffect(() => {
+            await api.delete(
 
-    if (!token) return;
+                `/announcements/${id}`,
 
-    fetchAnnouncements();
+                {
+                    headers:{
+                        Authorization:`Bearer ${token}`,
+                    },
+                }
 
-  }, [token]);
+            );
 
-  // =========================
-  // DELETE
-  // =========================
 
-  const handleDelete = async (id) => {
+            setAnnouncements((prev)=>
 
-    const confirmDelete =
-      window.confirm(
-        "Delete this announcement?"
-      );
+                prev.filter(
+                    (announcement)=>
+                        announcement._id !== id
+                )
 
-    if (!confirmDelete) return;
+            );
 
-    try {
 
-      await api.delete(
-        `/announcements/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+            showToast(
+                "success",
+                "Announcement deleted successfully."
+            );
+
+
+        } catch(err){
+
+            console.log(err);
+
+
+            showToast(
+                "error",
+                err.response?.data?.message ||
+                "Unable to delete announcement."
+            );
+
         }
-      );
 
-      setAnnouncements((prev) =>
-        prev.filter((a) => a._id !== id)
-      );
+    };
 
-      showToast(
-        "success",
-        "Announcement deleted."
-      );
+    // ==========================================
+    // PIN
+    // ==========================================
 
-    } catch (err) {
+    const handlePin = async (id) => {
 
-      console.log(err);
+        try {
 
-      showToast(
-        "error",
-        "Failed to delete announcement."
-      );
+            await api.patch(
 
-    }
+                `/announcements/${id}/pin`,
 
-  };
+                {},
 
-  // =========================
-  // PIN
-  // =========================
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
 
-  const handlePin = async (id) => {
+            );
 
-    try {
-
-      const res = await api.patch(
-        `/announcements/${id}/pin`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setAnnouncements((prev) =>
-        prev.map((announcement) => {
-
-          if (
-            announcement._id !== id
-          ) {
-            return announcement;
-          }
-
-          return res.data.announcement;
-
-        })
-      );
-
-      showToast(
-        "success",
-        "Announcement updated."
-      );
-
-    } catch (err) {
-
-      console.log(err);
-
-      showToast(
-        "error",
-        "Unable to update announcement."
-      );
-
-    }
-
-  };
-
-  // =========================
-  // SHOW / HIDE
-  // =========================
-
-  const handleVisibility = async (id) => {
-
-    try {
-
-      const res = await api.patch(
-        `/announcements/${id}/active`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      setAnnouncements((prev) =>
-        prev.map((announcement) => {
-
-          if (
-            announcement._id !== id
-          ) {
-            return announcement;
-          }
-
-          return res.data.announcement;
-
-        })
-      );
-
-      showToast(
-        "success",
-        "Announcement updated."
-      );
-
-    } catch (err) {
-
-      console.log(err);
-
-      showToast(
-        "error",
-        "Unable to update announcement."
-      );
-
-    }
-
-  };
-
-  // =========================
-  // FILTER
-  // =========================
-
-  const filteredAnnouncements =
-    announcements.filter((announcement) => {
-
-      const matchesSearch =
-
-        announcement.title
-          .toLowerCase()
-          .includes(
-            search.toLowerCase()
-          ) ||
-
-        announcement.content
-          .toLowerCase()
-          .includes(
-            search.toLowerCase()
-          );
-
-      if (!matchesSearch) {
-        return false;
-      }
-
-      switch (filter) {
-
-        case "active":
-          return announcement.active;
-
-        case "hidden":
-          return !announcement.active;
-
-        case "pinned":
-          return announcement.pinned;
-
-        default:
-          return true;
-
-      }
-
-    });
-
-  // =========================
-  // LOADING
-  // =========================
-
-  if (loading) {
-
-    return (
-
-      <div className="announcements-page loading">
-
-        Loading announcements...
-
-      </div>
-
-    );
-
-  }
-
-  return (
-
-    <div className="announcements-page">
-
-      <div className="announcement-header">
-
-        <div>
-
-          <h1>
-
-            <FiBell />
-
-            Announcements
-
-          </h1>
-
-          <p>
-
-            Manage company-wide announcements
-            for all users.
-
-          </p>
-
-        </div>
-
-        <button
-          className="new-announcement-btn"
-          onClick={() => {
-
-            setEditingAnnouncement(null);
-
-            setShowModal(true);
-
-          }}
-        >
-
-          <FiPlus />
-
-          New Announcement
-
-        </button>
-
-      </div>
-
-      <div className="announcement-toolbar">
-
-        <div className="announcement-search">
-
-          <FiSearch />
-
-          <input
-            type="text"
-            placeholder="Search announcements..."
-            value={search}
-            onChange={(e) =>
-              setSearch(
-                e.target.value
-              )
-            }
-          />
-
-        </div>
-
-        <div className="announcement-filters">
-
-          <button
-            className={
-              filter === "all"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setFilter("all")
-            }
-          >
-            All
-          </button>
-
-          <button
-            className={
-              filter === "active"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setFilter("active")
-            }
-          >
-            Active
-          </button>
-
-          <button
-            className={
-              filter === "hidden"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setFilter("hidden")
-            }
-          >
-            Hidden
-          </button>
-
-          <button
-            className={
-              filter === "pinned"
-                ? "active"
-                : ""
-            }
-            onClick={() =>
-              setFilter("pinned")
-            }
-          >
-            Pinned
-          </button>
-
-        </div>
-
-      </div>
-
-      <div className="announcement-list">
-
-                {filteredAnnouncements.length === 0 ? (
-
-          <div className="announcement-empty">
-
-            <FiBell size={42} />
-
-            <h3>
-              No announcements found
-            </h3>
-
-            <p>
-              Create your first announcement to keep users informed.
-            </p>
-
-          </div>
-
-        ) : (
-
-          filteredAnnouncements.map((announcement) => (
-
-            <div
-              key={announcement._id}
-              className={`announcement-card ${
-                announcement.pinned ? "pinned" : ""
-              }`}
-            >
-
-              <div className="announcement-card-header">
-
-                <div>
-
-                  <h3>
-
-                    {announcement.title}
-
-                    {announcement.pinned && (
-                      <span className="pinned-badge">
-
-                        <FiPinned />
-
-                        Pinned
-
-                      </span>
-                    )}
-
-                  </h3>
-
-                  <div className="announcement-meta">
-
-                    <span
-                      className={`announcement-type ${announcement.type}`}
-                    >
-                      {announcement.type.toUpperCase()}
-                    </span>
-
-                    <span>
-                      {new Date(
-                        announcement.createdAt
-                      ).toLocaleDateString([], {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </span>
-
-                    <span>
-                      {announcement.active
-                        ? "Visible"
-                        : "Hidden"}
-                    </span>
-
-                  </div>
-
-                </div>
-
-                <div className="announcement-actions">
-
-                  <button
-                    type="button"
-                    title="Edit"
-                    onClick={() => {
-
-                      setEditingAnnouncement(
-                        announcement
-                      );
-
-                      setShowModal(true);
-
-                    }}
-                  >
-
-                    <FiEdit2 />
-
-                  </button>
-
-                  <button
-                    type="button"
-                    title={
-                      announcement.pinned
-                        ? "Unpin"
-                        : "Pin"
-                    }
-                    onClick={() =>
-                      handlePin(
-                        announcement._id
-                      )
-                    }
-                  >
-
-                    <FiBookmark />
-
-                  </button>
-
-                  <button
-                    type="button"
-                    title={
-                      announcement.active
-                        ? "Hide"
-                        : "Show"
-                    }
-                    onClick={() =>
-                      handleVisibility(
-                        announcement._id
-                      )
-                    }
-                  >
-
-                    {announcement.active ? (
-                      <FiEyeOff />
-                    ) : (
-                      <FiEye />
-                    )}
-
-                  </button>
-
-                  <button
-                    type="button"
-                    title="Delete"
-                    className="danger"
-                    onClick={() =>
-                      handleDelete(
-                        announcement._id
-                      )
-                    }
-                  >
-
-                    <FiTrash2 />
-
-                  </button>
-
-                </div>
-
-              </div>
-
-              <div className="announcement-content">
-
-                <p>
-
-                  {announcement.content}
-
-                </p>
-
-              </div>
-
-            </div>
-
-          ))
-
-        )}
-
-      </div>
-
-      {showModal && (
-
-        <AnnouncementModal
-
-          announcement={editingAnnouncement}
-
-          onClose={() => {
-
-            setShowModal(false);
-
-            setEditingAnnouncement(null);
-
-          }}
-
-          onSaved={() => {
+            showToast(
+                "success",
+                "Announcement updated."
+            );
 
             fetchAnnouncements();
 
-            setShowModal(false);
+        } catch (err) {
 
-            setEditingAnnouncement(null);
+            console.log(err);
 
-          }}
+            showToast(
+                "error",
+                "Unable to update announcement."
+            );
 
-        />
+        }
 
-      )}
+    };
+
+    // ==========================================
+    // ACTIVE
+    // ==========================================
+
+    const handleVisibility = async (id) => {
+
+        try {
+
+            await api.patch(
+
+                `/announcements/${id}/active`,
+
+                {},
+
+                {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                }
+
+            );
+
+            showToast(
+                "success",
+                "Announcement updated."
+            );
+
+            fetchAnnouncements();
+
+        } catch (err) {
+
+            console.log(err);
+
+            showToast(
+                "error",
+                "Unable to update announcement."
+            );
+
+        }
+
+    };
+
+    // ==========================================
+    // FILTER
+    // ==========================================
+
+    const filteredAnnouncements = useMemo(() => {
+
+        return announcements.filter((announcement) => {
+
+            const matchesSearch =
+
+                announcement.title
+                    .toLowerCase()
+                    .includes(search.toLowerCase())
+
+                ||
+
+                announcement.content
+                    .toLowerCase()
+                    .includes(search.toLowerCase());
+
+            if (!matchesSearch) return false;
+
+            switch (filter) {
+
+                case "active":
+                    return announcement.active;
+
+                case "hidden":
+                    return !announcement.active;
+
+                case "pinned":
+                    return announcement.pinned;
+
+                default:
+                    return true;
+
+            }
+
+        });
+
+    }, [
+        announcements,
+        search,
+        filter,
+    ]);
+
+    // ==========================================
+    // DASHBOARD CARDS
+    // ==========================================
+
+    const totalAnnouncements = announcements.length;
+
+    const totalVisible =
+        announcements.filter(
+            a => a.active
+        ).length;
+
+    const totalHidden =
+        announcements.filter(
+            a => !a.active
+        ).length;
+
+    const totalPinned =
+        announcements.filter(
+            a => a.pinned
+        ).length;
+
+    // ==========================================
+    // LOADING
+    // ==========================================
+
+    if (loading) {
+
+        return (
+
+            <div className="announcements-loading">
+
+                <FiBell size={42} />
+
+                <h3>
+                    Loading Announcements...
+                </h3>
+
+                <p>
+                    Please wait while we load the latest announcements.
+                </p>
+
+            </div>
+
+        );
+
+    }
+
+return (
+
+    <div className="announcements-page">
+
+        {/* ==========================================
+            HEADER
+        ========================================== */}
+
+        <div className="announcement-header">
+
+            <div>
+
+            </div>
+
+            <div className="announcement-header-actions">
+
+                <button
+                    className="refresh-announcement-btn"
+                    onClick={fetchAnnouncements}
+                >
+
+                    <FiRefreshCw />
+
+                    Refresh
+
+                </button>
+
+                <button
+                    className="new-announcement-btn"
+                    onClick={() => {
+
+                        setEditingAnnouncement(null);
+
+                        setShowModal(true);
+
+                    }}
+                >
+
+                    <FiPlus />
+
+                    New Announcement
+
+                </button>
+
+            </div>
+
+        </div>
+
+        {/* ==========================================
+            STATISTICS
+        ========================================== */}
+
+        <div className="announcement-stats">
+
+            <div className="announcement-stat-card">
+
+                <FiGrid />
+
+                <div>
+
+                    <h4>Total</h4>
+
+                    <span>{totalAnnouncements}</span>
+
+                </div>
+
+            </div>
+
+            <div className="announcement-stat-card">
+
+                <FiCheckCircle />
+
+                <div>
+
+                    <h4>Visible</h4>
+
+                    <span>{totalVisible}</span>
+
+                </div>
+
+            </div>
+
+            <div className="announcement-stat-card">
+
+                <FiStar />
+
+                <div>
+
+                    <h4>Pinned</h4>
+
+                    <span>{totalPinned}</span>
+
+                </div>
+
+            </div>
+
+            <div className="announcement-stat-card">
+
+                <FiSlash />
+
+                <div>
+
+                    <h4>Hidden</h4>
+
+                    <span>{totalHidden}</span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        {/* ==========================================
+            TOOLBAR
+        ========================================== */}
+
+        <div className="announcement-toolbar">
+
+            <div className="announcement-search">
+
+                <FiSearch />
+
+                <input
+                    type="text"
+                    placeholder="Search announcements..."
+                    value={search}
+                    onChange={(e) =>
+                        setSearch(e.target.value)
+                    }
+                />
+
+            </div>
+
+            <div className="announcement-filters">
+
+                <button
+                    className={filter === "all" ? "active" : ""}
+                    onClick={() => setFilter("all")}
+                >
+                    All
+                </button>
+
+                <button
+                    className={filter === "active" ? "active" : ""}
+                    onClick={() => setFilter("active")}
+                >
+                    Visible
+                </button>
+
+                <button
+                    className={filter === "hidden" ? "active" : ""}
+                    onClick={() => setFilter("hidden")}
+                >
+                    Hidden
+                </button>
+
+                <button
+                    className={filter === "pinned" ? "active" : ""}
+                    onClick={() => setFilter("pinned")}
+                >
+                    Pinned
+                </button>
+
+            </div>
+
+        </div>
+
+        {/* ==========================================
+            LIST
+        ========================================== */}
+
+        <div className="announcement-list">
+
+            {filteredAnnouncements.length === 0 ? (
+
+                <div className="announcement-empty">
+
+                    <FiBell size={56} />
+
+                    <h3>
+
+                        No announcements available
+
+                    </h3>
+
+                    <p>
+
+                        Create your first announcement to keep everyone informed.
+
+                    </p>
+
+                </div>
+
+            ) : (
+
+                filteredAnnouncements.map((announcement) => (
+
+                    <div
+                        key={announcement._id}
+                        className={`announcement-card ${announcement.pinned ? "pinned" : ""}`}
+                    >
+
+                        {/* ======================== */}
+
+                        <div className="announcement-card-header">
+
+                            <div className="announcement-title">
+
+                                <h3>
+
+                                    {announcement.title}
+
+                                </h3>
+
+                                {announcement.pinned && (
+
+                                    <span className="pinned-badge">
+
+                                        <FiBookmark />
+
+                                        Pinned
+
+                                    </span>
+
+                                )}
+
+                            </div>
+
+                            <div className="announcement-actions">
+
+                                <button
+                                    title="Edit"
+                                    onClick={() => {
+
+                                        setEditingAnnouncement(
+                                            announcement
+                                        );
+
+                                        setShowModal(true);
+
+                                    }}
+                                >
+
+                                    <FiEdit2 />
+
+                                </button>
+
+                                <button
+                                    title={
+                                        announcement.pinned
+                                            ? "Unpin"
+                                            : "Pin"
+                                    }
+                                    onClick={() =>
+                                        handlePin(
+                                            announcement._id
+                                        )
+                                    }
+                                >
+
+                                    <FiBookmark />
+
+                                </button>
+
+                                <button
+                                    title={
+                                        announcement.active
+                                            ? "Hide"
+                                            : "Show"
+                                    }
+                                    onClick={() =>
+                                        handleVisibility(
+                                            announcement._id
+                                        )
+                                    }
+                                >
+
+                                    {announcement.active
+                                        ? <FiEyeOff />
+                                        : <FiEye />}
+
+                                </button>
+
+                                <button
+                                    className="danger"
+                                    title="Delete"
+                                    onClick={() => {
+                                        setDeleteAnnouncement(announcement);
+                                    }}
+                                >
+                                    <FiTrash2 />
+                                </button>
+
+                            </div>
+
+                        </div>
+
+                        {/* ======================== */}
+
+                        <div className="announcement-meta">
+
+                            <span
+                                className={`announcement-type ${announcement.type}`}
+                            >
+
+                                {announcement.type}
+
+                            </span>
+
+                            <span
+                                className={
+                                    announcement.active
+                                        ? "status-badge active"
+                                        : "status-badge hidden"
+                                }
+                            >
+
+                                {announcement.active
+                                    ? "Visible"
+                                    : "Hidden"}
+
+                            </span>
+
+                            <span>
+
+                                {new Date(
+                                    announcement.createdAt
+                                ).toLocaleString([], {
+
+                                    month: "short",
+
+                                    day: "numeric",
+
+                                    year: "numeric",
+
+                                    hour: "numeric",
+
+                                    minute: "2-digit",
+
+                                })}
+
+                            </span>
+
+                        </div>
+
+                        {/* ======================== */}
+
+                        <div className="announcement-content">
+
+                            <p>
+
+                                {announcement.content}
+
+                            </p>
+
+                        </div>
+
+                    </div>
+
+                ))
+
+            )}
+
+        </div>
+
+        {/* ==========================================
+            MODAL
+        ========================================== */}
+
+        {showModal && (
+
+            <AnnouncementModal
+
+                announcement={editingAnnouncement}
+
+                onClose={() => {
+
+                    setShowModal(false);
+
+                    setEditingAnnouncement(null);
+
+                }}
+
+                onSaved={() => {
+
+                    fetchAnnouncements();
+
+                    setShowModal(false);
+
+                    setEditingAnnouncement(null);
+
+                }}
+
+            />
+
+        )}
+
+        {deleteAnnouncement && (
+
+            <div
+                className="modal-overlay"
+                onClick={() => setDeleteAnnouncement(null)}
+            >
+
+                <div
+                    className="modal resolve-modal"
+                    onClick={(e)=>e.stopPropagation()}
+                >
+
+                    <div className="resolve-header">
+
+                        <FiTrash2 className="resolve-icon"/>
+
+                        <h2>
+                            Delete Announcement
+                        </h2>
+
+                    </div>
+
+
+                    <div className="resolve-body">
+
+                        <p>
+                            Are you sure you want to delete this announcement?
+                        </p>
+
+
+                        <div className="resolve-warning">
+
+                            This action cannot be undone.
+
+                        </div>
+
+                    </div>
+
+
+                    <div className="resolve-actions">
+
+
+                        <button
+                            className="btn-keep-ticket"
+                            onClick={() =>
+                                setDeleteAnnouncement(null)
+                            }
+                        >
+
+                            Cancel
+
+                        </button>
+
+
+
+                        <button
+                            className="btn-delete-ticket"
+                            onClick={() => {
+
+                                handleDelete(
+                                    deleteAnnouncement._id
+                                );
+
+                                setDeleteAnnouncement(null);
+
+                            }}
+                        >
+
+                            Delete
+
+                        </button>
+
+
+                    </div>
+
+
+                </div>
+
+            </div>
+
+        )}
 
     </div>
 
-  );
+);
 
 }

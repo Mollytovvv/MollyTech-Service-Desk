@@ -19,14 +19,28 @@ const connectDB = require("./src/config/db");
   // SOCKET.IO SETUP
   // ===============================
   const io = new Server(server, {
+
     cors: {
-      origin: "http://localhost:5173",
-      methods: ["GET", "POST"],
+
+      origin:"http://localhost:5173",
+
+      methods:[
+        "GET",
+        "POST",
+      ],
+
+      credentials:true,
+
     },
+
   });
 
-  // attach io to express (for controllers)
-  app.set("io", io);
+
+  // attach io to express
+  app.set(
+    "io",
+    io
+  );
 
   // ===============================
   // ONLINE USERS STORE
@@ -38,6 +52,10 @@ const connectDB = require("./src/config/db");
   // ===============================
   io.on("connection", (socket) => {
     console.log("🟢 User connected:", socket.id);
+
+  console.log(
+    "Socket ready for real-time updates"
+  );
 
   // ===============================
   // 👤 REGISTER USER
@@ -69,6 +87,8 @@ const connectDB = require("./src/config/db");
     // ===============================
 
     socket.join("admins");
+
+    socket.join("users");
 
 
 
