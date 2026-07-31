@@ -26,7 +26,10 @@ const {
   getMyArchivedTickets,
 } = require("../controllers/ticket.controller");
 
-const authMiddleware = require("../middleware/auth.middleware");
+const {
+  authMiddleware,
+} = require("../middleware/auth.middleware");
+
 const roleMiddleware = require("../middleware/role.middleware");
 
 // ===============================
@@ -40,9 +43,18 @@ router.get(
 );
 
 // ===============================
-// PUBLIC READ ROUTES
+// STAFF TICKET LIST
 // ===============================
-router.get("/", getTickets);
+router.get(
+  "/",
+  authMiddleware,
+  roleMiddleware(
+    "admin",
+    "technician",
+    "support"
+  ),
+  getTickets
+);
 
 // ===============================
 // ADMIN ARCHIVED TICKETS
@@ -67,18 +79,22 @@ router.get(
 router.get(
   "/my/assigned",
   authMiddleware,
-  roleMiddleware("technician", "admin"),
+  roleMiddleware("technician", "support", "admin"),
   getMyAssignedTickets
 );
 
 
 // ===============================
 // CREATE TICKET
+// USER / ADMIN ONLY
 // ===============================
 router.post(
   "/",
   authMiddleware,
-  roleMiddleware("user", "admin", "technician"),
+  roleMiddleware(
+    "user",
+    "admin"
+  ),
   createTicket
 );
 
@@ -108,7 +124,7 @@ router.patch(
 router.post(
   "/:id/comment",
   authMiddleware,
-  roleMiddleware("user", "technician", "admin"),
+  roleMiddleware("user", "technician", "support", "admin"),
   addTicketComment
 );
 
@@ -171,40 +187,77 @@ router.patch(
 // ===============================
 // UPDATE / ASSIGN / RESOLVE / REOPEN
 // ===============================
+
+// VIEW SINGLE TICKET
 router.get(
   "/:id",
   authMiddleware,
+  roleMiddleware(
+    "admin",
+    "technician",
+    "support",
+    "user"
+  ),
   getTicketById
 );
 
+
+// UPDATE TICKET DETAILS
+// User can update own ticket
+// Staff can update tickets they handle
 router.put(
   "/:id",
   authMiddleware,
-  roleMiddleware("user", "admin"),
+  roleMiddleware(
+    "user",
+    "admin",
+    "technician",
+    "support"
+  ),
   updateTicket
 );
 
 // ===============================
-// ASSIGN
+// ASSIGN TICKET
+// ADMIN ONLY
 // ===============================
 router.patch(
   "/:id/assign",
   authMiddleware,
-  roleMiddleware("admin"),
+  roleMiddleware(
+    "admin"
+  ),
   assignTicket
 );
 
+
+// ===============================
+// REOPEN TICKET
+// ADMIN / TECHNICIAN / SUPPORT
+// ===============================
 router.patch(
   "/:id/reopen",
   authMiddleware,
-  roleMiddleware("admin", "technician"),
+  roleMiddleware(
+    "admin",
+    "technician",
+    "support"
+  ),
   reopenTicket
 );
 
+// ===============================
+// RESOLVE TICKET
+// ADMIN / TECHNICIAN / SUPPORT
+// ===============================
 router.patch(
   "/:id/resolve",
   authMiddleware,
-  roleMiddleware("admin", "technician"),
+  roleMiddleware(
+    "admin",
+    "technician",
+    "support"
+  ),
   resolveTicket
 );
 

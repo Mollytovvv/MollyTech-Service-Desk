@@ -62,30 +62,75 @@ export default function Dashboard() {
   const [tickets, setTickets] = useState([]);
   const [users, setUsers] = useState([]);
 
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   useEffect(() => {
     if (!token) return;
 
-    const fetchData = async () => {
-      try {
-        const [ticketRes, userRes] = await Promise.all([
-          api.get("/tickets", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-          api.get("/auth/users", {
-            headers: { Authorization: `Bearer ${token}` },
-          }),
-        ]);
+  const fetchData = async () => {
+    try {
 
-        setTickets(ticketRes.data.tickets ?? []);
-        setUsers(userRes.data.users ?? []);
-        console.log(userRes.data.users);
+      const ticketRes = await api.get("/tickets", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-      } catch (err) {
-        console.log(err.response?.data || err.message);
+
+      setTickets(
+        ticketRes.data.tickets ?? []
+      );
+
+    // =========================
+    // 👥 USERS DATA
+    // =========================
+
+    if(user?.role === "admin"){
+
+    const userRes = await api.get("/auth/users", {
+      headers:{
+        Authorization:`Bearer ${token}`
       }
-    };
+    });
+
+    setUsers(
+      userRes.data.users ?? []
+    );
+
+    }
+
+    else if(
+    user?.role === "technician" ||
+    user?.role === "support"
+    ){
+
+    const userRes = await api.get("/dashboard/staff-recent-users",{
+      headers:{
+        Authorization:`Bearer ${token}`
+      }
+    });
+
+    setUsers(
+      userRes.data.users ?? []
+    );
+
+    }
+
+    else{
+
+    setUsers([]);
+
+    }
+
+
+    } catch (err) {
+
+      console.log(
+        err.response?.data || err.message
+      );
+
+    }
+  };
 
     const handleNewTicket = (ticket) => {
         setTickets((prev) => [ticket, ...prev]);
@@ -103,21 +148,29 @@ export default function Dashboard() {
 
     };
 
-    const handleNewUser = (user) => {
+    const handleNewUser = (newUser) => {
 
-        setUsers((prev) => {
+
+        if(user?.role !== "admin"){
+            return;
+        }
+
+
+        setUsers((prev)=>{
 
             const exists = prev.some(
-                existingUser =>
-                    existingUser._id === user._id
+                existing =>
+                existing._id === newUser._id
             );
 
-            if (exists) {
+
+            if(exists){
                 return prev;
             }
 
+
             return [
-                user,
+                newUser,
                 ...prev
             ];
 
@@ -151,7 +204,7 @@ export default function Dashboard() {
     socket.off("userUpdated", handleUserUpdated);
     };
 
-  }, [token]);
+  }, [token, user]);
 
 
   // =========================
@@ -217,19 +270,36 @@ export default function Dashboard() {
 
   const recentUsers = users
     .filter((u) => {
-      if (u.role !== "user") return false;
 
-      if (userFilter === "all") return true;
+      // only admin needs role filtering
+      if(user?.role === "admin"){
+        
+        if(u.role !== "user") {
+          return false;
+        }
 
-      if (userFilter === "approved")
+      }
+
+
+      if (userFilter === "all") {
+        return true;
+      }
+
+
+      if (userFilter === "approved"){
         return u.status === "approved";
+      }
 
-      if (userFilter === "pending")
+
+      if (userFilter === "pending"){
         return u.status === "pending";
+      }
+
 
       return true;
+
     })
-    .slice(0, 5);
+    .slice(0,5);
 
   const getMonthlyStats = () => {
     const stats = {};
@@ -259,15 +329,20 @@ export default function Dashboard() {
     <div className="dashboard">
 
     <TopCards
+
         tickets={tickets}
+
         users={users}
+
+        user={user}
+
         totalUsers={
             users.filter(
-                user =>
-                    user.role === "user" &&
-                    user.status === "approved"
+                u =>
+                    u.role === "user"
             ).length
         }
+
     />
 
       {/* MAIN WORKSPACE */}

@@ -123,7 +123,6 @@ export default function EditTicketModal({ ticket, onClose }) {
                 <option value="software">Software</option>
                 <option value="network">Network</option>
                 <option value="account">Account</option>
-                <option value="printer">Printer</option>
                 <option value="others">Others</option>
               </select>
             </div>

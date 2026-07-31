@@ -69,6 +69,15 @@ export default function Login() {
 
             }
 
+            else if (
+                user.role === "support" ||
+                user.role === "technician"
+            ) {
+
+                navigate("/dashboard");
+
+            }
+
             else if (user.role === "user") {
 
                 navigate("/user/dashboard");

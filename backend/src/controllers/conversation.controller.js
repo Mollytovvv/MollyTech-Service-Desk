@@ -22,22 +22,59 @@ const getConversations = async (req, res) => {
 
     let query = {};
 
-    // ADMIN
-    if (req.user.role === "admin") {
+    // STAFF
+    if (
+    [
+    "admin",
+    "technician",
+    "support",
+    "it_support"
+    ].includes(req.user.role)
+    ) {
 
-      if (req.query.archived === "true") {
 
-        query = {
-          archivedBy: userId,
-        };
+      // ADMIN sees everything
+      if(req.user.role === "admin"){
 
-      } else {
+        if(req.query.archived === "true"){
 
-        query = {
-          archivedBy: {
-            $ne: userId,
-          },
-        };
+          query = {
+            archivedBy:userId
+          };
+
+        }else{
+
+          query = {
+            archivedBy:{
+              $ne:userId
+            }
+          };
+
+        }
+
+      }
+
+
+      // STAFF sees assigned tickets only
+      else {
+
+
+        if(req.query.archived === "true"){
+
+          query = {
+            archivedBy:userId
+          };
+
+        }else{
+
+          query = {
+            archivedBy:{
+              $ne:userId
+            }
+          };
+
+        }
+
 
       }
 
@@ -64,17 +101,43 @@ const getConversations = async (req, res) => {
 
     }
 
-    const conversations = await Conversation.find(query)
-      .sort({ updatedAt: -1 })
-      .populate(
-        "ticketId",
-        "_id ticketId title status priority category assignedTo"
-      )
-      .populate(
-        "participants.userId",
-        "firstName lastName email"
-      )
-      .lean();
+  let conversations = await Conversation.find(query)
+    .sort({ updatedAt:-1 })
+    .populate({
+      path: "ticketId",
+      select:
+        "_id ticketId title status priority category assignedTo",
+      populate: {
+        path: "assignedTo",
+        select: "role"
+      }
+    })
+    .populate(
+      "participants.userId",
+      "firstName lastName email"
+    )
+    .lean();
+
+    if(
+    [
+    "technician",
+    "support",
+    "it_support"
+    ].includes(req.user.role)
+    ){
+
+    conversations = conversations.filter(
+      (conversation)=>{
+
+        return (
+          conversation.ticketId?.assignedTo?._id?.toString()
+          === userId.toString()
+        );
+
+      }
+    );
+
+    }
 
     const formattedConversations = conversations.map((conversation) => {
       const requesterParticipant = conversation.participants.find(
@@ -219,7 +282,16 @@ const getConversations = async (req, res) => {
       p => p.userId.toString() === req.user.id
     );
 
-    if (!isParticipant && req.user.role !== "admin") {
+
+    if (
+      !isParticipant &&
+      ![
+        "admin",
+        "technician",
+        "support",
+        "it_support",
+      ].includes(req.user.role)
+    ) {
       return res.status(403).json({
         message: "Unauthorized",
       });

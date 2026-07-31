@@ -114,7 +114,50 @@ const User = require("../models/User");
 
     };
 
+    // ===============================
+    // 👥 GET STAFF RECENT USERS
+    // ===============================
+    const getStaffRecentUsers = async (req,res)=>{
+
+      try{
+
+        const users = await User.find({
+          role:"user"
+        })
+        .select(
+          "firstName lastName email createdAt status role"
+        )
+        .sort({
+          createdAt:-1
+        })
+        .limit(5);
+
+
+        return res.json({
+
+          users
+
+        });
+
+
+      }catch(err){
+
+        console.log(
+          "STAFF RECENT USERS ERROR:",
+          err
+        );
+
+
+        return res.status(500).json({
+          message:err.message
+        });
+
+      }
+
+    };
+    
 module.exports = {
   getSidebarCounts,
   getUserMessageCount,
+  getStaffRecentUsers
 };

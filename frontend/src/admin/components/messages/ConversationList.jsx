@@ -4,6 +4,7 @@ import {
   formatCategory,
   formatStatus,
   formatPriority,
+  formatAssignedTo,
 } from "../../../utils/formatter";
 
 import "../../styles/ConversationList.css";
@@ -121,7 +122,7 @@ const filteredConversations = conversations.filter((conversation) => {
   
   const matchesSearch =
     conversation.ticketId?.title?.toLowerCase().includes(query) ||
-    conversation.ticketId?._id?.toLowerCase().includes(query) ||
+    conversation.ticketId?._id?.toString().toLowerCase().includes(query) ||
     conversation.ticketId?.submittedBy?.firstName?.toLowerCase().includes(query) ||
     conversation.ticketId?.submittedBy?.lastName?.toLowerCase().includes(query) ||
     conversation.ticketId?.category?.toLowerCase().includes(query) ||
@@ -324,6 +325,18 @@ const filteredConversations = conversations.filter((conversation) => {
                 ? `${c.requester.firstName} ${c.requester.lastName}`
                 : "Unknown User"}
             </span>
+
+            </div>
+
+            <div className="conversation-requester">
+
+                <i className="fa-solid fa-headset"></i>
+
+                <span>
+                  {c.ticketId?.assignedTo
+                    ? formatAssignedTo(c.ticketId.assignedTo)
+                    : "Awaiting Support"}
+                </span>
 
             </div>
 

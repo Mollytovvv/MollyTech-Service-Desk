@@ -6,7 +6,9 @@ const {
   downloadAttachment,
 } = require("../controllers/message.controller");
 
-const authMiddleware = require("../middleware/auth.middleware");
+const {
+  authMiddleware
+} = require("../middleware/auth.middleware");
 const upload = require("../middleware/upload.middleware");
 
 // ===============================

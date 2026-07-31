@@ -90,8 +90,6 @@ const connectDB = require("./src/config/db");
 
     socket.join("users");
 
-
-
     // Broadcast online users list
     io.emit(
       "onlineUsers",

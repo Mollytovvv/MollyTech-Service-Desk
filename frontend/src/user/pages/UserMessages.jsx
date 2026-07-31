@@ -94,9 +94,32 @@ export default function UserMessages() {
       console.log(activeRes.data);
       console.log(archivedRes.data);
 
-      setConversations(activeRes.data.conversations || []);
+      const normalizeConversation = (conversation)=>{
+
+        return {
+          ...conversation,
+
+          requester:
+            conversation.requester
+            ?
+            `${conversation.requester.firstName || ""} ${conversation.requester.lastName || ""}`.trim()
+            :
+            "Unknown",
+
+        };
+
+      };
+
+
+      setConversations(
+        (activeRes.data.conversations || [])
+        .map(normalizeConversation)
+      );
+
+
       setArchivedConversations(
-        archivedRes.data.conversations || []
+        (archivedRes.data.conversations || [])
+        .map(normalizeConversation)
       );
 
     } catch (err) {

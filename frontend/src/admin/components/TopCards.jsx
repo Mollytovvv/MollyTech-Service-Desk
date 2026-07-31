@@ -3,62 +3,114 @@ import "../styles/TopCards.css";
 
 export default function TopCards({
     tickets = [],
-    totalUsers = 0
+    totalUsers = 0,
+    user
 }) {
 
+
+  const isStaff =
+    user?.role === "support" ||
+    user?.role === "technician";
+
+
   const totalTickets = tickets.length;
+
+
   const pending = tickets.filter(
-      t =>
-          t.status === "open" ||
-          t.status === "pending"
+    t =>
+      t.status === "open" ||
+      t.status === "pending"
   ).length;
-  const resolved = tickets.filter(t => t.status === "resolved").length;
+
+
+  const resolved = tickets.filter(
+    t =>
+      t.status === "resolved"
+  ).length;
+
+
 
   const kpis = [
+
     {
-      label: "Total Users",
+      label:"Total Users",
       value: totalUsers,
-      icon: <FaUsers />,
-      type: "users"
+      icon:<FaUsers />,
+      type:"users"
     },
+
     {
-      label: "Total Tickets",
+      label: isStaff
+        ? "Assigned Tickets"
+        : "Total Tickets",
+
       value: totalTickets,
-      icon: <FaTicketAlt />,
-      type: "tickets"
+
+      icon:<FaTicketAlt />,
+
+      type:"tickets"
     },
+
     {
-      label: "Pending Tickets",
-      value: pending,
-      icon: <FaClock />,
-      type: "pending"
+      label:"Pending Tickets",
+
+      value:pending,
+
+      icon:<FaClock />,
+
+      type:"pending"
     },
+
+
     {
-      label: "Resolved Tickets",
-      value: resolved,
-      icon: <FaCheckCircle />,
-      type: "resolved"
+      label:"Resolved Tickets",
+
+      value:resolved,
+
+      icon:<FaCheckCircle />,
+
+      type:"resolved"
     }
+
   ];
 
+
+
   return (
+
     <div className="kpi-grid">
 
-      {kpis.map((kpi, index) => (
-        <div key={index} className="kpi-card">
+      {kpis.map((kpi,index)=>(
+
+        <div
+          key={index}
+          className="kpi-card"
+        >
 
           <div className={`kpi-icon ${kpi.type}`}>
             {kpi.icon}
           </div>
 
+
           <div className="kpi-content">
-            <p>{kpi.label}</p>
-            <h2>{kpi.value}</h2>
+
+            <p>
+              {kpi.label}
+            </p>
+
+            <h2>
+              {kpi.value}
+            </h2>
+
           </div>
 
         </div>
+
       ))}
 
+
     </div>
+
   );
+
 }
