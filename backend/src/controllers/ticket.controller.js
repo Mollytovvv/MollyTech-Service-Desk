@@ -1024,15 +1024,31 @@ const getArchivedTickets = async (req, res) => {
       );
 
 
-      // notify ticket owner
+      // ===============================
+      // 🔔 REALTIME NOTIFICATION BELL
+      // ===============================
+
+      io.to(
+        ticket.submittedBy.userId.toString()
+      )
+      .emit(
+        "notificationCreated",
+        populatedNotification
+      );
+
+
+      // ===============================
+      // 💬 REALTIME MESSAGE UPDATE
+      // ===============================
+
       io.to(
         ticket.submittedBy.userId.toString()
       )
       .emit(
         "messageNotification",
         {
-          conversationId:conversation._id,
-          message:chatMessage
+          conversationId: conversation._id,
+          message: chatMessage
         }
       );
 
