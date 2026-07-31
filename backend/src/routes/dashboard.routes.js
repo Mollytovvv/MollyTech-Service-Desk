@@ -16,7 +16,7 @@ const {
 
 
 // ===============================
-// 📊 SIDEBAR COUNTS
+// 📊 ADMIN / STAFF SIDEBAR COUNTS
 // ===============================
 
 router.get(
@@ -32,16 +32,16 @@ router.get(
 
 
 // ===============================
-// 💬 MESSAGE COUNT
+// 💬 USER MESSAGE COUNT
 // ===============================
+// Used by UserDashboardLayout
+// Shows unread replies from IT Support
 
 router.get(
   "/user-message-count",
   authMiddleware,
   roleMiddleware(
-    "admin",
-    "technician",
-    "support"
+    "user"
   ),
   getUserMessageCount
 );
@@ -50,8 +50,7 @@ router.get(
 // ===============================
 // 👥 STAFF RECENT USERS
 // ===============================
-// Staff only see users connected
-// to their assigned tickets
+// Staff only
 
 router.get(
   "/staff-recent-users",
@@ -62,5 +61,6 @@ router.get(
   ),
   getStaffRecentUsers
 );
+
 
 module.exports = router;
