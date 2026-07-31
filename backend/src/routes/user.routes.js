@@ -4,10 +4,13 @@ const router = express.Router();
 
 const {
     getProfile,
-    updateProfile
+    updateProfile,
+    getStaffMembers
 } = require("../controllers/user.controller");
 
-const authMiddleware = require("../middleware/auth.middleware");
+const {
+  authMiddleware
+} = require("../middleware/auth.middleware");
 
 
 router.get(
@@ -16,6 +19,11 @@ router.get(
     getProfile
 );
 
+router.get(
+    "/staff",
+    authMiddleware,
+    getStaffMembers
+);
 
 router.patch(
     "/update-profile",

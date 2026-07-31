@@ -89,6 +89,10 @@ export default function UserTicketCenter() {
   const capitalize = (text) => {
     if (!text) return "";
 
+    // Display-friendly labels
+    if (text === "other") return "Others";
+    if (text === "it") return "IT";
+
     const formatted = text
       .replace(/_/g, " ")
       .replace(/\b\w/g, (char) => char.toUpperCase());
@@ -306,7 +310,6 @@ export default function UserTicketCenter() {
             <option value="software">Software</option>
             <option value="network">Network</option>
             <option value="account">Account</option>
-            <option value="printer">Printer</option>
             <option value="others">Others</option>
         </select>
       </section>

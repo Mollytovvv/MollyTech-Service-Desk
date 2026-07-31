@@ -11,7 +11,6 @@ import {
   FiHome,
   FiList,
   FiFileText,
-  FiBarChart2,
   FiSettings,
   FiLogOut,
   FiMessageSquare,
@@ -22,6 +21,7 @@ import {
 export default function DashboardLayout() {
 
   const { logout, token, user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
   const [ticketCount, setTicketCount] = useState(0);
   const [messageCount, setMessageCount] = useState(0);
@@ -239,15 +239,19 @@ export default function DashboardLayout() {
           )}
           </button>
 
-          <p className="nav-title">DATA</p>
+          {isAdmin && (
+            <>
+              <p className="nav-title">DATA</p>
 
-          <button
-            className={isActive("/records") ? "active" : ""}
-            onClick={() => navigate("/records")}
-          >
-            <FiFileText className="icon" />
-            Records
-          </button>
+              <button
+                className={isActive("/records") ? "active" : ""}
+                onClick={() => navigate("/records")}
+              >
+                <FiFileText className="icon" />
+                Records
+              </button>
+            </>
+          )}
 
           {/* 🔥 NEW SECTION */}
           <p className="nav-title">CONTENT</p>
@@ -283,33 +287,34 @@ export default function DashboardLayout() {
           )}
           </button>
 
-          <p className="nav-title">SYSTEM</p>
+          {isAdmin && (
+            <>
+              <p className="nav-title">SYSTEM</p>
 
-          <button
-            className={isActive("/access-requests") ? "active" : ""}
-            onClick={() => navigate("/access-requests")}
-          >
-            <FiUserCheck className="icon" />
+              <button
+                className={isActive("/access-requests") ? "active" : ""}
+                onClick={() => navigate("/access-requests")}
+              >
+                <FiUserCheck className="icon" />
 
-            <span>
-              Access Requests
-            </span>
+                <span>Access Requests</span>
 
-            {accessRequestCount > 0 && (
-              <span className="sidebar-badge">
-                {accessRequestCount}
-              </span>
-            )}
-          </button>
+                {accessRequestCount > 0 && (
+                  <span className="sidebar-badge">
+                    {accessRequestCount}
+                  </span>
+                )}
+              </button>
 
-
-          <button
-            className={isActive("/settings") ? "active" : ""}
-            onClick={() => navigate("/settings")}
-          >
-            <FiSettings className="icon" />
-            Settings
-          </button>
+              <button
+                className={isActive("/settings") ? "active" : ""}
+                onClick={() => navigate("/settings")}
+              >
+                <FiSettings className="icon" />
+                Settings
+              </button>
+            </>
+          )}
 
         </nav>
 
@@ -347,11 +352,16 @@ export default function DashboardLayout() {
 
 
               <div className="status-pill">
-
                 <span className="dot-online"></span>
 
-                Admin System Online
-
+                {user?.role === "admin"
+                  ? "Administrator"
+                  : user?.role === "technician"
+                  ? "Technician"
+                  : user?.role === "support"
+                  ? "IT Support"
+                  : "User"}{" "}
+                Online
               </div>
 
 

@@ -13,8 +13,11 @@ export const formatCategory = (category) => {
     .join(" ");
 };
 
+
 export const formatStatus = (status) => {
+
   switch (status) {
+
     case "open":
       return "Pending";
 
@@ -29,27 +32,50 @@ export const formatStatus = (status) => {
 
     default:
       return status;
+
   }
+
 };
 
+
 export const formatPriority = (priority) => {
+
   if (!priority) return "N/A";
 
   return priority.charAt(0).toUpperCase() +
          priority.slice(1).toLowerCase();
+
 };
 
+
 export const formatAssignedTo = (assignedTo) => {
-  if (!assignedTo) return "Unassigned";
+
+  if (!assignedTo) {
+    return "Unassigned";
+  }
+
 
   const roles = {
     admin: "Admin",
     it_support: "IT Support",
     technician: "Technician",
+    support: "Support",
   };
 
+
+  // populated User object
+  if (typeof assignedTo === "object") {
+
+    return roles[assignedTo.role] || "Assigned Staff";
+
+  }
+
+
+  // fallback string role
   return roles[assignedTo] || assignedTo;
+
 };
+
 
 export const formatDateTime = (date) => {
 
@@ -65,4 +91,3 @@ export const formatDateTime = (date) => {
     }).replace(",", " •");
 
 };
-

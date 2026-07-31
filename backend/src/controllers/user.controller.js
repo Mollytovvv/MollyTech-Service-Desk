@@ -381,7 +381,58 @@ const rejectUser = async(req,res)=>{
 };
 
 
+// ===============================
+// GET STAFF MEMBERS
+// ADMIN / STAFF
+// ===============================
+const getStaffMembers = async (req, res) => {
 
+    try {
+
+        const staff = await User.find({
+
+            role: {
+                $in: [
+                    "technician",
+                    "support"
+                ]
+            },
+
+            status: "approved"
+
+        })
+
+        .select(
+            "_id firstName lastName role email"
+        )
+
+        .sort({
+            firstName: 1
+        });
+
+        return res.json({
+            count: staff.length,
+            staff
+        });
+
+    }
+
+    catch (err) {
+
+        console.error(
+            "Get staff members error:",
+            err
+        );
+
+        return res.status(500).json({
+
+            message: "Failed to fetch staff"
+
+        });
+
+    }
+
+};
 
 
 // ===============================
@@ -397,6 +448,8 @@ module.exports = {
 
     approveUser,
 
-    rejectUser
+    rejectUser,
+
+    getStaffMembers
 
 };

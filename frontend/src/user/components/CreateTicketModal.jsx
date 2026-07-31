@@ -275,15 +275,11 @@ export default function CreateTicketModal({
                   Network
                 </option>
 
-                <option value="bug">
-                    Bug
-                </option>
-
                 <option value="account">
                   Account
                 </option>
 
-                <option value="other">
+                <option value="others">
                   Others
                 </option>
               </select>
@@ -312,7 +308,12 @@ export default function CreateTicketModal({
                 <option value="high">
                   🔴 High
                 </option>
+
+                <option value="urgent">
+                  ⛔ Urgent
+                </option>
               </select>
+
             </div>
           </div>
 

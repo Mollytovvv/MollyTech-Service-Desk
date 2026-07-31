@@ -14,6 +14,7 @@ export default function TicketCenter() {
   // STATE MANAGEMENT
   // =========================
   const [tickets, setTickets] = useState([]);
+  const [staff, setStaff] = useState([]);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [selectedTicket, setSelectedTicket] = useState(null);
@@ -37,7 +38,10 @@ export default function TicketCenter() {
   // =========================
   useEffect(() => {
     if (!token) return;
+
     fetchTickets();
+    fetchStaff();
+
   }, [token]);
 
   useEffect(() => {
@@ -59,6 +63,25 @@ export default function TicketCenter() {
     }
   };
 
+  // =========================
+  // FETCH STAFF MEMBERS 
+  // =========================
+  const fetchStaff = async () => {
+    try {
+      const res = await api.get("/users/staff", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      setStaff(res.data.staff);
+
+    } catch (err) {
+      console.log(err);
+      showToast("error", "Failed to load staff");
+    }
+  };
+  
   // =========================
   // FORMAT HELPERS
   // =========================
@@ -94,13 +117,9 @@ export default function TicketCenter() {
   const formatAssignedTo = (assignedTo) => {
     if (!assignedTo) return "Unassigned";
 
-    const roles = {
-      admin: "Admin",
-      it_support: "IT Support",
-      technician: "Technician",
-    };
-
-    return roles[assignedTo] || assignedTo;
+    return assignedTo.role === "support"
+      ? "IT Support"
+      : "Technician";
   };
 
   // =========================
@@ -210,19 +229,27 @@ const handleReopen = async (id) => {
     // =====================
     // ASSIGN TICKET
     // =====================
-    const assignRes = await api.patch(
-      `/tickets/${selectedTicket._id}/assign`,
-      {
-        assignedTo: assignValue || null,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    let updatedTicket = selectedTicket;
 
-    let updatedTicket = assignRes.data.ticket;
+    // Only assign if the selected staff changed
+    if (
+      assignValue !== (selectedTicket.assignedTo?._id || "")
+    ) {
+
+      const assignRes = await api.patch(
+        `/tickets/${selectedTicket._id}/assign`,
+        {
+          assignedTo: assignValue || null,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      updatedTicket = assignRes.data.ticket;
+    }
 
     // =====================
     // ADD COMMENT
@@ -538,7 +565,7 @@ const handleReopen = async (id) => {
                     onClick={(e) => {
                       e.stopPropagation();
                       setSelectedTicket(t);
-                      setAssignValue(t.assignedTo || "");
+                      setAssignValue(t.assignedTo?._id || "");
                       setCommentInput("");
                     }}
                   >
@@ -664,9 +691,17 @@ const handleReopen = async (id) => {
                     onChange={(e) => setAssignValue(e.target.value)}
                   >
                     <option value="">Unassigned</option>
-                    <option value="admin">Admin</option>
-                    <option value="it_support">IT Support</option>
-                    <option value="technician">Technician</option>
+
+                    {staff.map((member) => (
+                      <option
+                        key={member._id}
+                        value={member._id}
+                      >
+                        {member.role === "support"
+                          ? "IT Support"
+                          : "Technician"}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

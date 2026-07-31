@@ -10,14 +10,11 @@ const userSchema = new mongoose.Schema(
 
     firstName: {
 
-        type: String,
+        type:String,
 
-        required: function(){
+        required:function(){
 
-            return (
-                this.role === "user" ||
-                this.role === "technician"
-            );
+            return this.role === "user";
 
         },
 
@@ -34,7 +31,8 @@ const userSchema = new mongoose.Schema(
 
             return (
                 this.role === "user" ||
-                this.role === "technician"
+                this.role === "technician" ||
+                this.role === "support"
             );
 
         },
@@ -86,19 +84,21 @@ const userSchema = new mongoose.Schema(
 
     role: {
 
-        type:String,
+        type: String,
 
-        enum:[
+        enum: [
 
             "admin",
 
             "technician",
 
-            "user"
+            "support",
+
+            "user",
 
         ],
 
-        default:"user",
+        default: "user",
 
     },
 

@@ -28,6 +28,22 @@ if(!user){
 
 }
 
+// =========================
+// BLOCK STAFF FROM CREATING TICKETS
+// =========================
+
+if(
+    user.role === "admin" ||
+    user.role === "technician" ||
+    user.role === "support"
+){
+
+    return res.status(403).json({
+        message:"Staff accounts cannot create tickets."
+    });
+
+}
+
 console.log("BODY:", req.body);
 
 const rawPhone =
@@ -222,22 +238,38 @@ console.log("FORMATTED PHONE:", phoneNumber);
   // ===============================
   const getTickets = async (req, res) => {
     try {
-  const query = Ticket.find({
-      "archivedBy.admin": false,
-      status: { $ne: "cancelled" }
-  });
 
-  const tickets = await query.sort({ createdAt: -1 });
+      let filter = {
+        "archivedBy.admin": false,
+        status: { $ne: "cancelled" },
+      };
 
-  console.log(JSON.stringify(tickets, null, 2));
+      // ===============================
+      // STAFF ONLY SEE THEIR ASSIGNED TICKETS
+      // ===============================
+      if (
+        req.user.role === "support" ||
+        req.user.role === "technician"
+      ) {
+        filter.assignedTo = req.user.id;
+      }
 
-  res.json({
-    count: tickets.length,
-    tickets,
-  });
+      const tickets = await Ticket.find(filter)
+        .sort({ createdAt: -1 })
+        .populate(
+          "assignedTo",
+          "firstName lastName role"
+        );
+
+      return res.json({
+        count: tickets.length,
+        tickets,
+      });
 
     } catch (err) {
-      res.status(500).json({ message: err.message });
+      return res.status(500).json({
+        message: err.message,
+      });
     }
   };
 
@@ -402,93 +434,179 @@ const getTicketById = async (req, res) => {
   };
 
 // ===============================
-// 👨‍💼 ASSIGN TICKET
+// ADMIN ONLY
 // ===============================
 const assignTicket = async (req, res) => {
   try {
-    const { assignedTo } = req.body;
 
-    const updatedTicket = await Ticket.findByIdAndUpdate(
-      req.params.id,
-      {
-        $set: {
-          assignedTo: assignedTo || null,
-        },
-        $push: {
-          activityLogs: {
-            action: "Ticket Assigned",
-            performedBy: req.user?.id || "system",
-            details: assignedTo || "Unassigned",
-          },
-        },
-      },
-      {
-        new: true,
-        runValidators: false, 
-      }
-    );
+    console.log("========== ASSIGN DEBUG ==========");
+    console.log("USER:", req.user);
+    console.log("BODY:", req.body);
+    console.log("PARAMS:", req.params);
 
-    if (!updatedTicket) {
-      return res.status(404).json({ message: "Ticket not found" });
+
+    console.log("ASSIGN USER:", req.user);
+
+    if(req.user.role !== "admin"){
+      return res.status(403).json({
+        message:"Only admin can assign tickets."
+      });
     }
 
-    // ===============================
-    // CREATE USER NOTIFICATION
-    // ===============================
 
-    const notification =
-      await Notification.create({
-        recipient:
-          updatedTicket.submittedBy.userId,
-        sender: req.user.id,
-        type: "ticket_assigned",
-        title: "Ticket Assigned",
-        message: `Your ticket "${updatedTicket.title}" has been assigned.`,
-        ticketId: updatedTicket._id,
-      });
+    const { assignedTo } = req.body;
 
-    // ===============================
-    // POPULATE NOTIFICATION
-    // ===============================
 
-    const populatedNotification =
-      await Notification.findById(
-        notification._id
-      )
-        .populate(
-          "sender",
-          "_id firstName lastName role"
-        )
-        .populate(
-          "ticketId",
-          "ticketId title status"
-        );
-
-    // ===============================
-    // REAL-TIME EVENTS
-    // ===============================
-
-    const io = req.app.get("io");
-
-    // Update tickets
-    io.emit("ticketUpdated", updatedTicket);
-
-    // Send notification
-    io.to(
-      updatedTicket.submittedBy.userId.toString()
-    ).emit(
-      "notificationCreated",
-      populatedNotification
+    const ticket = await Ticket.findById(
+      req.params.id
     );
 
-    return res.json({
-      message: "Ticket assigned successfully",
-      ticket: updatedTicket,
+
+    if(!ticket){
+
+      return res.status(404).json({
+        message:"Ticket not found."
+      });
+
+    }
+
+
+
+    // ===============================
+    // PREVENT REASSIGNMENT
+    // ===============================
+
+    if(ticket.assignedTo){
+
+      return res.status(400).json({
+        message:"Ticket is already assigned."
+      });
+
+    }
+
+
+
+    let staff = null;
+
+
+
+    // ===============================
+    // VALIDATE STAFF
+    // ===============================
+
+    if (assignedTo) {
+
+      staff = await User.findById(assignedTo);
+
+      if (!staff) {
+        return res.status(404).json({
+          message:"Staff member not found."
+        });
+      }
+
+      if(!staff){
+
+        return res.status(404).json({
+          message:"Staff member not found."
+        });
+
+      }
+
+      if(
+      ![
+        "support",
+        "technician",
+        "it_support"
+      ].includes(staff.role)
+      )
+      
+      {
+
+        return res.status(400).json({
+          message:
+          "Only support or technician can be assigned."
+        });
+
+      }
+
+    }
+
+
+
+    // ===============================
+    // ASSIGN
+    // ===============================
+
+    ticket.assignedTo =
+      staff._id;
+
+
+
+    ticket.activityLogs.push({
+
+      action:"Ticket Assigned",
+
+      performedBy:req.user.id,
+
+      details:
+      `Assigned to ${staff.firstName} ${staff.lastName}`
+
     });
 
-  } catch (err) {
-    console.log("ASSIGN ERROR:", err);
-    return res.status(500).json({ message: err.message });
+
+
+    await ticket.save();
+
+
+
+    await ticket.populate(
+      "assignedTo",
+      "firstName lastName role"
+    );
+
+
+
+    // ===============================
+    // SOCKET UPDATE
+    // ===============================
+
+    const io=req.app.get("io");
+
+
+    if(io){
+
+      io.emit(
+        "ticketUpdated",
+        ticket
+      );
+
+    }
+
+
+
+    return res.json({
+
+      message:
+      "Ticket assigned successfully.",
+
+      ticket
+
+    });
+
+
+  }
+  catch(err){
+
+    console.log(
+      "ASSIGN ERROR:",
+      err
+    );
+
+
+    return res.status(500).json({
+      message:err.message
+    });
+
   }
 };
 
@@ -524,39 +642,44 @@ const resolveTicket = async (req, res) => {
 
     const io = req.app.get("io");
 
-// ===============================
-// 🔔 NOTIFY USER TICKET RESOLVED
-// ===============================
+    // ===============================
+    // 🔔 NOTIFY USER TICKET RESOLVED
+    // ===============================
 
-const notification = await Notification.create({
+    const notification = await Notification.create({
 
-  recipient: ticket.submittedBy.userId,
+      recipient: ticket.submittedBy.userId,
 
-  sender: req.user.id,
+      sender: req.user.id,
 
-  type: "ticket_resolved",
+      type: "ticket_resolved",
 
-  title: "Ticket Resolved",
+      title: "Ticket Resolved",
 
-  message: `Your ticket "${ticket.title}" has been resolved.`,
+      message: `Your ticket "${ticket.title}" has been resolved.`,
 
-  ticketId: ticket._id,
+      ticketId: ticket._id,
 
-});
+    });
 
-const populatedNotification =
-  await Notification.findById(notification._id)
-    .populate(
-      "sender",
-      "_id firstName lastName role"
-    )
-    .populate(
-      "ticketId",
-      "ticketId title status"
-    );
+    const populatedNotification =
+      await Notification.findById(notification._id)
+        .populate(
+          "sender",
+          "_id firstName lastName role"
+        )
+        .populate(
+          "ticketId",
+          "ticketId title status"
+        );
 
 
-if(io){
+  if(io){
+
+  io.to(ticket.submittedBy.userId.toString()).emit(
+      "notificationCreated",
+      populatedNotification
+  );
 
   io.to(ticket.submittedBy.userId.toString())
     .emit(
@@ -767,24 +890,34 @@ const getArchivedTickets = async (req, res) => {
   }
 };
 
-// ===============================
-// 💬 ADD COMMENT
-// ===============================
-const addTicketComment = async (req, res) => {
-  try {
+    // ===============================
+    // 💬 ADD COMMENT
+    // ===============================
+    const addTicketComment = async (req, res) => {
+      try {
 
-    console.log("🔥 ADD COMMENT HIT");
-    console.log("BODY:", req.body);
-    console.log("TICKET ID:", req.params.id);
-    console.log("USER:", req.user);
-  
-    const { id } = req.params;
-    const { message } = req.body;
+        console.log("🔥 ADD COMMENT HIT");
+        console.log("BODY:", req.body);
+        console.log("TICKET ID:", req.params.id);
+        console.log("USER:", req.user);
+      
+        const { id } = req.params;
+        const { message } = req.body;
 
-    // ❌ BLOCK USERS
-    if (req.user?.role === "user") {
+    // ===============================
+    // STAFF ONLY COMMENT ACCESS
+    // ===============================
+
+    if(
+      ![
+        "admin",
+        "support",
+        "technician",
+        "it_support"
+      ].includes(req.user.role)
+    ){
       return res.status(403).json({
-        message: "Users are not allowed to comment on tickets"
+        message:"Only staff can comment."
       });
     }
 
@@ -801,8 +934,10 @@ const addTicketComment = async (req, res) => {
       return res.status(404).json({ message: "Ticket not found" });
     }
 
-    const username = req.user
-      ? `${req.user.firstName} ${req.user.lastName}`
+    const currentUser = await User.findById(req.user.id);
+
+    const username = currentUser
+      ? `${currentUser.firstName} ${currentUser.lastName}`
       : "System";
 
     // 💬 ADD COMMENT
@@ -822,36 +957,84 @@ const addTicketComment = async (req, res) => {
 
     const chatMessage = await Message.create({
       conversationId: conversation._id,
-      sender: req.user.id,
+      sender: req.user._id || req.user.id,
       senderRole: req.user.role || "admin",
       text: message,
     });
 
 
     conversation.lastMessage = message;
+
     conversation.updatedAt = new Date();
+
+    conversation.userUnread = true;
 
     await conversation.save();
 
+    // ===============================
+    // CREATE USER NOTIFICATION
+    // ===============================
+    const notification = await Notification.create({
+        recipient: ticket.submittedBy.userId,
+        sender: req.user.id,
+        type: "new_message",
+        title: "New Support Reply",
+        message: `Support replied to "${ticket.title}".`,
+        ticketId: ticket._id,
+        conversationId: conversation._id,
+    });
+
+    const populatedNotification =
+        await Notification.findById(notification._id)
+            .populate(
+                "sender",
+                "_id firstName lastName role"
+            )
+            .populate(
+                "ticketId",
+                "ticketId title status"
+            )
+            .populate(
+                "conversationId",
+                "_id"
+            );
 
     const io = req.app.get("io");
 
+    if(io){
 
-    if (io) {
-
-      // Update open chat window
-      io.to(conversation._id.toString()).emit(
+      // update opened chat windows
+      io.to(
+        conversation._id.toString()
+      )
+      .emit(
         "receiveMessage",
         chatMessage
       );
 
 
-      // Update conversation sidebar
-      io.emit("conversationUpdated", {
-        conversationId: conversation._id,
-        lastMessage: message,
-        updatedAt: new Date(),
-      });
+      // update all conversation lists
+      io.emit(
+        "conversationUpdated",
+        {
+          conversationId: conversation._id,
+          lastMessage: message,
+          updatedAt:new Date(),
+        }
+      );
+
+
+      // notify ticket owner
+      io.to(
+        ticket.submittedBy.userId.toString()
+      )
+      .emit(
+        "messageNotification",
+        {
+          conversationId:conversation._id,
+          message:chatMessage
+        }
+      );
 
     }
 

@@ -59,12 +59,36 @@ if (
     // AUTHORIZATION CHECK
     // ===============================
     const isParticipant = conversation.participants?.some(
-      (p) => p.userId?.toString() === req.user.id?.toString()
+      (p) =>
+        p.userId?.toString() === req.user.id?.toString()
     );
 
-    if (!isParticipant && req.user.role !== "admin") {
+
+    const isStaff = [
+      "admin",
+      "technician",
+      "support",
+      "it_support",
+    ].includes(req.user.role);
+
+
+    const assignedStaff =
+    (
+      conversation.ticketId?.assignedTo?._id ||
+      conversation.ticketId?.assignedTo
+    )?.toString()
+    ===
+    req.user.id.toString();
+
+
+    if (
+      !isParticipant &&
+      !isStaff &&
+      !assignedStaff
+    ) {
       return res.status(403).json({
-        message: "You are not allowed to send messages in this conversation",
+        message:
+          "You are not allowed to send messages in this conversation",
       });
     }
 
@@ -111,14 +135,23 @@ if (
 
     conversation.updatedAt = new Date();
 
-    // User sent a message
     if (req.user.role === "user") {
+
       conversation.adminUnread = true;
+
     }
 
-    // Admin sent a message
-    if (req.user.role === "admin") {
+    if (
+      [
+        "admin",
+        "technician",
+        "it_support",
+        "support"
+      ].includes(req.user.role)
+    ) {
+
       conversation.userUnread = true;
+
     }
 
     await conversation.save();
@@ -288,7 +321,11 @@ if (
       .populate({
         path: "ticketId",
         select:
-        "_id ticketId title description status priority category assignedTo createdAt comments email phoneNumber"
+          "_id ticketId title description status priority category assignedTo createdAt comments email phoneNumber",
+        populate: {
+          path: "assignedTo",
+          select: "firstName lastName role",
+        },
       })
       .populate({
         path: "participants.userId",
@@ -304,10 +341,22 @@ if (
     // ===============================
     // RESET UNREAD FLAG
     // ===============================
-    if (req.user.role === "admin") {
+
+    if (
+    [
+      "admin",
+      "technician",
+      "support",
+      "it_support",
+    ].includes(req.user.role)
+    ) {
+
       conversation.adminUnread = false;
+
     } else {
+
       conversation.userUnread = false;
+
     }
 
     await conversation.save();

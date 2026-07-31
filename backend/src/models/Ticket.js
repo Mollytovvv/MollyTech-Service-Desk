@@ -121,8 +121,15 @@ const ticketSchema = new mongoose.Schema(
 
     category: {
       type: String,
-      enum: ["software", "hardware", "network", "account", "bug", "other"],
-      default: "other",
+      enum: [
+        "software",
+        "hardware",
+        "network",
+        "account",
+        "bug",
+        "others",
+      ],
+      default: "others",
     },
 
     status: {
@@ -144,7 +151,8 @@ const ticketSchema = new mongoose.Schema(
     },
 
     assignedTo: {
-      type: String,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       default: null,
     },
 

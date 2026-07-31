@@ -6,6 +6,7 @@ const conversationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Ticket",
       required: true,
+      index: true,
     },
 
     participants: [
@@ -13,6 +14,7 @@ const conversationSchema = new mongoose.Schema(
         userId: {
           type: mongoose.Schema.Types.ObjectId,
           ref: "User",
+          required: true,
         },
 
         role: {
@@ -29,7 +31,10 @@ const conversationSchema = new mongoose.Schema(
 
     status: {
       type: String,
-      enum: ["active", "closed"],
+      enum: [
+        "active",
+        "closed"
+      ],
       default: "active",
     },
 
@@ -50,7 +55,34 @@ const conversationSchema = new mongoose.Schema(
       },
     ],
   },
-  { timestamps: true }
+  {
+    timestamps: true,
+  }
 );
 
-module.exports = mongoose.model("Conversation", conversationSchema);
+
+// =====================================
+// INDEXES
+// =====================================
+
+// Faster ticket lookup
+
+
+// Faster user conversation lookup
+conversationSchema.index({
+  "participants.userId": 1,
+});
+
+
+// Faster sorting for recent conversations
+conversationSchema.index({
+  updatedAt: -1,
+});
+
+
+module.exports =
+  mongoose.models.Conversation ||
+  mongoose.model(
+    "Conversation",
+    conversationSchema
+  );
