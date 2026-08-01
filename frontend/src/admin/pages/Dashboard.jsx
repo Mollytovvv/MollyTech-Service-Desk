@@ -138,13 +138,99 @@ export default function Dashboard() {
 
     const handleTicketUpdated = (updatedTicket) => {
 
-        setTickets((prev) =>
-            prev.map((ticket) =>
-                ticket._id === updatedTicket._id
-                    ? updatedTicket
-                    : ticket
-            )
+        console.log(
+            "🟢 Ticket Update Received:",
+            updatedTicket
         );
+
+
+        if(!updatedTicket) return;
+
+
+        setTickets((prev)=>{
+
+            const exists = prev.some(
+                t => t._id === updatedTicket._id
+            );
+
+
+            // =========================
+            // EXISTING TICKET
+            // =========================
+            if(exists){
+
+                return prev.map((ticket)=>{
+
+                    if(ticket._id === updatedTicket._id){
+
+                        return updatedTicket;
+
+                    }
+
+                    return ticket;
+
+                });
+
+            }
+
+
+
+            // =========================
+            // TECHNICIAN / SUPPORT
+            // ONLY SHOW ASSIGNED
+            // =========================
+            if(
+                user?.role === "technician" ||
+                user?.role === "support"
+            ){
+
+
+                const assignedId =
+                    updatedTicket.assignedTo?._id ||
+                    updatedTicket.assignedTo;
+
+
+
+                const currentUserId =
+                    user._id ||
+                    user.id;
+
+
+
+                if(
+                    assignedId &&
+                    assignedId.toString() === currentUserId.toString()
+                ){
+
+                    console.log(
+                        "🔥 Assigned ticket added"
+                    );
+
+
+                    return [
+                        updatedTicket,
+                        ...prev
+                    ];
+
+                }
+
+
+
+                return prev;
+
+            }
+
+
+
+            // =========================
+            // ADMIN
+            // =========================
+            return [
+                updatedTicket,
+                ...prev
+            ];
+
+        });
 
     };
 
@@ -188,20 +274,104 @@ export default function Dashboard() {
         );
     };
 
+    const handleAssignedTicket = (ticket)=>{
+
+        console.log(
+            "🔥 Assigned Ticket Received:",
+            ticket
+        );
+
+
+        setTickets((prev)=>{
+
+
+            const exists = prev.some(
+                t => t._id === ticket._id
+            );
+
+
+            // =========================
+            // UPDATE EXISTING TICKET
+            // =========================
+            if(exists){
+
+                return prev.map(t =>
+                    t._id === ticket._id
+                        ? ticket
+                        : t
+                );
+
+            }
+
+
+            // =========================
+            // ADD NEW ASSIGNED TICKET
+            // =========================
+            return [
+                ticket,
+                ...prev
+            ];
+
+
+        });
+
+    };
+
 
     socket.on("newTicket", handleNewTicket);
-    socket.on("ticketUpdated", handleTicketUpdated);
+
+    socket.on(
+        "ticketUpdated",
+        handleTicketUpdated
+    );
+
+
+    socket.on(
+        "assignedTicket",
+        handleAssignedTicket
+    );
+
+
     socket.on("newUser", handleNewUser);
-    socket.on("userUpdated", handleUserUpdated);
+
+    socket.on(
+        "userUpdated",
+        handleUserUpdated
+    );
 
     fetchData();
 
     return () => {
-    socket.off("newTicket", handleNewTicket);
-    socket.off("ticketUpdated", handleTicketUpdated);
 
-    socket.off("newUser", handleNewUser);
-    socket.off("userUpdated", handleUserUpdated);
+    socket.off(
+        "newTicket",
+        handleNewTicket
+    );
+
+
+    socket.off(
+        "ticketUpdated",
+        handleTicketUpdated
+    );
+
+
+    socket.off(
+        "assignedTicket",
+        handleAssignedTicket
+    );
+
+
+    socket.off(
+        "newUser",
+        handleNewUser
+    );
+
+
+    socket.off(
+        "userUpdated",
+        handleUserUpdated
+    );
+
     };
 
   }, [token, user]);

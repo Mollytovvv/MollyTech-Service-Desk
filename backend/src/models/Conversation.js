@@ -38,15 +38,12 @@ const conversationSchema = new mongoose.Schema(
       default: "active",
     },
 
-    adminUnread: {
-      type: Boolean,
-      default: false,
-    },
-
-    userUnread: {
-      type: Boolean,
-      default: false,
-    },
+    unreadBy: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
 
     archivedBy: [
       {

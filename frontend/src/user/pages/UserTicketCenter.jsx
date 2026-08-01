@@ -44,6 +44,23 @@ export default function UserTicketCenter() {
   const { showToast } = useToast();
 
   // ===============================
+  // REGISTER SOCKET USER ROOM
+  // ===============================
+
+  useEffect(() => {
+
+    if (!user?._id) return;
+
+    console.log(
+      "Socket registered:",
+      user._id,
+      user.role
+    );
+
+
+  }, [user]);
+
+  // ===============================
   // FETCH USER TICKETS
   // ===============================
 
@@ -72,19 +89,140 @@ export default function UserTicketCenter() {
     fetchTickets(true);
   }, []);
 
-  useEffect(() => {
-    const handleTicketUpdate = () => {
-      fetchTickets(false);
+  // ===============================
+  // REALTIME USER TICKET UPDATE
+  // ===============================
+
+useEffect(() => {
+
+
+    const updateTicketState = (updatedTicket)=>{
+
+
+        console.log(
+            "🔥 Realtime Ticket Update:",
+            updatedTicket
+        );
+
+
+        if(!updatedTicket){
+            return;
+        }
+
+
+        setTickets((prev)=>{
+
+
+            const exists = prev.some(
+                t => t._id === updatedTicket._id
+            );
+
+
+            if(!exists){
+
+                return [
+                    updatedTicket,
+                    ...prev
+                ];
+
+            }
+
+
+            return prev.map((ticket)=>{
+
+
+                if(ticket._id === updatedTicket._id){
+
+
+                    return {
+                        ...ticket,
+                        ...updatedTicket
+                    };
+
+
+                }
+
+
+                return ticket;
+
+
+            });
+
+
+        });
+
+
     };
 
-    socket.on("ticketUpdated", handleTicketUpdate);
-    socket.on("newTicket", handleTicketUpdate);
 
-    return () => {
-      socket.off("ticketUpdated", handleTicketUpdate);
-      socket.off("newTicket", handleTicketUpdate);
+
+    const handleNewTicket = (ticket)=>{
+
+        console.log(
+            "🔥 New Ticket:",
+            ticket
+        );
+
+
+        if(
+            ticket.submittedBy?.userId === user?._id
+        ){
+
+            setTickets((prev)=>[
+                ticket,
+                ...prev
+            ]);
+
+        }
+
     };
-  }, []);
+
+
+
+    socket.on(
+        "ticketUpdated",
+        updateTicketState
+    );
+
+
+    socket.on(
+        "assignedTicket",
+        updateTicketState
+    );
+
+
+    socket.on(
+        "newTicket",
+        handleNewTicket
+    );
+
+
+
+    return ()=>{
+
+
+        socket.off(
+            "ticketUpdated",
+            updateTicketState
+        );
+
+
+        socket.off(
+            "assignedTicket",
+            updateTicketState
+        );
+
+
+        socket.off(
+            "newTicket",
+            handleNewTicket
+        );
+
+
+    };
+
+
+}, [user]);
 
   const capitalize = (text) => {
     if (!text) return "";
@@ -385,7 +523,11 @@ export default function UserTicketCenter() {
                 <span className="ticket-label">Assigned To</span>
 
                 <span className="ticket-assigned">
-                  {ticket.assignedTo ? capitalize(ticket.assignedTo) : "Unassigned"}
+                  {ticket.assignedTo
+                    ? ticket.assignedTo.role === "support"
+                      ? "IT Support"
+                      : capitalize(ticket.assignedTo.role)
+                    : "Awaiting Assignment"}
                 </span>
               </div>
 

@@ -31,7 +31,7 @@ export default function TicketCenter() {
 
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
 
   // =========================
   // FETCH TICKETS
@@ -300,50 +300,158 @@ const handleReopen = async (id) => {
   }
 };
 
-  // =========================
-  // REAL-TIME SOCKET EVENTS
-  // =========================
-  useEffect(() => {
-    const handleNewTicket = (ticket) => {
-      console.log("🔥 New Ticket:", ticket);
+// =========================
+// REAL-TIME SOCKET EVENTS
+// =========================
+useEffect(() => {
 
-      setTickets((prev) => {
-        const exists = prev.some((t) => t._id === ticket._id);
+const handleNewTicket = (ticket) => {
 
-        if (exists) return prev;
+  console.log(
+    "🔥 New Ticket Received:",
+    ticket
+  );
 
-        return [ticket, ...prev];
-      });
-    };
 
-    const handleTicketUpdated = (updatedTicket) => {
-      console.log("🟢 Ticket Updated:", updatedTicket);
+  // Only allow unassigned tickets for admin view
+  if (ticket.assignedTo) {
+    return;
+  }
 
-      if (!updatedTicket) return;
 
-      setTickets((prev) =>
-        prev.map((ticket) =>
-          ticket._id === updatedTicket._id
-            ? updatedTicket
-            : ticket
-        )
-      );
+  setTickets((prev) => {
 
-      setSelectedTicket((prev) =>
-        prev && prev._id === updatedTicket._id
+    const exists = prev.some(
+      (t) => t._id === ticket._id
+    );
+
+
+    if (exists) return prev;
+
+
+    return [
+      ticket,
+      ...prev
+    ];
+
+  });
+
+};
+
+
+
+  const handleTicketUpdated = (updatedTicket) => {
+
+    console.log(
+      "🟢 Ticket Updated:",
+      updatedTicket
+    );
+
+
+    if (!updatedTicket) return;
+
+
+    setTickets((prev) =>
+      prev.map((ticket) =>
+        ticket._id === updatedTicket._id
           ? updatedTicket
-          : prev
+          : ticket
+      )
+    );
+
+
+    setSelectedTicket((prev) =>
+      prev && prev._id === updatedTicket._id
+        ? updatedTicket
+        : prev
+    );
+
+  };
+
+
+
+  // =========================
+  // ASSIGNED TICKET EVENT
+  // =========================
+  const handleAssignedTicket = (ticket) => {
+
+    console.log(
+      "🔥 Assigned Ticket Received:",
+      ticket
+    );
+
+
+    setTickets((prev) => {
+
+      const exists = prev.some(
+        (t) => t._id === ticket._id
       );
-    };
 
-    socket.on("newTicket", handleNewTicket);
-    socket.on("ticketUpdated", handleTicketUpdated);
 
-    return () => {
-      socket.off("newTicket", handleNewTicket);
-      socket.off("ticketUpdated", handleTicketUpdated);
-    };
-  }, []);
+      if (exists) {
+
+        return prev.map((t) =>
+          t._id === ticket._id
+            ? ticket
+            : t
+        );
+
+      }
+
+
+      return [
+        ticket,
+        ...prev
+      ];
+
+    });
+
+  };
+
+
+
+  socket.on(
+    "newTicket",
+    handleNewTicket
+  );
+
+
+  socket.on(
+    "ticketUpdated",
+    handleTicketUpdated
+  );
+
+
+  socket.on(
+    "assignedTicket",
+    handleAssignedTicket
+  );
+
+
+
+  return () => {
+
+    socket.off(
+      "newTicket",
+      handleNewTicket
+    );
+
+
+    socket.off(
+      "ticketUpdated",
+      handleTicketUpdated
+    );
+
+
+    socket.off(
+      "assignedTicket",
+      handleAssignedTicket
+    );
+
+  };
+
+
+}, []);
 
   // =========================
   // FILTER + SEARCH
@@ -697,9 +805,11 @@ const handleReopen = async (id) => {
                         key={member._id}
                         value={member._id}
                       >
-                        {member.role === "support"
-                          ? "IT Support"
-                          : "Technician"}
+                        {
+                        member.role === "support" || member.role === "it_support"
+                        ? "IT Support"
+                        : "Technician"
+                        }
                       </option>
                     ))}
                   </select>

@@ -22,7 +22,6 @@ import {
 
 export default function Messages() {
   const { token, user } = useAuth();
-  console.log("AUTH USER:", user);
 
   const [conversations, setConversations] = useState([]);
   const [selectedConversation, setSelectedConversation] = useState(null);
@@ -70,12 +69,10 @@ export default function Messages() {
         }
       });
 
-
       console.log(
-        "FETCH CONVERSATIONS:",
+        "Fetched conversations:",
         res.data.conversations
       );
-
 
       setConversations(
         res.data.conversations || []
@@ -272,30 +269,18 @@ export default function Messages() {
     setRequester(res.data.requester || null);
 
     // Remove unread dot immediately
-    setConversations((prev) =>
-      prev.map((conversation) => {
-        if (conversation._id !== selectedConversation._id) {
+    setConversations((prev)=>
+      prev.map((conversation)=>{
+
+        if(conversation._id !== selectedConversation._id){
           return conversation;
         }
 
         return {
           ...conversation,
-          adminUnread: false,
+          isUnread:false,
         };
-      })
-    );
 
-    setConversations((prev) =>
-      prev.map((conversation) => {
-        if (conversation._id !== selectedConversation._id) {
-          return conversation;
-        }
-
-        return {
-          ...conversation,
-          adminUnread: false,
-          userUnread: false,
-        };
       })
     );
 
@@ -382,37 +367,9 @@ export default function Messages() {
     };
 
 
-    const handleConversationUpdated = (data) => {
+    const handleConversationUpdated = () => {
 
-      setConversations((prev) => {
-
-        const updated = prev.map((conversation) => {
-
-          if(
-            conversation._id !== data.conversationId
-          ){
-            return conversation;
-          }
-
-
-          return {
-              ...conversation,
-              lastMessage:data.lastMessage,
-              updatedAt:data.updatedAt,
-              adminUnread:data.adminUnread,
-              userUnread:data.userUnread
-          };
-
-        });
-
-
-        return updated.sort(
-          (a,b)=>
-            new Date(b.updatedAt) -
-            new Date(a.updatedAt)
-        );
-
-      });
+      fetchConversations();
 
     };
 
@@ -441,10 +398,39 @@ export default function Messages() {
     );
 
 
-    socket.on(
-      "conversationUpdated",
-      handleConversationUpdated
-    );
+    socket.on("conversationUpdated", (updated) => {
+
+    console.log("conversationUpdated:", updated);
+    console.log("Current user:", user._id);
+
+      setConversations((prev)=> 
+        prev.map((conversation)=>{
+
+          if(conversation._id !== updated.conversationId){
+            return conversation;
+          }
+
+
+          return {
+            ...conversation,
+
+            lastMessage: updated.lastMessage,
+
+            updatedAt: updated.updatedAt,
+
+            unreadBy: updated.unreadBy,
+
+            isUnread:
+                updated.unreadBy?.some(
+                    (id) => id.toString() === user._id.toString()
+                )
+
+          };
+
+        })
+      );
+
+    });
 
 
     return () => {
@@ -473,10 +459,7 @@ export default function Messages() {
       );
 
 
-      socket.off(
-        "conversationUpdated",
-        handleConversationUpdated
-      );
+      socket.off("conversationUpdated");
 
     };
 
@@ -646,11 +629,6 @@ export default function Messages() {
         senderId: res.data.data.sender,
         senderRole: user.role,
       };
-
-      socket.emit("sendMessage", {
-        conversationId: selectedConversation._id,
-        message: savedMessage,
-      });
 
       setInput("");
       setSelectedFile(null);

@@ -107,6 +107,21 @@ export default function DashboardLayout() {
       refreshSidebarCounts
     );
 
+    socket.on(
+      "ticketUpdated",
+      refreshSidebarCounts
+    );
+
+    socket.on(
+      "assignedTicket",
+      refreshSidebarCounts
+    );
+
+    socket.on(
+        "notificationCreated",
+        refreshSidebarCounts
+    );
+
     socket.on("accessRequestUpdated", () => {
 
         console.log("accessRequestUpdated received");
@@ -128,8 +143,23 @@ export default function DashboardLayout() {
         );
 
         socket.off(
+          "ticketUpdated",
+          refreshSidebarCounts
+        );
+
+        socket.off(
+          "assignedTicket",
+          refreshSidebarCounts
+        );
+
+        socket.off(
           "accessRequestUpdated",
           refreshSidebarCounts
+        );
+
+        socket.off(
+            "notificationCreated",
+            refreshSidebarCounts
         );
 
     };
@@ -137,24 +167,6 @@ export default function DashboardLayout() {
 
   }, []);
 
-  // ===============================
-  // 🔌 SOCKET CONNECTION
-  // ===============================
-  useEffect(() => {
-
-    if(!user?._id) return;
-
-
-    socket.connect();
-
-
-    socket.emit(
-      "register",
-      user._id
-    );
-
-
-  }, [user]);
 
   const handleLogout = () => {
     logout();

@@ -143,8 +143,19 @@ console.log("FORMATTED PHONE:", phoneNumber);
 
     if (io) {
 
-        io.emit(
+        // Admin realtime update
+        io.to("admins").emit(
             "newTicket",
+            ticket
+        );
+
+
+        // User who created the ticket
+        io.to(
+            currentUser._id.toString()
+        )
+        .emit(
+            "ticketUpdated",
             ticket
         );
 
@@ -473,16 +484,10 @@ const assignTicket = async (req, res) => {
 
 
     // ===============================
-    // PREVENT REASSIGNMENT
+    // ALLOW REASSIGNMENT
     // ===============================
 
-    if(ticket.assignedTo){
-
-      return res.status(400).json({
-        message:"Ticket is already assigned."
-      });
-
-    }
+    const previousAssignee = ticket.assignedTo;
 
 
 
@@ -537,8 +542,7 @@ const assignTicket = async (req, res) => {
     // ASSIGN
     // ===============================
 
-    ticket.assignedTo =
-      staff._id;
+    ticket.assignedTo = staff ? staff._id : null;
 
 
 
@@ -548,8 +552,9 @@ const assignTicket = async (req, res) => {
 
       performedBy:req.user.id,
 
-      details:
-      `Assigned to ${staff.firstName} ${staff.lastName}`
+      details: staff
+        ? `Assigned to ${staff.firstName} ${staff.lastName} (${staff.role})`
+        : "Ticket unassigned"
 
     });
 
@@ -567,22 +572,150 @@ const assignTicket = async (req, res) => {
 
 
     // ===============================
-    // SOCKET UPDATE
+    // 🔥 REALTIME ASSIGNMENT UPDATE
     // ===============================
 
-    const io=req.app.get("io");
-
+    const io = req.app.get("io");
 
     if(io){
 
-      io.emit(
-        "ticketUpdated",
-        ticket
-      );
+        // update admins
+        io.to("admins")
+        .emit(
+            "ticketUpdated",
+            ticket
+        );
+
+
+        // update assigned staff
+        if(ticket.assignedTo){
+
+        const assignedUserId =
+        ticket.assignedTo._id
+        ? ticket.assignedTo._id.toString()
+        : ticket.assignedTo.toString();
+
+
+          // realtime ticket update
+          io.to(assignedUserId)
+          .emit(
+            "assignedTicket",
+            ticket
+          );
+
+
+          // create notification
+          const notification =
+            await Notification.create({
+
+              recipient: assignedUserId,
+
+              sender: req.user.id,
+
+              type: "ticket_assigned",
+
+              title: "New Ticket Assigned",
+
+              message:
+              `A new ticket "${ticket.title}" has been assigned to you.`,
+
+              ticketId: ticket._id,
+
+            });
+
+
+
+          const populatedNotification =
+            await Notification.findById(
+              notification._id
+            )
+            .populate(
+              "sender",
+              "_id firstName lastName role"
+            )
+            .populate(
+              "ticketId",
+              "ticketId title status"
+            );
+
+
+
+          // send realtime bell update
+          io.to(assignedUserId)
+          .emit(
+            "notificationCreated",
+            populatedNotification
+          );
+
+
+        }
+
+        // ===============================
+        // 🔔 NOTIFY TICKET OWNER
+        // ===============================
+
+        const userNotification =
+          await Notification.create({
+
+            recipient:
+              ticket.submittedBy.userId,
+
+            sender:
+              req.user.id,
+
+            type:
+              "ticket_updated",
+
+            title:
+              "Support Assigned",
+
+            message:
+              "A support staff has been assigned to your ticket.",
+
+            ticketId:
+              ticket._id,
+
+          });
+
+        const populatedUserNotification =
+          await Notification.findById(
+            userNotification._id
+          )
+          .populate(
+            "sender",
+            "_id firstName lastName role"
+          )
+          .populate(
+            "ticketId",
+            "ticketId title status"
+          );
+
+        io.to(
+          ticket.submittedBy.userId.toString()
+        ).emit(
+          "notificationCreated",
+          populatedUserNotification
+        );
+
+        // ===============================
+        // 🔥 UPDATE TICKET OWNER
+        // ===============================
+
+        io.to(
+            ticket.submittedBy.userId.toString()
+        )
+        .emit(
+            "ticketUpdated",
+            ticket
+        );
+
+
+        console.log(
+            "🔥 Sent ticket update to owner:",
+            ticket.submittedBy.userId.toString()
+        );
 
     }
-
-
 
     return res.json({
 
@@ -709,6 +842,7 @@ const resolveTicket = async (req, res) => {
   }
 };
 
+
 // ===============================
 // 🔄 REOPEN / UNRESOLVE TICKET
 // ===============================
@@ -745,6 +879,38 @@ const reopenTicket = async (req, res) => {
     await ticket.save();
 
     const io = req.app.get("io");
+
+    const notification =
+    await Notification.create({
+
+      recipient:
+      ticket.submittedBy.userId,
+
+      sender:
+      req.user.id,
+
+      type:
+      "ticket_reopened",
+
+      title:
+      "Ticket Reopened",
+
+      message:
+      `Your ticket "${ticket.title}" has been reopened.`,
+
+      ticketId:
+      ticket._id,
+
+    });
+
+
+    io.to(
+    ticket.submittedBy.userId.toString()
+    )
+    .emit(
+    "notificationCreated",
+    notification
+    );
 
     io.emit("ticketUpdated", ticket);
 
@@ -962,12 +1128,14 @@ const getArchivedTickets = async (req, res) => {
       text: message,
     });
 
-
     conversation.lastMessage = message;
 
     conversation.updatedAt = new Date();
 
-    conversation.userUnread = true;
+    // User should see the unread dot
+    conversation.unreadBy = [
+      ticket.submittedBy.userId,
+    ];
 
     await conversation.save();
 
@@ -1014,14 +1182,12 @@ const getArchivedTickets = async (req, res) => {
 
 
       // update all conversation lists
-      io.emit(
-        "conversationUpdated",
-        {
+      io.emit("conversationUpdated", {
           conversationId: conversation._id,
-          lastMessage: message,
-          updatedAt:new Date(),
-        }
-      );
+          lastMessage: conversation.lastMessage,
+          updatedAt: conversation.updatedAt,
+          unreadBy: conversation.unreadBy,
+      });
 
 
       // ===============================
@@ -1427,6 +1593,13 @@ const archiveTickets = async (req, res) => {
       "submittedBy.userId": req.user.id,
       "archivedBy.user": false,
       deletedByUser: false,
+  })
+  .populate(
+      "assignedTo",
+      "firstName lastName role"
+  )
+  .sort({
+      createdAt: -1
   });
 
       return res.json({

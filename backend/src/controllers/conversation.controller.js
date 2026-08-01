@@ -109,7 +109,7 @@ const getConversations = async (req, res) => {
         "_id ticketId title status priority category assignedTo",
       populate: {
         path: "assignedTo",
-        select: "role"
+        select: "_id firstName lastName role"
       }
     })
     .populate(
@@ -149,13 +149,16 @@ const getConversations = async (req, res) => {
 
       requester: requesterParticipant?.userId || null,
 
-      adminUnread: conversation.adminUnread,
-      userUnread: conversation.userUnread,
+      isUnread:
+        conversation.unreadBy?.some(
+          id => id.toString() === userId.toString()
+        ),
 
       isArchived: conversation.archivedBy?.some(
         id => id.toString() === userId
       ),
     };
+    
     });
 
     return res.json({
