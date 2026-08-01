@@ -1,37 +1,69 @@
 import { io } from "socket.io-client";
 
+
 // ===============================
 // SINGLE SOCKET INSTANCE
 // ===============================
-const socket = io("http://localhost:5000", {
-  autoConnect: false,
-  transports: ["websocket"],
-});
+const socket = io(
+  "http://localhost:5000",
+  {
+    autoConnect:false,
+    transports:[
+      "websocket"
+    ],
+  }
+);
+
+
 
 // ===============================
-// CONNECT SOCKET (ONLY ONCE)
+// CONNECT SOCKET
 // ===============================
-export const connectSocket = (userId) => {
-  if (!userId) return;
+export const connectSocket = (
+  userId,
+  role
+)=>{
 
-  // prevent duplicate connection
-  if (!socket.connected) {
+  if(!userId) return;
+
+
+  if(!socket.connected){
+
     socket.connect();
+
   }
 
-  socket.emit("register", userId);
+
+
+  socket.emit(
+    "register",
+    {
+      userId,
+      role,
+    }
+  );
+
+
 };
+
+
 
 // ===============================
 // DISCONNECT SOCKET
 // ===============================
-export const disconnectSocket = () => {
-  if (socket.connected) {
+export const disconnectSocket = ()=>{
+
+  if(socket.connected){
+
     socket.disconnect();
+
   }
+
 };
 
+
+
 // ===============================
-// EXPORT SOCKET INSTANCE
+// EXPORT INSTANCE
 // ===============================
 export default socket;

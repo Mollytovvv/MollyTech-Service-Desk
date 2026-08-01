@@ -135,26 +135,61 @@ if (
 
     conversation.updatedAt = new Date();
 
+    // ===============================
+    // UPDATE UNREAD USERS
+    // ===============================
+
+    conversation.unreadBy = [];
+
+    // USER -> notify assigned staff/admin
     if (req.user.role === "user") {
 
-      conversation.adminUnread = true;
+      conversation.unreadBy = [];
+
+      // Assigned technician/support
+      if (conversation.ticketId?.assignedTo) {
+        conversation.unreadBy.push(
+          conversation.ticketId.assignedTo._id ||
+          conversation.ticketId.assignedTo
+        );
+      }
+
+      // Admins
+      const admins = await User.find({
+        role: "admin",
+      }).select("_id");
+
+      admins.forEach((admin) => {
+        conversation.unreadBy.push(admin._id);
+      });
 
     }
 
-    if (
-      [
-        "admin",
-        "technician",
-        "it_support",
-        "support"
-      ].includes(req.user.role)
-    ) {
+    // STAFF -> notify requester
+    else {
 
-      conversation.userUnread = true;
+      const requester =
+        conversation.participants.find(
+          p => p.role === "user"
+        );
+
+      if (requester) {
+        conversation.unreadBy.push(
+          requester.userId.toString()
+        );
+      }
 
     }
 
     await conversation.save();
+
+    const verifyConversation =
+      await Conversation.findById(conversation._id);
+
+    console.log("================================");
+    console.log("AFTER SAVE");
+    console.log("UnreadBy:", verifyConversation.unreadBy);
+    console.log("================================");
 
     console.log("Conversation saved.");
 
@@ -269,24 +304,25 @@ if (
 
     }
 
-  // ===============================
-  // SOCKET.IO
-  // ===============================
-  if (io) {
-    io.to(conversationId).emit(
-      "receiveMessage",
-      populatedMessage
-    );
+    // ===============================
+    // SOCKET.IO
+    // ===============================
+    if (io) {
 
-    io.emit("conversationUpdated", {
-      conversationId,
-      lastMessage: conversation.lastMessage,
-      updatedAt: conversation.updatedAt,
-      senderRole: req.user.role,
-      adminUnread: conversation.adminUnread,
-      userUnread: conversation.userUnread,
-    });
-  }
+      io.to(conversationId).emit(
+        "receiveMessage",
+        populatedMessage
+      );
+
+
+      io.emit("conversationUpdated", {
+        conversationId: conversation._id,
+        lastMessage: conversation.lastMessage,
+        updatedAt: conversation.updatedAt,
+        unreadBy: conversation.unreadBy,
+      });
+
+    }
 
     // ===============================
     // RESPONSE
@@ -339,25 +375,13 @@ if (
     }
 
     // ===============================
-    // RESET UNREAD FLAG
+    // REMOVE CURRENT USER FROM UNREAD
     // ===============================
 
-    if (
-    [
-      "admin",
-      "technician",
-      "support",
-      "it_support",
-    ].includes(req.user.role)
-    ) {
-
-      conversation.adminUnread = false;
-
-    } else {
-
-      conversation.userUnread = false;
-
-    }
+    conversation.unreadBy =
+      (conversation.unreadBy || []).filter(
+        (id) => id.toString() !== req.user.id.toString()
+      );
 
     await conversation.save();
 
@@ -371,8 +395,7 @@ if (
         conversationId: conversation._id,
         lastMessage: conversation.lastMessage,
         updatedAt: conversation.updatedAt,
-        adminUnread: conversation.adminUnread,
-        userUnread: conversation.userUnread,
+        unreadBy: conversation.unreadBy,
       });
     }
 
@@ -399,7 +422,7 @@ if (
     const messages = await Message.find({ conversationId })
       .sort({ createdAt: 1 })
       .populate("sender", "_id firstName lastName role");
-
+          
     // ===============================
     // RESPONSE
     // ===============================

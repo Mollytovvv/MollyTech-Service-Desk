@@ -56,39 +56,51 @@ const connectDB = require("./src/config/db");
   console.log(
     "Socket ready for real-time updates"
   );
-
+  
   // ===============================
   // 👤 REGISTER USER
   // ===============================
-  socket.on("register", (userId) => {
+  socket.on("register", ({ userId, role }) => {
 
     if (!userId) return;
 
 
-    // Save user ID on socket
+    // Save user data on socket
     socket.userId = userId;
+    socket.userRole = role;
 
 
     // Store online user
-    onlineUsers.set(userId, socket.id);
-
+    onlineUsers.set(
+      userId,
+      socket.id
+    );
 
 
     // ===============================
     // PERSONAL USER ROOM
     // ===============================
-
     socket.join(userId);
 
 
 
     // ===============================
-    // ADMIN NOTIFICATION ROOM
+    // ROLE ROOMS
     // ===============================
 
-    socket.join("admins");
+    if (role === "admin") {
 
-    socket.join("users");
+      socket.join("admins");
+
+    }
+
+
+    if (role === "user") {
+
+      socket.join("users");
+
+    }
+
 
     // Broadcast online users list
     io.emit(
@@ -99,7 +111,8 @@ const connectDB = require("./src/config/db");
 
     console.log(
       "👤 Registered user:",
-      userId
+      userId,
+      role
     );
 
 

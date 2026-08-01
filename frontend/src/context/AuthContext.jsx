@@ -64,7 +64,10 @@ export const AuthProvider = ({ children }) => {
 
     if(user?._id){
 
-      connectSocket(user._id);
+    connectSocket(
+      user._id,
+      user.role
+    );
 
     }
 

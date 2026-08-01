@@ -84,31 +84,59 @@ export const NotificationProvider = ({
   }, [user]);
 
   // ===============================
-  // REAL-TIME SOCKET
+  // REAL-TIME SOCKET NOTIFICATIONS
   // ===============================
   useEffect(() => {
 
-    if (!user) return;
+    if (!user?._id) return;
+
 
     const handleNotification = (
       notification
     ) => {
 
-      setNotifications(
-        (prev) => [
-          notification,
-          ...prev,
-        ]
+
+      console.log(
+        "🔔 REALTIME NOTIFICATION:",
+        notification
       );
 
+
+      const realtimeNotification = {
+
+        ...notification,
+
+        isRead:
+          notification.isRead ?? false,
+
+      };
+
+
+      setNotifications((prev) => {
+
+          const exists = prev.some(
+              n => n._id === realtimeNotification._id
+          );
+
+          if (exists) return prev;
+
+          return [
+              realtimeNotification,
+              ...prev,
+          ];
+
+      });
+
     };
+
 
     socket.on(
       "notificationCreated",
       handleNotification
     );
 
-    return () => {
+
+    return()=>{
 
       socket.off(
         "notificationCreated",
@@ -116,6 +144,7 @@ export const NotificationProvider = ({
       );
 
     };
+
 
   }, [user]);
 

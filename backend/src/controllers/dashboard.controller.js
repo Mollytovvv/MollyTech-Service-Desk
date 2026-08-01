@@ -3,114 +3,158 @@ const Ticket = require("../models/Ticket");
 const User = require("../models/User");
 
 
-  // ===============================
-  // 📊 GET SIDEBAR COUNTS
-  // ===============================
-  const getSidebarCounts = async (req, res) => {
+    // ===============================
+    // 📊 GET SIDEBAR COUNTS
+    // ===============================
+    const getSidebarCounts = async (req, res) => {
 
-    try {
+      try {
 
-      // ===============================
-      // 💬 MESSAGE COUNT
-      // ===============================
-      const messageCount =
-        await Conversation.countDocuments({
-          adminUnread: true,
+        let ticketCount = 0;
+        let messageCount = 0;
+        let accessRequestCount = 0;
+
+
+        // ===============================
+        // 🎫 TICKET COUNT BY ROLE
+        // ===============================
+
+        if (req.user.role === "admin") {
+
+          ticketCount = await Ticket.countDocuments({
+            status: {
+              $ne: "resolved",
+            },
+            "archivedBy.admin": false,
+          });
+
+        }
+
+
+        else if (
+          req.user.role === "technician" ||
+          req.user.role === "support"
+        ) {
+
+          ticketCount = await Ticket.countDocuments({
+
+            assignedTo: req.user.id,
+
+            status: {
+              $ne: "resolved",
+            },
+
+            "archivedBy.admin": false,
+
+          });
+
+        }
+
+
+        else {
+
+          ticketCount = await Ticket.countDocuments({
+
+            "submittedBy.userId": req.user.id,
+
+            status: {
+              $ne: "resolved",
+            },
+
+            "archivedBy.user": false,
+
+            deletedByUser: false,
+
+          });
+
+        }
+
+
+
+        // ===============================
+        // 💬 MESSAGE COUNT
+        // ===============================
+
+        messageCount = await Conversation.countDocuments({
+          unreadBy: req.user.id,
         });
 
 
-      // ===============================
-      // 🎫 TICKET COUNT
-      // ===============================
-      const ticketCount =
-        await Ticket.countDocuments({
-          status: {
-            $ne: "resolved",
-          },
+
+        // ===============================
+        // 👤 ACCESS REQUEST COUNT
+        // ===============================
+
+        if(req.user.role === "admin"){
+
+          accessRequestCount =
+            await User.countDocuments({
+
+              role:"user",
+
+              status:"pending",
+
+            });
+
+        }
+
+
+
+        return res.json({
+
+          ticketCount,
+
+          messageCount,
+
+          accessRequestCount,
+
         });
 
 
-      // ===============================
-      // 👤 ACCESS REQUEST COUNT
-      // ===============================
-      const accessRequestCount =
-        await User.countDocuments({
+      } catch(err){
 
-          role: "user",
+        console.log(
+          "SIDEBAR COUNT ERROR:",
+          err
+        );
 
-          status: "pending",
 
+        return res.status(500).json({
+          message:err.message,
         });
 
+      }
 
-      return res.json({
-
-        ticketCount,
-
-        messageCount,
-
-        accessRequestCount,
-
-      });
-
-
-    } catch(err){
-
-      console.log(
-        "SIDEBAR COUNT ERROR:",
-        err
-      );
-
-
-      return res.status(500).json({
-        message: err.message,
-      });
-
-    }
-
-  };
+    };
 
     // ===============================
     // 📩 GET USER MESSAGE COUNT
     // ===============================
     const getUserMessageCount = async (req, res) => {
 
-    try {
+      try {
 
         const messageCount =
-        await Conversation.countDocuments({
-
-            participants: {
-            $elemMatch: {
-                userId: req.user.id
-            }
-            },
-
-            userUnread: true
-
-        });
-
+          await Conversation.countDocuments({
+            unreadBy: req.user.id,
+          });
 
         return res.json({
-
-        messageCount
-
+          messageCount,
         });
 
-
-    } catch(err){
+      } catch (err) {
 
         console.log(
-        "USER MESSAGE COUNT ERROR:",
-        err
+          "USER MESSAGE COUNT ERROR:",
+          err
         );
 
-
         return res.status(500).json({
-        message: err.message,
+          message: err.message,
         });
 
-    }
+      }
 
     };
 

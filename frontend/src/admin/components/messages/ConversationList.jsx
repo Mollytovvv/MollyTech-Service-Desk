@@ -132,7 +132,8 @@ const filteredConversations = conversations.filter((conversation) => {
 
     if (filter === "unread") {
         matchesFilter =
-            conversation.adminUnread && !conversation.isArchived;
+            conversation.isUnread &&
+            !conversation.isArchived;
     }
 
     if (filter === "archives") {
@@ -232,8 +233,8 @@ const filteredConversations = conversations.filter((conversation) => {
                   {c.ticketId?.title || "Untitled Ticket"}
                 </span>
 
-                {c.adminUnread && (
-                  <span className="conversation-unread-dot"></span>
+                {c.isUnread && (
+                    <span className="conversation-unread-dot"></span>
                 )}
 
               </div>
