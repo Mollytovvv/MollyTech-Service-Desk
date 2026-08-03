@@ -2,6 +2,7 @@ import { Routes, Route } from "react-router-dom";
 
 import Login from "./auth/Login";
 
+import ResetPassword from "./auth/ResetPassword";
 
 // ===========================
 // ADMIN / STAFF PAGES
@@ -15,7 +16,6 @@ import Settings from "./admin/pages/Settings";
 import AccessRequests from "./admin/pages/AccessRequests";
 import Announcements from "./admin/pages/Announcements";
 
-
 // ===========================
 // USER PAGES
 // ===========================
@@ -26,7 +26,6 @@ import UserArchives from "./user/pages/UserArchives";
 import UserMessages from "./user/pages/UserMessages";
 import UserSettings from "./user/pages/UserSettings";
 
-
 // ===========================
 // LAYOUTS
 // ===========================
@@ -34,13 +33,11 @@ import UserSettings from "./user/pages/UserSettings";
 import DashboardLayout from "./admin/layouts/DashboardLayout";
 import UserDashboardLayout from "./user/layouts/UserDashboardLayout";
 
-
 // ===========================
 // SECURITY
 // ===========================
 
 import ProtectedRoute from "./components/ProtectedRoute";
-
 
 // ===========================
 // CONTEXT
@@ -48,26 +45,23 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 import { ToastProvider } from "./context/ToastContext";
 
-
 function App() {
-
   return (
-
     <ToastProvider>
-
       <Routes>
-
-
         {/* ===========================
             PUBLIC ROUTES
         ============================ */}
 
         <Route
-          path="/"
-          element={<Login />}
+            path="/"
+            element={<Login />}
         />
 
-
+        <Route
+            path="/reset-password/:token"
+            element={<ResetPassword />}
+        />
 
         {/* ===========================
             STAFF ROUTES
@@ -78,108 +72,69 @@ function App() {
         ============================ */}
 
         <Route
-
           element={
-
             <ProtectedRoute
-
               allowedRoles={[
                 "admin",
                 "technician",
-                "support"
+                "support",
               ]}
-
             >
-
               <DashboardLayout />
-
             </ProtectedRoute>
-
           }
-
         >
-
-
           <Route
             path="/dashboard"
             element={<Dashboard />}
           />
-
 
           <Route
             path="/ticket-center"
             element={<TicketCenter />}
           />
 
-
           <Route
             path="/messages"
             element={<Messages />}
           />
-
-
-          <Route
-            path="/announcements"
-            element={<Announcements />}
-          />
-
-
-        </Route>
-
-
-
-
-
-        {/* ===========================
-            ADMIN ONLY ROUTES
-
-            ADMIN ONLY
-        ============================ */}
-
-        <Route
-
-          element={
-
-            <ProtectedRoute
-
-              allowedRoles={[
-                "admin"
-              ]}
-
-            >
-
-              <DashboardLayout />
-
-            </ProtectedRoute>
-
-          }
-
-        >
-
 
           <Route
             path="/records"
             element={<Records />}
           />
 
+          <Route
+            path="/settings"
+            element={<Settings />}
+          />
+        </Route>
+
+        {/* ===========================
+            ADMIN ONLY ROUTES
+        ============================ */}
+
+        <Route
+          element={
+            <ProtectedRoute
+              allowedRoles={[
+                "admin",
+              ]}
+            >
+              <DashboardLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route
+            path="/announcements"
+            element={<Announcements />}
+          />
 
           <Route
             path="/access-requests"
             element={<AccessRequests />}
           />
-
-
-          <Route
-            path="/settings"
-            element={<Settings />}
-          />
-
-
         </Route>
-
-
-
-
 
         {/* ===========================
             USER ROUTES
@@ -188,68 +143,44 @@ function App() {
         ============================ */}
 
         <Route
-
           element={
-
             <ProtectedRoute
-
               allowedRoles={[
-                "user"
+                "user",
               ]}
-
             >
-
               <UserDashboardLayout />
-
             </ProtectedRoute>
-
           }
-
         >
-
-
           <Route
             path="/user/dashboard"
             element={<UserDashboard />}
           />
-
 
           <Route
             path="/user/tickets"
             element={<UserTicketCenter />}
           />
 
-
           <Route
             path="/user/archives"
             element={<UserArchives />}
           />
-
 
           <Route
             path="/user/messages"
             element={<UserMessages />}
           />
 
-
           <Route
             path="/user/settings"
             element={<UserSettings />}
           />
-
-
         </Route>
-
-
-
       </Routes>
-
-
     </ToastProvider>
-
   );
-
 }
-
 
 export default App;

@@ -170,17 +170,17 @@ const ticketSchema = new mongoose.Schema(
     },
 
     archivedBy: {
-
       user: {
         type: Boolean,
         default: false,
       },
 
-      admin: {
-        type: Boolean,
-        default: false,
-      },
-
+      staff: [
+        {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+      ],
     },
 
     deletedByUser: {

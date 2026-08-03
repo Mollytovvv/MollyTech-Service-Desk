@@ -17,7 +17,16 @@ export default function Records() {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const { token } = useAuth();
+  const { token, user } = useAuth();
+  
+  const isAdmin = user?.role === "admin";
+
+  const isStaff = [
+    "admin",
+    "technician",
+    "support",
+    "it_support",
+  ].includes(user?.role);
 
   // FETCH
   useEffect(() => {
@@ -211,32 +220,32 @@ export default function Records() {
             </select>
 
             {/* DEFAULT BUTTONS */}
-            {actionMode === null && (
-              <>
-                <button
-                  className="btn-unarchive"
-                  onClick={() => {
-                    setActionMode("restore");
-                    setSelectedIds([]);
-                  }}
-                >
-                  Unarchive
-                </button>
+            {isStaff && actionMode === null && (
+              <button
+                className="btn-unarchive"
+                onClick={() => {
+                  setActionMode("restore");
+                  setSelectedIds([]);
+                }}
+              >
+                Unarchive
+              </button>
+            )}
 
-                <button
-                  className="btn-delete"
-                  onClick={() => {
-                    setActionMode("delete");
-                    setSelectedIds([]);
-                  }}
-                >
-                  Delete
-                </button>
-              </>
+            {isAdmin && actionMode === null && (
+              <button
+                className="btn-delete"
+                onClick={() => {
+                  setActionMode("delete");
+                  setSelectedIds([]);
+                }}
+              >
+                Delete
+              </button>
             )}
 
             {/* RESTORE MODE */}
-            {actionMode === "restore" && (
+            {isStaff && actionMode === "restore" && (
               <>
                 <button
                   className="btn-cancel"
@@ -266,7 +275,7 @@ export default function Records() {
             )}
 
             {/* DELETE MODE */}
-            {actionMode === "delete" && (
+            {isAdmin && actionMode === "delete" && (
               <>
                 <button
                   className="btn-cancel"
@@ -326,10 +335,10 @@ export default function Records() {
             {filteredTickets.map((t) => (
             <tr
               key={t._id}
-              onClick={() => {
-                if (!actionMode) return;
-                toggleSelect(t._id);
-              }}
+                onClick={() => {
+                  if (!isStaff || !actionMode) return;
+                  toggleSelect(t._id);
+                }}
                 className={`${actionMode ? "clickable-row" : ""} ${
                 selectedIds.includes(t._id) ? "selected-row" : ""
               }`}
@@ -339,7 +348,7 @@ export default function Records() {
                 <td className="title-cell title-flex">
 
                     {/* CHECKBOX (ONLY WHEN UNARCHIVE MODE IS ON) */}
-                    {actionMode && (
+                    {isStaff && actionMode && (
                     <input
                       type="checkbox"
                       className="row-checkbox"

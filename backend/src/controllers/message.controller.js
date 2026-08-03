@@ -66,8 +66,8 @@ if (
 
     const isStaff = [
       "admin",
-      "technician",
       "support",
+      "technician",
       "it_support",
     ].includes(req.user.role);
 
@@ -207,11 +207,16 @@ if (
     // USER -> Notify all support staff
     if (req.user.role === "user") {
 
-      const staff = await User.find({
-        role: {
-          $in: ["admin", "technician"],
-        },
-      });
+    const staff = await User.find({
+      role: {
+        $in: [
+          "admin",
+          "support",
+          "technician",
+          "it_support",
+        ],
+      },
+    });
 
       for (const member of staff) {
 

@@ -922,7 +922,7 @@ export default function Messages() {
                     <div
                       key={msg._id || i}
                       className={`message-bubble ${
-                        isStaffMessage(msg)
+                        msg.sender?._id?.toString() === user._id?.toString()
                           ? "admin-msg"
                           : "user-msg"
                       }`}

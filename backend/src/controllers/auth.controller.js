@@ -5,8 +5,14 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const Notification = require("../models/Notification");
 
+const crypto = require("crypto");
+
+const {
+    sendPasswordResetEmail
+} = require("../services/email.service");
+
+const Notification = require("../models/Notification");
 
 // ===============================
 // 🧾 REGISTER USER
@@ -69,7 +75,6 @@ const register = async (req,res)=>{
         );
 
 
-
         const user = await User.create({
 
             firstName,
@@ -84,7 +89,7 @@ const register = async (req,res)=>{
 
             role:"user",
 
-            status:"pending"
+            status:"pending",
 
         });
 
@@ -202,8 +207,7 @@ const register = async (req,res)=>{
 
         res.status(201).json({
 
-            message:
-            "Registration submitted. Waiting for administrator approval."
+            message: "Registration submitted successfully. Please wait for administrator approval."
 
         });
 
@@ -362,7 +366,220 @@ const login = async(req,res)=>{
 
 };
 
+// ===============================
+// 🔐 FORGOT PASSWORD
+// ===============================
+const forgotPassword = async (req, res) => {
 
+    try {
+
+        const {
+            email
+        } = req.body;
+
+        if (!email) {
+
+            return res.status(400).json({
+
+                message: "Email is required"
+
+            });
+
+        }
+
+        const user = await User.findOne({
+
+            email
+
+        });
+
+        // Always return success to prevent email enumeration
+        if (!user) {
+
+            return res.json({
+
+                message:
+                "If the email exists, a password reset link has been sent."
+
+            });
+
+        }
+
+        const resetToken = crypto
+            .randomBytes(32)
+            .toString("hex");
+
+        user.passwordResetToken = resetToken;
+
+        user.passwordResetExpires =
+            Date.now() + 60 * 60 * 1000;
+
+        await user.save();
+
+        const resetLink =
+            `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
+
+        await sendPasswordResetEmail({
+
+            email: user.email,
+
+            resetLink
+
+        });
+
+        res.json({
+
+            message:
+            "If the email exists, a password reset link has been sent."
+
+        });
+
+    } catch (err) {
+
+        console.error(
+            "FORGOT PASSWORD ERROR:",
+            err
+        );
+
+        res.status(500).json({
+
+            message: err.message
+
+        });
+
+    }
+
+};
+
+// ===============================
+// 🔑 RESET PASSWORD
+// ===============================
+const resetPassword = async (req, res) => {
+
+    try {
+
+        const {
+            token
+        } = req.params;
+
+        const {
+            password,
+            confirmPassword
+        } = req.body;
+
+        if (
+            !password ||
+            !confirmPassword
+        ) {
+
+            return res.status(400).json({
+
+                message: "All fields are required"
+
+            });
+
+        }
+
+        if (password !== confirmPassword) {
+
+            return res.status(400).json({
+
+                message: "Passwords do not match"
+
+            });
+
+        }
+
+        if (password.length < 8) {
+
+            return res.status(400).json({
+
+                message:
+                "Password must be at least 8 characters"
+
+            });
+
+        }
+
+        const user = await User.findOne({
+
+            passwordResetToken: token,
+
+            passwordResetExpires: {
+
+                $gt: Date.now()
+
+            }
+
+        });
+
+        if (!user) {
+
+            return res.status(400).json({
+
+                message:
+                "Invalid or expired password reset link"
+
+            });
+
+        }
+
+        const isSamePassword = await bcrypt.compare(
+
+            password,
+
+            user.password
+
+        );
+
+        if (isSamePassword) {
+
+            return res.status(400).json({
+
+                message:
+                "New password must be different from your current password"
+
+            });
+
+        }
+
+        user.password = await bcrypt.hash(
+
+            password,
+
+            10
+
+        );
+
+        user.passwordResetToken = null;
+
+        user.passwordResetExpires = null;
+
+        await user.save();
+
+        res.json({
+
+            message:
+            "Password has been reset successfully"
+
+        });
+
+    } catch (err) {
+
+        console.error(
+            "RESET PASSWORD ERROR:",
+            err
+        );
+
+        res.status(500).json({
+
+            message: err.message
+
+        });
+
+    }
+
+};
 
 // ===============================
 // 🔑 CHANGE PASSWORD
@@ -552,6 +769,8 @@ module.exports = {
 
     register,
     login,
+    forgotPassword,
+    resetPassword,
     changePassword,
     getUsers
 

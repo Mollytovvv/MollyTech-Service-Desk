@@ -23,6 +23,11 @@ export default function DashboardLayout() {
   const { logout, token, user } = useAuth();
   const isAdmin = user?.role === "admin";
 
+  const isStaff =
+    user?.role === "admin" ||
+    user?.role === "technician" ||
+    user?.role === "support";
+
   const [ticketCount, setTicketCount] = useState(0);
   const [messageCount, setMessageCount] = useState(0);
   const [accessRequestCount, setAccessRequestCount] = useState(0);
@@ -251,7 +256,7 @@ export default function DashboardLayout() {
           )}
           </button>
 
-          {isAdmin && (
+          {isStaff && (
             <>
               <p className="nav-title">DATA</p>
 
@@ -265,19 +270,23 @@ export default function DashboardLayout() {
             </>
           )}
 
-          {/* 🔥 NEW SECTION */}
-          <p className="nav-title">CONTENT</p>
+          {/* CONTENT (ADMIN ONLY) */}
+          {isAdmin && (
+            <>
+              <p className="nav-title">CONTENT</p>
 
-          <button
-            className={isActive("/announcements") ? "active" : ""}
-            onClick={() => navigate("/announcements")}
-          >
-            <FiBell className="icon" />
+              <button
+                className={isActive("/announcements") ? "active" : ""}
+                onClick={() => navigate("/announcements")}
+              >
+                <FiBell className="icon" />
 
-            <span>
-              Announcements
-            </span>
-          </button>
+                <span>
+                  Announcements
+                </span>
+              </button>
+            </>
+          )}
 
           {/* 🔥 NEW SECTION */}
           <p className="nav-title">COMMUNICATION</p>
@@ -299,24 +308,26 @@ export default function DashboardLayout() {
           )}
           </button>
 
-          {isAdmin && (
+          {isStaff && (
             <>
               <p className="nav-title">SYSTEM</p>
 
-              <button
-                className={isActive("/access-requests") ? "active" : ""}
-                onClick={() => navigate("/access-requests")}
-              >
-                <FiUserCheck className="icon" />
+              {isAdmin && (
+                <button
+                  className={isActive("/access-requests") ? "active" : ""}
+                  onClick={() => navigate("/access-requests")}
+                >
+                  <FiUserCheck className="icon" />
 
-                <span>Access Requests</span>
+                  <span>Access Requests</span>
 
-                {accessRequestCount > 0 && (
-                  <span className="sidebar-badge">
-                    {accessRequestCount}
-                  </span>
-                )}
-              </button>
+                  {accessRequestCount > 0 && (
+                    <span className="sidebar-badge">
+                      {accessRequestCount}
+                    </span>
+                  )}
+                </button>
+              )}
 
               <button
                 className={isActive("/settings") ? "active" : ""}

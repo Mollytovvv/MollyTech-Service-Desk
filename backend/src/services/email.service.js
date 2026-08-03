@@ -1,8 +1,12 @@
 const nodemailer = require("nodemailer");
+const fs = require("fs");
+const path = require("path");
+
 
 // ===============================
 // GMAIL TRANSPORT
 // ===============================
+
 const transporter = nodemailer.createTransport({
 
     service: "gmail",
@@ -17,16 +21,54 @@ const transporter = nodemailer.createTransport({
 
 });
 
+
+// ===============================
+// LOAD EMAIL TEMPLATE
+// ===============================
+
+const loadTemplate = (templateName, replacements = {}) => {
+
+    const templatePath = path.join(
+        __dirname,
+        "../templates",
+        templateName
+    );
+
+
+    let template = fs.readFileSync(
+        templatePath,
+        "utf8"
+    );
+
+
+    Object.keys(replacements).forEach((key) => {
+
+        template = template.replace(
+            new RegExp(`{{${key}}}`, "g"),
+            replacements[key]
+        );
+
+    });
+
+
+    return template;
+
+};
+
+
+
 // ===============================
 // GENERIC EMAIL SENDER
 // ===============================
+
 const sendEmail = async ({ to, subject, html }) => {
 
     try {
 
         await transporter.sendMail({
 
-            from: `"MollyTech Service Desk" <${process.env.EMAIL_USER}>`,
+            from:
+            `"MollyTech Service Desk" <${process.env.EMAIL_USER}>`,
 
             to,
 
@@ -36,11 +78,16 @@ const sendEmail = async ({ to, subject, html }) => {
 
         });
 
+
         console.log(`📧 Email sent to ${to}`);
+
 
     } catch (err) {
 
-        console.error("EMAIL ERROR:", err);
+        console.error(
+            "EMAIL ERROR:",
+            err
+        );
 
         throw err;
 
@@ -48,8 +95,102 @@ const sendEmail = async ({ to, subject, html }) => {
 
 };
 
+
+
+// ===============================
+// ACCOUNT APPROVED EMAIL
+// ===============================
+
+const sendApprovalEmail = async ({
+    email,
+    firstName,
+    loginLink
+}) => {
+
+
+    console.log("APPROVAL EMAIL DATA:", {
+        email,
+        firstName,
+        loginLink
+    });
+
+
+    const html = loadTemplate(
+
+        "account.approved.html",
+
+        {
+
+            firstName,
+
+            loginLink
+
+        }
+
+    );
+
+
+    await sendEmail({
+
+        to: email,
+
+        subject:
+        "Your MollyTech Service Desk account has been approved",
+
+        html,
+
+    });
+
+
+};
+
+
+
+// ===============================
+// PASSWORD RESET EMAIL
+// ===============================
+
+const sendPasswordResetEmail = async ({
+    email,
+    resetLink
+}) => {
+
+
+    const html = loadTemplate(
+
+        "reset.password.html",
+
+        {
+
+            resetLink
+
+        }
+
+    );
+
+
+    await sendEmail({
+
+        to: email,
+
+        subject:
+        "Reset your MollyTech Service Desk password",
+
+        html,
+
+    });
+
+
+};
+
+
+
 module.exports = {
 
     sendEmail,
+
+    sendApprovalEmail,
+
+    sendPasswordResetEmail,
 
 };
