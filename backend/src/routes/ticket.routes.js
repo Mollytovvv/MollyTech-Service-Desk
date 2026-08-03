@@ -62,7 +62,11 @@ router.get(
 router.get(
   "/status/archived",
   authMiddleware,
-  roleMiddleware("admin"),
+  roleMiddleware(
+    "admin",
+    "technician",
+    "support"
+  ),
   getArchivedTickets
 );
 
@@ -135,7 +139,11 @@ router.post(
 router.patch(
   "/archive",
   authMiddleware,
-  roleMiddleware("admin"),
+  roleMiddleware(
+    "admin",
+    "technician",
+    "support"
+  ),
   archiveTickets
 );
 
@@ -146,7 +154,11 @@ router.patch(
 router.patch(
   "/unarchive",
   authMiddleware,
-  roleMiddleware("admin"),
+  roleMiddleware(
+    "admin",
+    "technician",
+    "support"
+  ),
   unarchiveTickets
 );
 

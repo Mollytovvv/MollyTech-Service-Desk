@@ -680,13 +680,10 @@ export default function UserMessages() {
     }
   };
 
-  const isStaffMessage = (msg) => {
-    const role = msg.senderRole?.toLowerCase();
-
+  const isOwnMessage = (msg) => {
     return (
-      role === "admin" ||
-      role === "it_support" ||
-      role === "technician"
+      (msg.senderId || msg.sender?._id)?.toString() ===
+      user?._id?.toString()
     );
   };
 
@@ -990,11 +987,11 @@ export default function UserMessages() {
               messages.map((msg) => (
                 <div
                   key={msg._id}
-                    className={`user-message-bubble ${
-                        isStaffMessage(msg)
-                          ? "user-message-admin"
-                          : "user-message-owner"
-                    }`}
+                  className={`user-message-bubble ${
+                      isOwnMessage(msg)
+                        ? "user-message-owner"
+                        : "user-message-admin"
+                  }`}
                 >
 
                   {msg.text && (

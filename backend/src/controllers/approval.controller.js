@@ -5,6 +5,10 @@
 
 const User = require("../models/User");
 
+const {
+    sendApprovalEmail
+} = require("../services/email.service");
+
 // ===============================
 // GET PENDING USERS
 // ===============================
@@ -112,9 +116,22 @@ const approveUser = async(req,res)=>{
 
         await user.save();
 
+
         // ===============================
-        // REALTIME ACCESS REQUEST UPDATE
+        // SEND ACCOUNT APPROVAL EMAIL
         // ===============================
+
+        await sendApprovalEmail({
+
+            email:user.email,
+
+            firstName:user.firstName,
+
+            loginLink:
+            process.env.CLIENT_URL || "http://localhost:5173"
+
+        });
+
         const io = req.app.get("io");
 
         if(io){

@@ -2,6 +2,7 @@ import { useState } from "react";
 import api from "../../api/axios";
 import { useToast } from "../../context/ToastContext";
 import "../styles/Settings.css";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Settings() {
 
@@ -9,6 +10,12 @@ export default function Settings() {
   // PASSWORD STATE
   // =========================
   const { showToast } = useToast();
+  const { user } = useAuth();
+
+  const displayName =
+  `${user?.firstName || ""} ${user?.lastName || ""}`.trim() ||
+  "MollyTech Service Desk";
+  
   const [currentPassword, setCurrentPassword] = useState("");
 
   const [newPassword, setNewPassword] = useState("");
@@ -122,7 +129,11 @@ export default function Settings() {
                             <i className="fa-solid fa-user-shield"></i>
 
                             <h2>
-                                Administrator Account
+                                {user?.role === "admin"
+                                    ? "Administrator Account"
+                                    : user?.role === "technician"
+                                    ? "Technician Account"
+                                    : "IT Support Account"}
                             </h2>
 
                         </div>
@@ -139,12 +150,14 @@ export default function Settings() {
 
                                 <div className="profile-details">
 
-                                    <h3>
-                                        MollyTech Service Desk
-                                    </h3>
+                                    <h3>{displayName}</h3>
 
                                     <p>
-                                        Administrator
+                                        {user?.role === "admin"
+                                            ? "Administrator"
+                                            : user?.role === "technician"
+                                            ? "Technician"
+                                            : "IT Support"}
                                     </p>
 
                                 </div>
@@ -160,9 +173,7 @@ export default function Settings() {
                                     </label>
 
                                     <div className="settings-value">
-
-                                        MollyTech Service Desk
-
+                                        {displayName}
                                     </div>
 
                                 </div>
@@ -175,7 +186,7 @@ export default function Settings() {
 
                                     <div className="settings-value">
 
-                                        mollytech.sd@gmail.com
+                                        {user?.email}
 
                                     </div>
 
@@ -187,10 +198,9 @@ export default function Settings() {
                                         Phone Number
                                     </label>
 
-                                    <input
-                                        type="text"
-                                        placeholder="+63 916 847 1713"
-                                    />
+                                    <div className="settings-value">
+                                        {user?.phoneNumber || "N/A"}
+                                    </div>
 
                                 </div>
 
@@ -202,7 +212,11 @@ export default function Settings() {
 
                                     <div className="settings-value">
 
-                                        Administrator
+                                        {user?.role === "admin"
+                                            ? "Administrator"
+                                            : user?.role === "technician"
+                                            ? "Technician"
+                                            : "IT Support"}
 
                                     </div>
 
@@ -233,9 +247,7 @@ export default function Settings() {
                         <div className="settings-card-body">
 
                             <p className="security-description">
-
-                                Change your administrator password to keep your account secure.
-
+                                Change your password to keep your account secure.
                             </p>
 
                             <div className="settings-form">

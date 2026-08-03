@@ -5,7 +5,10 @@ import { useNavigate } from "react-router-dom";
 import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
 import { useToast } from "../context/ToastContext";
 import logo from "../assets/mollytech_logo.jpg";
+
 import RegisterForm from "./RegisterForm";
+import ForgotPasswordForm from "./ForgotPasswordForm";
+
 import "./Login.css";
 
 export default function Login() {
@@ -217,216 +220,221 @@ return (
 
                     <div className="login-card">
 
-                    {
-
-                    mode === "login" ? (
+            {
+                mode === "login" ? (
 
                     <>
+                        <div className="login-header">
 
-                    <div className="login-header">
+                            <h3>
 
-                    <h3>
+                                Welcome Back
 
-                        Welcome Back
+                            </h3>
 
-                    </h3>
+                            <p>
 
-                    <p>
+                                Sign in to continue to MollyTech Service Desk.
 
-                        Sign in to continue to MollyTech Service Desk.
-
-                    </p>
-
-                </div>
-
-
-                <form
-                    className="login-form"
-                    onSubmit={handleLogin}
-                >
-
-                    {/* EMAIL */}
-
-                    <div className="login-field">
-
-                        <label>
-
-                            Email Address
-
-                        </label>
-
-                        <div className="login-input">
-
-                            <FiMail />
-
-                            <input
-
-                                type="email"
-
-                                placeholder="Enter your email"
-
-                                value={email}
-
-                                onChange={(e) =>
-                                    setEmail(e.target.value)
-                                }
-
-                                required
-
-                            />
+                            </p>
 
                         </div>
 
-                    </div>
+                        <form
+                            className="login-form"
+                            onSubmit={handleLogin}
+                        >
 
+                            {/* EMAIL */}
 
-                    {/* PASSWORD */}
+                            <div className="login-field">
 
-                    <div className="login-field">
+                                <label>
 
-                        <label>
+                                    Email Address
 
-                            Password
+                                </label>
 
-                        </label>
+                                <div className="login-input">
 
-                        <div className="login-input">
+                                    <FiMail />
 
-                            <FiLock />
+                                    <input
 
-                            <input
+                                        type="email"
 
-                                type={
-                                    showPassword
-                                        ? "text"
-                                        : "password"
-                                }
+                                        placeholder="Enter your email"
 
-                                placeholder="Enter your password"
+                                        value={email}
 
-                                value={password}
+                                        onChange={(e) =>
+                                            setEmail(e.target.value)
+                                        }
 
-                                onChange={(e) =>
-                                    setPassword(e.target.value)
-                                }
+                                        required
 
-                                required
+                                    />
 
-                            />
+                                </div>
+
+                            </div>
+
+                            {/* PASSWORD */}
+
+                            <div className="login-field">
+
+                                <label>
+
+                                    Password
+
+                                </label>
+
+                                <div className="login-input">
+
+                                    <FiLock />
+
+                                    <input
+
+                                        type={
+                                            showPassword
+                                                ? "text"
+                                                : "password"
+                                        }
+
+                                        placeholder="Enter your password"
+
+                                        value={password}
+
+                                        onChange={(e) =>
+                                            setPassword(e.target.value)
+                                        }
+
+                                        required
+
+                                    />
+
+                                    <button
+
+                                        type="button"
+
+                                        className="password-toggle"
+
+                                        onClick={() =>
+                                            setShowPassword(!showPassword)
+                                        }
+
+                                    >
+
+                                        {
+
+                                            showPassword
+
+                                                ?
+
+                                                <FiEyeOff />
+
+                                                :
+
+                                                <FiEye />
+
+                                        }
+
+                                    </button>
+
+                                </div>
+
+                            </div>
 
                             <button
 
-                                type="button"
+                                className="login-btn"
 
-                                className="password-toggle"
+                                type="submit"
 
-                                onClick={() =>
-                                    setShowPassword(!showPassword)
-                                }
+                                disabled={loading}
 
                             >
 
                                 {
 
-                                    showPassword
+                                    loading
 
                                         ?
 
-                                        <FiEyeOff />
+                                        "Signing In..."
 
                                         :
 
-                                        <FiEye />
+                                        "Sign In"
 
                                 }
 
                             </button>
 
+                            <div className="login-actions">
+
+                                <button
+
+                                    type="button"
+
+                                    className="forgot-link"
+
+                                    onClick={() => switchMode("forgot")}
+
+                                >
+
+                                    Forgot password?
+
+                                </button>
+
+                            </div>
+
+                            <div className="register-prompt">
+
+                                <span>
+
+                                    New to MollyTech?
+
+                                </span>
+
+                                <button
+
+                                    type="button"
+
+                                    onClick={() => switchMode("register")}
+
+                                >
+
+                                    Create Account
+
+                                </button>
+
+                            </div>
+
+                        </form>
+
+                        <div className="login-footer">
+
+                            © 2026 MollyTech Service Desk
+
                         </div>
-
-                    </div>
-
-
-                    <button
-
-                        className="login-btn"
-
-                        type="submit"
-
-                        disabled={loading}
-
-                    >
-
-                        {
-
-                            loading
-
-                                ?
-
-                                "Signing In..."
-
-                                :
-
-                                "Sign In"
-
-                        }
-
-                    </button>
-
-
-                    <div className="login-actions">
-
-                        <button
-                            type="button"
-                            className="forgot-link"
-                            onClick={() => console.log("Forgot password")}
-                        >
-                            Forgot password?
-                        </button>
-
-                    </div>
-
-
-                    <div className="register-prompt">
-
-                        <span>
-                            New to MollyTech?
-                        </span>
-
-                        <button
-                            type="button"
-                            onClick={() => switchMode("register")}
-                        >
-                            Create Account
-                        </button>
-
-                    </div>
-
-
-                    </form>
-
-
-                    <div className="login-footer">
-
-                        © 2026 MollyTech Service Desk
-
-                    </div>
 
                     </>
 
-                    )
-
-                    :
-
-                    (
+                ) : mode === "register" ? (
 
                     <RegisterForm
                         setMode={setMode}
                     />
 
-                    )
+                ) : (
 
-                    }
+                    <ForgotPasswordForm
+                        setMode={setMode}
+                    />
+
+                )
+            }
 
             </div>
 

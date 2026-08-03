@@ -28,21 +28,6 @@ if(!user){
 
 }
 
-// =========================
-// BLOCK STAFF FROM CREATING TICKETS
-// =========================
-
-if(
-    user.role === "admin" ||
-    user.role === "technician" ||
-    user.role === "support"
-){
-
-    return res.status(403).json({
-        message:"Staff accounts cannot create tickets."
-    });
-
-}
 
 console.log("BODY:", req.body);
 
@@ -77,14 +62,10 @@ console.log("FORMATTED PHONE:", phoneNumber);
       ticketId = `MT-${String(lastNumber + 1).padStart(6, "0")}`;
     }
 
-    const currentUser = await User.findById(req.user.id);
-
-    if(!user){
-
+    if (!currentUser) {
         return res.status(404).json({
-            message:"User not found"
+            message: "User not found",
         });
-
     }
 
   // =========================
@@ -251,8 +232,12 @@ console.log("FORMATTED PHONE:", phoneNumber);
     try {
 
       let filter = {
-        "archivedBy.admin": false,
-        status: { $ne: "cancelled" },
+        "archivedBy.staff": {
+            $ne: req.user.id,
+        },
+        status: {
+          $ne: "cancelled",
+        },
       };
 
       // ===============================
@@ -457,13 +442,6 @@ const assignTicket = async (req, res) => {
 
 
     console.log("ASSIGN USER:", req.user);
-
-    if(req.user.role !== "admin"){
-      return res.status(403).json({
-        message:"Only admin can assign tickets."
-      });
-    }
-
 
     const { assignedTo } = req.body;
 
@@ -843,16 +821,11 @@ const resolveTicket = async (req, res) => {
 };
 
 
-// ===============================
-// 🔄 REOPEN / UNRESOLVE TICKET
-// ===============================
-const reopenTicket = async (req, res) => {
-  try {
-    if (req.user?.role !== "admin") {
-      return res.status(403).json({
-        message: "Only admin can reopen tickets",
-      });
-    }
+  // ===============================
+  // 🔄 REOPEN / UNRESOLVE TICKET
+  // ===============================
+  const reopenTicket = async (req, res) => {
+    try {
 
     const ticket = await Ticket.findById(req.params.id);
 
@@ -932,11 +905,6 @@ const reopenTicket = async (req, res) => {
 // ===============================
 const deleteTicket = async (req, res) => {
   try {
-    if (req.user?.role !== "admin") {
-      return res.status(403).json({
-        message: "Only admin can delete tickets"
-      });
-    }
 
     const ticket = await Ticket.findByIdAndDelete(req.params.id);
 
@@ -1013,9 +981,11 @@ const getTicketsByStatus = async (req, res) => {
 const getArchivedTickets = async (req, res) => {
   try {
 
-    const tickets = await Ticket.find({
-      "archivedBy.admin": true,
-    }).sort({ updatedAt: -1 });
+const tickets = await Ticket.find({
+  "archivedBy.staff": req.user.id,
+}).sort({
+  updatedAt: -1,
+});
 
     return res.json({
       count: tickets.length,
@@ -1069,23 +1039,6 @@ const getArchivedTickets = async (req, res) => {
       
         const { id } = req.params;
         const { message } = req.body;
-
-    // ===============================
-    // STAFF ONLY COMMENT ACCESS
-    // ===============================
-
-    if(
-      ![
-        "admin",
-        "support",
-        "technician",
-        "it_support"
-      ].includes(req.user.role)
-    ){
-      return res.status(403).json({
-        message:"Only staff can comment."
-      });
-    }
 
     // ❌ VALIDATION
     if (!message || !message.trim()) {
@@ -1244,7 +1197,13 @@ const getArchivedTickets = async (req, res) => {
     });
 
   } catch (err) {
-    return res.status(500).json({ message: err.message });
+
+    console.log("ADD COMMENT ERROR:", err);
+
+    return res.status(500).json({
+      message: err.message,
+    });
+
   }
 };
 
@@ -1257,9 +1216,11 @@ const archiveTickets = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (req.user?.role !== "admin") {
+    if (
+      !["admin", "technician", "support"].includes(req.user.role)
+    ) {
       return res.status(403).json({
-        message: "Only admin can archive tickets"
+        message: "Only staff can archive tickets"
       });
     }
 
@@ -1288,11 +1249,13 @@ const archiveTickets = async (req, res) => {
 
     // update all
     await Ticket.updateMany(
-      { _id: { $in: ticketIds } },
       {
-        $set: {
-          "archivedBy.admin": true,
-        }
+        _id: { $in: ticketIds },
+      },
+      {
+        $addToSet: {
+            "archivedBy.staff": req.user.id,
+        },
       }
     );
 
@@ -1330,9 +1293,6 @@ const archiveTickets = async (req, res) => {
 
   const unarchiveTickets = async (req, res) => {
     try {
-      if (req.user?.role !== "admin") {
-        return res.status(403).json({ message: "Only admin can unarchive tickets" });
-      }
 
       const { ticketIds } = req.body;
 
@@ -1341,11 +1301,13 @@ const archiveTickets = async (req, res) => {
       }
 
       await Ticket.updateMany(
-        { _id: { $in: ticketIds } },
         {
-          $set: {
-              "archivedBy.admin": false,
-          }
+          _id: { $in: ticketIds },
+        },
+        {
+          $pull: {
+              "archivedBy.staff": req.user.id,
+          },
         }
       );
 
@@ -1432,13 +1394,6 @@ const archiveTickets = async (req, res) => {
   const deleteArchivedTickets = async (req, res) => {
     try {
 
-      if (req.user?.role !== "admin") {
-        return res.status(403).json({
-          message: "Only admin can delete tickets"
-        });
-      }
-
-
       const { ticketIds } = req.body;
 
 
@@ -1450,13 +1405,10 @@ const archiveTickets = async (req, res) => {
 
 
       const result = await Ticket.deleteMany({
-
-        _id:{
-          $in: ticketIds
+        _id: {
+          $in: ticketIds,
         },
-
-        "archivedBy.admin": true
-
+        archivedBy: req.user.id,
       });
 
 

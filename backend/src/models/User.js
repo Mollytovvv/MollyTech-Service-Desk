@@ -76,7 +76,26 @@ const userSchema = new mongoose.Schema(
 
     },
 
+    // =========================
+    // PASSWORD RESET
+    // =========================
 
+    passwordResetToken: {
+
+        type:String,
+
+        default:null,
+
+    },
+
+
+    passwordResetExpires: {
+
+        type:Date,
+
+        default:null,
+
+    },
 
     // =========================
     // ACCESS CONTROL

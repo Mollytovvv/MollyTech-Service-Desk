@@ -1,5 +1,5 @@
 const Conversation = require("../models/Conversation");
-console.log(Conversation.schema.obj);
+
 // ===============================
 // 📥 GET ALL CONVERSATIONS
 // ===============================

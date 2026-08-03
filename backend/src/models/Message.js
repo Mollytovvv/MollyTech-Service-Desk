@@ -20,6 +20,7 @@ const messageSchema = new mongoose.Schema(
       enum: [
         "user",
         "admin",
+        "support",
         "it_support",
         "technician",
         "system",

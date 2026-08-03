@@ -47,6 +47,27 @@ export default function UserSettings(){
 
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+    const formatPhone = (value) => {
+
+    if (!value) return "";
+
+    let cleaned = value.replace(/\D/g, "");
+
+    if (cleaned.startsWith("63")) {
+        cleaned = cleaned.slice(2);
+    }
+
+    if (cleaned.startsWith("0")) {
+        cleaned = cleaned.slice(1);
+    }
+
+    return cleaned.replace(
+        /(\d{3})(\d{3})(\d{4})/,
+        "$1 $2 $3"
+    );
+
+};
+
     // ===============================
     // FETCH PROFILE
     // ===============================
@@ -328,19 +349,30 @@ export default function UserSettings(){
                                     <input
                                         type="text"
                                         placeholder="917 123 4567"
-                                        value={
-                                            phone
-                                            ? phone.replace(
-                                                /(\d{3})(\d{3})(\d{4})/,
-                                                "$1 $2 $3"
-                                            )
-                                            : ""
-                                        }
-                                        onChange={(e)=>
-                                            setPhone(e.target.value.replace(/\D/g,""))
-                                        }
-                                    />
+                                        value={formatPhone(phone)}
+                                        onChange={(e) => {
 
+                                            let value = e.target.value.replace(/\D/g, "");
+
+                                            // Remove country code if user pastes it
+                                            if (value.startsWith("63")) {
+                                                value = value.slice(2);
+                                            }
+
+                                            // Remove leading 0 if user pastes 09xxxxxxxxx
+                                            if (value.startsWith("0")) {
+                                                value = value.slice(1);
+                                            }
+
+                                            // Limit to 10 digits (9168471713)
+                                            if (value.length > 10) {
+                                                value = value.slice(0, 10);
+                                            }
+
+                                            setPhone(value);
+
+                                        }}
+                                    />
                                 </div>
 
                                 </div>
