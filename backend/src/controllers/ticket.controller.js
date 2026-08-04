@@ -62,7 +62,7 @@ console.log("FORMATTED PHONE:", phoneNumber);
       ticketId = `MT-${String(lastNumber + 1).padStart(6, "0")}`;
     }
 
-    if (!currentUser) {
+    if (!user) {
         return res.status(404).json({
             message: "User not found",
         });
@@ -85,34 +85,22 @@ console.log("FORMATTED PHONE:", phoneNumber);
 
 
       // Snapshot current contact information
-      email: currentUser.email,
+      email: user.email,
 
-      phoneNumber: currentUser.phone,
+      phoneNumber: user.phone,
 
-
-      // Snapshot user identity
       submittedBy: {
-
-          userId: currentUser._id,
-
-          firstName: currentUser.firstName,
-
-          lastName: currentUser.lastName,
-
+          userId: user._id,
+          firstName: user.firstName,
+          lastName: user.lastName,
       },
 
-
       activityLogs: [
-
           {
               action: "Ticket Created",
-
-              performedBy: currentUser._id,
-
+              performedBy: user._id,
               details: "Ticket was created",
-
           },
-
       ],
 
   });
@@ -133,7 +121,7 @@ console.log("FORMATTED PHONE:", phoneNumber);
 
         // User who created the ticket
         io.to(
-            currentUser._id.toString()
+            user._id.toString()
         )
         .emit(
             "ticketUpdated",
@@ -411,7 +399,14 @@ const getTicketById = async (req, res) => {
 
       const io = req.app.get("io");
 
-      io.emit("ticketUpdated", ticket);
+      if (io) {
+        io.to("admins").emit("ticketUpdated", ticket);
+
+        io.to(ticket.submittedBy.userId.toString()).emit(
+          "ticketUpdated",
+          ticket
+        );
+      }
 
       return res.json({
         message: "Ticket cancelled successfully.",
