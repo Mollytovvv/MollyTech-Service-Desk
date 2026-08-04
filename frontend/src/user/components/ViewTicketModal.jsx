@@ -13,15 +13,15 @@ import {
 export default function ViewTicketModal({ ticket, onClose }) {
   if (!ticket) return null;
 
-  const capitalize = (text) => {
-    if (!text) return "";
+const capitalize = (text) => {
+  if (typeof text !== "string") return "";
 
-    const formatted = text
-      .replace(/_/g, " ")
-      .replace(/\b\w/g, (char) => char.toUpperCase());
+  const formatted = text
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
 
-    return formatted.replace(/\bIt\b/g, "IT");
-  };
+  return formatted.replace(/\bIt\b/g, "IT");
+};
 
   return (
     <div
@@ -85,7 +85,7 @@ export default function ViewTicketModal({ ticket, onClose }) {
             <span>
               <FiUser />
               {ticket.assignedTo
-                ? capitalize(ticket.assignedTo)
+                ? `${ticket.assignedTo.firstName} ${ticket.assignedTo.lastName}`
                 : "Unassigned"}
             </span>
           </div>

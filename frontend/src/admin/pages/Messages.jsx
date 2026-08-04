@@ -373,6 +373,34 @@ export default function Messages() {
 
     };
 
+    const handleTicketUpdated = (updatedTicket) => {
+
+      // Refresh the conversation sidebar
+      fetchConversations();
+
+      // Update currently opened ticket
+      setTicket((prev) => {
+        if (!prev) return prev;
+
+        if (prev._id !== updatedTicket._id) {
+          return prev;
+        }
+
+        return updatedTicket;
+      });
+
+      // If the conversation should disappear
+      if (
+        updatedTicket.deletedByUser ||
+        updatedTicket.status === "cancelled"
+      ) {
+        setSelectedConversation(null);
+        setMessages([]);
+        setTicket(null);
+        setRequester(null);
+      }
+
+    };
 
     socket.on(
       "receiveMessage",
@@ -395,6 +423,11 @@ export default function Messages() {
     socket.on(
       "stopTyping",
       handleStopTyping
+    );
+
+    socket.on(
+      "ticketUpdated",
+      handleTicketUpdated
     );
 
 
@@ -458,6 +491,10 @@ export default function Messages() {
         handleStopTyping
       );
 
+      socket.off(
+        "ticketUpdated",
+        handleTicketUpdated
+      );
 
       socket.off("conversationUpdated");
 

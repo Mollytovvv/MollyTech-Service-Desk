@@ -338,35 +338,31 @@ const handleNewTicket = (ticket) => {
 
 };
 
+const handleTicketUpdated = (updatedTicket) => {
+  if (!updatedTicket) return;
 
+  setTickets((prev) => {
+    if (updatedTicket.status === "cancelled") {
+      return prev.filter(
+        (t) => t._id !== updatedTicket._id
+      );
+    }
 
-  const handleTicketUpdated = (updatedTicket) => {
-
-    console.log(
-      "🟢 Ticket Updated:",
-      updatedTicket
-    );
-
-
-    if (!updatedTicket) return;
-
-
-    setTickets((prev) =>
-      prev.map((ticket) =>
-        ticket._id === updatedTicket._id
-          ? updatedTicket
-          : ticket
-      )
-    );
-
-
-    setSelectedTicket((prev) =>
-      prev && prev._id === updatedTicket._id
+    return prev.map((t) =>
+      t._id === updatedTicket._id
         ? updatedTicket
-        : prev
+        : t
     );
+  });
 
-  };
+  setSelectedTicket((prev) =>
+    prev && prev._id === updatedTicket._id
+      ? updatedTicket.status === "cancelled"
+        ? null
+        : updatedTicket
+      : prev
+  );
+};
 
 
 
@@ -408,7 +404,21 @@ const handleNewTicket = (ticket) => {
 
   };
 
+const handleTicketCancelled = ({ ticketId }) => {
 
+  console.log("❌ Ticket Cancelled:", ticketId);
+
+  setTickets((prev) =>
+    prev.filter((ticket) => ticket._id !== ticketId)
+  );
+
+  setSelectedTicket((prev) =>
+    prev?._id === ticketId
+      ? null
+      : prev
+  );
+
+};
 
   socket.on(
     "newTicket",
@@ -427,7 +437,10 @@ const handleNewTicket = (ticket) => {
     handleAssignedTicket
   );
 
-
+  socket.on(
+    "ticketCancelled",
+    handleTicketCancelled
+  );
 
   return () => {
 
@@ -448,6 +461,11 @@ const handleNewTicket = (ticket) => {
       handleAssignedTicket
     );
 
+    socket.off(
+      "ticketCancelled",
+      handleTicketCancelled
+    );
+
   };
 
 
@@ -458,7 +476,12 @@ const handleNewTicket = (ticket) => {
   // =========================
   const filteredTickets = tickets
     .filter((t) => {
-      if (t.status === "archived") return false;
+      if (
+        t.status === "archived" ||
+        t.status === "cancelled"
+      ) {
+        return false;
+      }
       if (archiveMode) return t.status === "resolved";
 
       if (filter === "all") return true;
