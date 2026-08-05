@@ -8,6 +8,7 @@ const Conversation = require("../models/Conversation");
 const formatPHNumber = require("../utils/formatPHNumber");
 const Message = require("../models/Message");
 const Notification = require("../models/Notification");
+const {sendTicketResolvedEmail,} = require("../services/email.service");
 
 // ===============================
 // 🧾 CREATE TICKET + CONVERSATION
@@ -747,6 +748,35 @@ const resolveTicket = async (req, res) => {
     const updatedTicket = await ticket.save();
 
     const io = req.app.get("io");
+
+    // ===============================
+    // 📧 SEND RESOLUTION EMAIL
+    // ===============================
+    try {
+
+      const ticketOwner = await User.findById(
+        ticket.submittedBy.userId
+      );
+
+      if (ticketOwner) {
+
+      await sendTicketResolvedEmail({
+        email: ticketOwner.email,
+        firstName: ticketOwner.firstName,
+        ticketId: ticket.ticketId,
+        title: ticket.title,
+      });
+
+      }
+
+    } catch (emailError) {
+
+      console.error(
+        "RESOLUTION EMAIL ERROR:",
+        emailError
+      );
+
+    }
 
     // ===============================
     // 🔔 NOTIFY USER TICKET RESOLVED

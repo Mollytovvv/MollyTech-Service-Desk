@@ -1,89 +1,363 @@
 <!DOCTYPE html>
-<html>
+
+<html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Account Approved</title>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="color-scheme" content="light only">
+
+<meta name="supported-color-schemes" content="light">
+
+<title>MollyTech Account Approved</title>
+
 </head>
 
-
-<body style="font-family: Arial, sans-serif; background:#f8fafc; padding:40px;">
-
-
-<div style="
-    max-width:600px;
-    margin:auto;
-    background:white;
-    padding:30px;
-    border-radius:12px;
-    border:1px solid #e5e7eb;
+<body style="
+margin:0;
+padding:0;
+background:#F1F5F9;
+font-family:'Segoe UI',Arial,sans-serif;
+-webkit-text-size-adjust:100%;
 ">
 
+<table width="100%" cellpadding="0" cellspacing="0"
+style="
+background:#F1F5F9;
+padding:40px 20px;
+">
 
-<h2 style="color:#111827;">
-    MollyTech Service Desk Account Approved
+<tr>
+<td align="center">
+
+<table width="600"
+cellpadding="0"
+cellspacing="0"
+style="
+width:100%;
+max-width:600px;
+background:#ffffff;
+border-radius:22px;
+overflow:hidden;
+border:1px solid #E2E8F0;
+">
+
+<!-- HEADER -->
+
+<tr>
+
+<td align="center"
+
+style="
+padding:50px 30px;
+background-color:#0F172A;
+">
+
+<img
+
+src="cid:mollytechlogo@mollytech"
+
+alt="MollyTech Logo"
+
+width="110"
+
+style="
+display:block;
+width:110px;
+height:auto;
+border-radius:18px;
+margin-bottom:25px;
+">
+
+<h1
+
+style="
+margin:0;
+font-size:32px;
+font-weight:700;
+color:#ffffff !important;
+-webkit-text-fill-color:#ffffff;
+">
+
+MollyTech
+
+</h1>
+
+<p
+
+style="
+margin:10px 0 0;
+font-size:16px;
+color:#CBD5E1 !important;
+-webkit-text-fill-color:#CBD5E1;
+">
+
+Service Desk System
+
+</p>
+
+<div
+
+style="
+margin-top:25px;
+display:inline-block;
+background:#1E3A8A;
+padding:8px 18px;
+border-radius:30px;
+">
+
+<span
+
+style="
+color:#DBEAFE !important;
+-webkit-text-fill-color:#DBEAFE;
+font-size:13px;
+font-weight:600;
+">
+
+ENTERPRISE IT SUPPORT PLATFORM
+
+</span>
+
+</div>
+
+</td>
+
+</tr>
+
+<!-- CONTENT -->
+
+<tr>
+
+<td style="
+padding:45px;
+">
+
+<h2
+
+style="
+margin:0 0 20px;
+font-size:28px;
+color:#0F172A !important;
+-webkit-text-fill-color:#0F172A;
+">
+
+Welcome to MollyTech, {{firstName}} 👋
+
 </h2>
 
+<p
 
-<p style="color:#374151; font-size:15px;">
-    Hello {{firstName}},
-</p>
-
-
-<p style="color:#374151; font-size:15px;">
-    Your registration request for the MollyTech Service Desk has been approved by an administrator.
-</p>
-
-
-<p style="color:#374151; font-size:15px;">
-    You may now access your account and start using the service desk system.
-</p>
-
-
-
-<div style="text-align:center; margin:30px 0;">
-
-<a href="{{loginLink}}"
 style="
-background:#2563eb;
-color:white;
-padding:12px 24px;
-border-radius:8px;
-text-decoration:none;
-font-weight:bold;
-display:inline-block;
+font-size:16px;
+line-height:28px;
+color:#475569 !important;
+-webkit-text-fill-color:#475569;
 ">
 
-Login to MollyTech Service Desk
+Your account registration has been reviewed and approved by a MollyTech administrator.
+
+</p>
+
+<p
+
+style="
+font-size:16px;
+line-height:28px;
+color:#475569 !important;
+-webkit-text-fill-color:#475569;
+">
+
+Your account is now active. You can now access the MollyTech Service Desk portal and begin submitting support requests whenever assistance is needed.
+
+</p>
+
+<!-- STATUS CARD -->
+
+<table width="100%"
+cellpadding="0"
+cellspacing="0"
+
+style="
+margin:35px 0;
+background:#EFF6FF;
+border-radius:16px;
+border:1px solid #DBEAFE;
+">
+
+<tr>
+
+<td style="
+padding:25px;
+">
+
+<p style="
+margin:0;
+font-size:12px;
+font-weight:700;
+letter-spacing:1px;
+color:#2563EB !important;
+">
+
+ACCOUNT STATUS
+
+</p>
+
+<h3
+
+style="
+margin:12px 0;
+font-size:26px;
+color:#0F172A !important;
+-webkit-text-fill-color:#0F172A;
+">
+
+✓ ACTIVE
+
+</h3>
+
+<p
+
+style="
+margin:0;
+font-size:15px;
+line-height:25px;
+color:#475569 !important;
+">
+
+Your MollyTech account is ready. You may now securely sign in using your registered email address.
+
+</p>
+
+</td>
+
+</tr>
+
+</table>
+
+<!-- LOGIN BUTTON -->
+
+<div style="
+text-align:center;
+margin:45px 0;
+">
+
+<a href="{{loginLink}}"
+
+style="
+display:inline-block;
+background:#2563EB;
+color:#ffffff !important;
+-webkit-text-fill-color:#ffffff;
+padding:16px 38px;
+border-radius:12px;
+font-size:16px;
+font-weight:700;
+text-decoration:none;
+">
+
+Access MollyTech Portal
 
 </a>
 
 </div>
 
+<!-- SECURITY -->
 
+<table width="100%"
 
-<p style="color:#6b7280; font-size:14px;">
-    You can now use your registered email address and password to sign in.
+style="
+background:#F8FAFC;
+border-radius:12px;
+border:1px solid #E2E8F0;
+">
+
+<tr>
+
+<td style="
+padding:18px;
+">
+
+<p style="
+margin:0;
+font-size:14px;
+line-height:24px;
+color:#475569 !important;
+">
+
+🔒 Security Notice:
+If you did not create this account, please contact your MollyTech administrator immediately.
+
 </p>
 
+</td>
 
-<p style="color:#6b7280; font-size:14px;">
-    If you did not request this account, please contact the MollyTech Service Desk administrator.
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+<!-- FOOTER -->
+
+<tr>
+
+<td align="center"
+
+style="
+padding:30px;
+background:#020617;
+">
+
+<p style="
+margin:0;
+font-size:15px;
+font-weight:700;
+color:#ffffff !important;
+-webkit-text-fill-color:#ffffff;
+">
+
+MollyTech Service Desk
+
 </p>
 
+<p style="
+margin:10px 0;
+font-size:13px;
+color:#94A3B8 !important;
+-webkit-text-fill-color:#94A3B8;
+">
 
+Powered by MollyTech Service Desk Platform
 
-<br>
-
-
-<p style="color:#111827;">
-    Regards,<br>
-    <strong>MollyTech Service Desk</strong>
 </p>
 
+<p style="
+margin:0;
+font-size:12px;
+color:#64748B !important;
+">
 
-</div>
+© 2026 MollyTech. All rights reserved.
 
+</p>
+
+</td>
+
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+</table>
 
 </body>
 

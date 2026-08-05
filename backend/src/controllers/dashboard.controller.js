@@ -23,9 +23,8 @@ const User = require("../models/User");
 
           ticketCount = await Ticket.countDocuments({
             status: {
-              $ne: "resolved",
+              $nin: ["resolved", "cancelled"],
             },
-            "archivedBy.admin": false,
           });
 
         }
@@ -36,36 +35,34 @@ const User = require("../models/User");
           req.user.role === "support"
         ) {
 
-          ticketCount = await Ticket.countDocuments({
+        ticketCount = await Ticket.countDocuments({
 
-            assignedTo: req.user.id,
+          assignedTo: req.user.id,
 
-            status: {
-              $ne: "resolved",
-            },
+          status: {
+            $nin: ["resolved", "cancelled"],
+          },
 
-            "archivedBy.admin": false,
-
-          });
+        });
 
         }
 
 
         else {
 
-          ticketCount = await Ticket.countDocuments({
+        ticketCount = await Ticket.countDocuments({
 
-            "submittedBy.userId": req.user.id,
+          "submittedBy.userId": req.user.id,
 
-            status: {
-              $ne: "resolved",
-            },
+          status: {
+            $nin: ["resolved", "cancelled"],
+          },
 
-            "archivedBy.user": false,
+          "archivedBy.user": false,
 
-            deletedByUser: false,
+          deletedByUser: false,
 
-          });
+        });
 
         }
 
