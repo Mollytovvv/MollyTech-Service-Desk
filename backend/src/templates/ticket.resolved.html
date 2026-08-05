@@ -1,5 +1,5 @@
+```html
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -12,9 +12,10 @@
 
 <meta name="supported-color-schemes" content="light">
 
-<title>MollyTech Password Reset</title>
+<title>MollyTech Ticket Resolved</title>
 
 </head>
+
 
 <body style="
 margin:0;
@@ -24,15 +25,18 @@ font-family:'Segoe UI',Arial,sans-serif;
 -webkit-text-size-adjust:100%;
 ">
 
+
 <table width="100%" cellpadding="0" cellspacing="0"
 style="
 background:#F1F5F9;
 padding:40px 20px;
 ">
 
+
 <tr>
 
 <td align="center">
+
 
 <table width="600"
 cellpadding="0"
@@ -47,6 +51,8 @@ overflow:hidden;
 border:1px solid #E2E8F0;
 ">
 
+
+
 <!-- HEADER -->
 
 <tr>
@@ -58,10 +64,9 @@ padding:50px 30px;
 background:#0F172A;
 ">
 
+
 <img
-
 src="cid:mollytechlogo"
-
 alt="MollyTech Logo"
 
 width="110"
@@ -74,63 +79,64 @@ border-radius:18px;
 margin-bottom:25px;
 ">
 
-<h1
 
-style="
+<h1 style="
 margin:0;
 font-size:32px;
 font-weight:700;
-color:#ffffff !important;
--webkit-text-fill-color:#ffffff;
+color:#ffffff;
 ">
 
 MollyTech
 
 </h1>
 
-<p
 
-style="
+<p style="
 margin:10px 0 0;
 font-size:16px;
-color:#CBD5E1 !important;
--webkit-text-fill-color:#CBD5E1;
+color:#CBD5E1;
 ">
 
 Service Desk System
 
 </p>
 
-<div
 
-style="
+
+<div style="
 margin-top:25px;
 display:inline-block;
-background:#1E3A8A;
+background:#166534;
 padding:8px 18px;
 border-radius:30px;
 ">
 
-<span
-
-style="
-color:#DBEAFE !important;
--webkit-text-fill-color:#DBEAFE;
+<span style="
+color:#DCFCE7;
 font-size:13px;
-font-weight:600;
+font-weight:700;
 ">
 
-ACCOUNT SECURITY
+✓ TICKET COMPLETED
 
 </span>
 
+
 </div>
+
 
 </td>
 
 </tr>
 
+
+
+
+
+
 <!-- CONTENT -->
+
 
 <tr>
 
@@ -138,44 +144,51 @@ ACCOUNT SECURITY
 padding:45px;
 ">
 
-<h2
 
-style="
+
+<h2 style="
 margin:0 0 20px;
 font-size:28px;
-color:#0F172A !important;
--webkit-text-fill-color:#0F172A;
+color:#0F172A;
 ">
 
-Password Reset Request 🔐
+Hello {{firstName}} 👋
 
 </h2>
 
-<p
 
-style="
+
+
+<p style="
 font-size:16px;
 line-height:28px;
-color:#475569 !important;
+color:#475569;
 ">
 
-We received a request to reset your MollyTech Service Desk account password.
+Your support request has been successfully reviewed and resolved by the MollyTech Service Desk team.
 
 </p>
 
-<p
 
-style="
+
+
+<p style="
 font-size:16px;
 line-height:28px;
-color:#475569 !important;
+color:#475569;
 ">
 
-If this request was made by you, click the button below to create a new password and regain access to your account.
+Below is the summary of your completed service request.
 
 </p>
 
-<!-- RESET CARD -->
+
+
+
+
+
+<!-- RESOLUTION STATUS -->
+
 
 <table width="100%"
 cellpadding="0"
@@ -183,10 +196,11 @@ cellspacing="0"
 
 style="
 margin:35px 0;
-background:#EFF6FF;
+background:#F0FDF4;
+border:1px solid #BBF7D0;
 border-radius:16px;
-border:1px solid #DBEAFE;
 ">
+
 
 <tr>
 
@@ -194,64 +208,277 @@ border:1px solid #DBEAFE;
 padding:25px;
 ">
 
+
+<table width="100%">
+
+<tr>
+
+<td width="50%">
+
+
 <p style="
 margin:0;
 font-size:12px;
 font-weight:700;
 letter-spacing:1px;
-color:#2563EB !important;
+color:#16A34A;
 ">
 
-PASSWORD RECOVERY
+STATUS
 
 </p>
 
-<h3
 
-style="
-margin:12px 0;
+<h3 style="
+margin:10px 0 0;
 font-size:24px;
-color:#0F172A !important;
--webkit-text-fill-color:#0F172A;
+color:#166534;
 ">
 
-Reset Your Password
+RESOLVED
 
 </h3>
 
-<p
 
-style="
-margin:0;
-font-size:15px;
-line-height:25px;
-color:#475569 !important;
+</td>
+
+
+<td align="right">
+
+
+<div style="
+font-size:42px;
 ">
 
-For your security, this password reset link will only remain valid for 15 minutes.
+✓
 
-</p>
+</div>
+
+
+</td>
+
+
+</tr>
+
+
+</table>
+
+
 
 </td>
 
 </tr>
 
+
 </table>
 
+
+
+
+
+
+
+
+<!-- TICKET SUMMARY -->
+
+
+<table width="100%"
+cellpadding="0"
+cellspacing="0"
+
+style="
+background:#F8FAFC;
+border-radius:16px;
+border:1px solid #E2E8F0;
+">
+
+
+<tr>
+
+<td style="
+padding:25px;
+">
+
+
+
+<p style="
+margin:0 0 20px;
+font-size:12px;
+font-weight:700;
+letter-spacing:1px;
+color:#64748B;
+">
+
+TICKET SUMMARY
+
+</p>
+
+
+
+
+<p style="
+margin:0 0 15px;
+font-size:15px;
+color:#334155;
+">
+
+<strong>Ticket ID</strong>
+
+<br>
+
+<span style="
+color:#2563EB;
+font-weight:700;
+">
+
+{{ticketId}}
+
+</span>
+
+</p>
+
+
+
+
+<p style="
+margin:0;
+font-size:15px;
+color:#334155;
+">
+
+<strong>Request Title</strong>
+
+<br>
+
+{{title}}
+
+</p>
+
+
+
+</td>
+
+</tr>
+
+
+</table>
+
+
+
+
+
+
+
+
+
+<!-- TIMELINE -->
+
+
+<table width="100%"
+cellpadding="0"
+cellspacing="0"
+
+style="
+margin-top:30px;
+">
+
+
+<tr>
+
+<td>
+
+
+<p style="
+font-size:16px;
+font-weight:700;
+color:#0F172A;
+">
+
+Request Progress
+
+</p>
+
+
+
+<p style="
+margin:15px 0;
+font-size:14px;
+color:#475569;
+">
+
+🟢 <strong>Submitted</strong>
+
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;Your request was received by MollyTech.
+
+</p>
+
+
+
+
+<p style="
+margin:15px 0;
+font-size:14px;
+color:#475569;
+">
+
+🟢 <strong>Assigned</strong>
+
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;Our support team reviewed your concern.
+
+</p>
+
+
+
+
+<p style="
+margin:15px 0;
+font-size:14px;
+color:#475569;
+">
+
+🟢 <strong>Resolved</strong>
+
+<br>
+
+&nbsp;&nbsp;&nbsp;&nbsp;The issue has been completed successfully.
+
+</p>
+
+
+
+</td>
+
+</tr>
+
+
+</table>
+
+
+
+
+
+
+
+
 <!-- BUTTON -->
+
 
 <div style="
 text-align:center;
 margin:45px 0;
 ">
 
-<a href="{{resetLink}}"
+
+<a href="{{loginLink}}"
 
 style="
 display:inline-block;
 background:#2563EB;
-color:#ffffff !important;
--webkit-text-fill-color:#ffffff;
+color:#ffffff;
 padding:16px 38px;
 border-radius:12px;
 font-size:16px;
@@ -259,51 +486,76 @@ font-weight:700;
 text-decoration:none;
 ">
 
-Reset Password
+View Ticket Portal
 
 </a>
 
+
 </div>
 
-<!-- SECURITY WARNING -->
+
+
+
+
+
+
+<!-- FEEDBACK -->
+
 
 <table width="100%"
 
 style="
-background:#FEF2F2;
+background:#EFF6FF;
 border-radius:12px;
-border:1px solid #FECACA;
+border:1px solid #DBEAFE;
 ">
+
 
 <tr>
 
 <td style="
-padding:18px;
+padding:20px;
 ">
+
 
 <p style="
 margin:0;
 font-size:14px;
 line-height:24px;
-color:#991B1B !important;
+color:#334155;
 ">
 
-⚠️ Security Notice:
-If you did not request a password reset, you can safely ignore this email. Your account will remain secure.
+💡 Need more help?
+
+You can create a new ticket anytime through the MollyTech Service Desk portal.
 
 </p>
 
+
 </td>
 
 </tr>
+
 
 </table>
 
+
+
+
+
 </td>
 
 </tr>
 
+
+
+
+
+
+
+
 <!-- FOOTER -->
+
 
 <tr>
 
@@ -314,51 +566,62 @@ padding:30px;
 background:#020617;
 ">
 
+
 <p style="
 margin:0;
 font-size:15px;
 font-weight:700;
-color:#ffffff !important;
--webkit-text-fill-color:#ffffff;
+color:#ffffff;
 ">
 
 MollyTech Service Desk
 
 </p>
 
+
+
 <p style="
 margin:10px 0;
 font-size:13px;
-color:#94A3B8 !important;
--webkit-text-fill-color:#94A3B8;
+color:#94A3B8;
 ">
 
 Powered by MollyTech Service Desk Platform
 
 </p>
 
+
+
 <p style="
 margin:0;
 font-size:12px;
-color:#64748B !important;
+color:#64748B;
 ">
 
 © 2026 MollyTech. All rights reserved.
 
 </p>
 
-</td>
-
-</tr>
-
-</table>
 
 </td>
 
 </tr>
 
+
+
+
 </table>
+
+
+</td>
+
+</tr>
+
+
+</table>
+
 
 </body>
 
 </html>
+```

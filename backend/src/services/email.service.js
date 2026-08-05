@@ -76,6 +76,23 @@ const sendEmail = async ({ to, subject, html }) => {
 
             html,
 
+            attachments: [
+            {
+                filename: "mollytech_logo.jpg",
+
+                path: path.join(
+                    __dirname,
+                    "../../../frontend/src/assets/mollytech_logo.jpg"
+                ),
+
+                cid: "mollytechlogo@mollytech",
+
+                contentType: "image/jpeg",
+
+                contentDisposition: "inline",
+            },
+            ],
+
         });
 
 
@@ -183,7 +200,49 @@ const sendPasswordResetEmail = async ({
 
 };
 
+// ===============================
+// TICKET RESOLVED EMAIL
+// ===============================
+const sendTicketResolvedEmail = async ({
+    email,
+    firstName,
+    ticketId,
+    title,
+}) => {
 
+
+    const html = loadTemplate(
+
+        "ticket.resolved.html",
+
+        {
+
+            firstName,
+
+            ticketId,
+
+            title,
+
+            loginLink:
+            "http://localhost:5173/login"
+
+        }
+
+    );
+
+
+    await sendEmail({
+
+        to: email,
+
+        subject:
+        `Your ticket ${ticketId} has been resolved`,
+
+        html,
+
+    });
+
+};
 
 module.exports = {
 
@@ -192,5 +251,7 @@ module.exports = {
     sendApprovalEmail,
 
     sendPasswordResetEmail,
+
+    sendTicketResolvedEmail,
 
 };
