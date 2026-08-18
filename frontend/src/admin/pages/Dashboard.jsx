@@ -493,6 +493,8 @@ export default function Dashboard() {
 
 
   const chartData = getMonthlyStats();
+
+  
   console.log("Chart Data:", chartData);
 
   return (

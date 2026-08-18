@@ -201,6 +201,58 @@ const sendPasswordResetEmail = async ({
 };
 
 // ===============================
+// PASSWORD CHANGED EMAIL
+// ===============================
+const sendPasswordChangedEmail = async ({
+    email,
+    role
+}) => {
+
+    const templateMap = {
+
+        admin: "admin.password.change.html",
+
+        user: "user.password.change.html",
+
+        itsupport: "itsupport.password.change.html",
+
+        technician: "technician.password.change.html",
+
+    };
+
+
+    const templateName =
+        templateMap[role];
+
+
+    if (!templateName) {
+
+        throw new Error(
+            `Unsupported password change email role: ${role}`
+        );
+
+    }
+
+
+    const html = loadTemplate(
+        templateName
+    );
+
+
+    await sendEmail({
+
+        to: email,
+
+        subject:
+        "Your MollyTech Service Desk password was changed",
+
+        html,
+
+    });
+
+};
+
+// ===============================
 // TICKET RESOLVED EMAIL
 // ===============================
 const sendTicketResolvedEmail = async ({
@@ -251,6 +303,8 @@ module.exports = {
     sendApprovalEmail,
 
     sendPasswordResetEmail,
+
+    sendPasswordChangedEmail,
 
     sendTicketResolvedEmail,
 
