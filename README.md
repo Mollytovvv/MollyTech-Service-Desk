@@ -1,5 +1,3 @@
-check my readme.md
-
 # MollyTech Service Desk
 
 A full-stack IT service desk system developed to simulate a real-world technical support environment for managing support tickets, user requests, support operations, notifications, and real-time communication through a centralized platform.
