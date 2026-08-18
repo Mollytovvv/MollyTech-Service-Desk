@@ -9,7 +9,8 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
 const {
-    sendPasswordResetEmail
+    sendPasswordResetEmail,
+    sendPasswordChangedEmail
 } = require("../services/email.service");
 
 const Notification = require("../models/Notification");
@@ -698,7 +699,27 @@ const changePassword = async(req,res)=>{
 
         await user.save();
 
+        // ===============================
+        // 📧 PASSWORD CHANGE NOTIFICATION
+        // ===============================
+        try {
 
+            await sendPasswordChangedEmail({
+
+                email: user.email,
+
+                role: user.role
+
+            });
+
+        } catch (emailError) {
+
+            console.error(
+                "PASSWORD CHANGE EMAIL ERROR:",
+                emailError
+            );
+
+        }
 
         res.json({
 
