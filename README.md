@@ -152,7 +152,7 @@ Primary collections include:
 * `notifications`
 * `announcements`
 
-The database stores user accounts, support tickets, conversations, messages, notifications, announcements, and relationships between support records.
+The database stores user accounts, support tickets, conversations, messages, notifications, announcements, and relationships between system records.
 
 MongoDB ObjectIds are used to associate users, tickets, conversations, messages, and other system records.
 
@@ -193,6 +193,39 @@ Real-time features include:
 
 Users and support personnel can communicate without manually refreshing the application.
 
+## System Workflow
+
+```text
+User
+ │
+ ▼
+Submit Support Ticket
+ │
+ ▼
+Administrator Reviews Ticket
+ │
+ ▼
+Ticket Assigned
+ │
+ ├── IT Support
+ │
+ └── Technician
+        │
+        ▼
+   Investigate / Respond
+        │
+        ▼
+    Resolve Ticket
+        │
+        ▼
+User Receives Notification
+        │
+        ▼
+Continued Communication
+```
+
+The workflow is designed to represent a structured IT support process where submitted concerns are reviewed, assigned to appropriate support personnel, monitored, communicated, and resolved.
+
 ## Requirements
 
 * Windows
@@ -204,14 +237,56 @@ Users and support personnel can communicate without manually refreshing the appl
 
 ## Running the Project
 
-1. Clone the repository.
-2. Install the required dependencies.
-3. Configure the application's environment variables.
-4. Configure the MongoDB connection.
-5. Start the backend server.
-6. Start the Vite development server.
+### 1. Clone the Repository
 
-> The project is currently configured for a local development environment and may require additional configuration depending on the user's machine.
+```bash
+git clone <repository-url>
+cd "MollyTech Service Desk"
+```
+
+### 2. Install Backend Dependencies
+
+```bash
+cd backend
+npm install
+```
+
+### 3. Install Frontend Dependencies
+
+Open another terminal:
+
+```bash
+cd frontend
+npm install
+```
+
+### 4. Configure Environment Variables
+
+Create the required environment configuration files based on `.env.example`.
+
+Configure the required application settings, including the MongoDB connection and authentication-related configuration.
+
+Do not commit `.env` files or other sensitive credentials to the repository.
+
+### 5. Start the Backend
+
+From the `backend` directory, run the configured development command:
+
+```bash
+npm run dev
+```
+
+### 6. Start the Frontend
+
+From the `frontend` directory, run:
+
+```bash
+npm run dev
+```
+
+The Vite development server will provide the local frontend address.
+
+> The project is currently configured for a local development environment and may require additional configuration depending on the user's machine and environment.
 
 ## Project Structure
 
@@ -247,62 +322,74 @@ MollyTech Service Desk/
 ├── .gitignore
 └── README.md
 ```
-#Project Status
 
-Functional Full-Stack Portfolio Project
+## Project Status
 
-The system's core functionality is implemented and functional and has undergone extensive local development and manual testing.
+**Functional Full-Stack Portfolio Project**
 
-The current version focuses on demonstrating full-stack system development, role-based support workflows, real-time communication, ticket management, authentication, database integration, and support operations.
+The system's core functionality is implemented and functional and has undergone extensive local development, manual testing, debugging, and feature validation.
+
+The current version focuses on demonstrating:
+
+* Full-stack system development
+* Role-based support workflows
+* Real-time communication
+* Ticket management
+* Authentication and authorization
+* Database integration
+* Support operations
+* Dashboard and analytics
 
 Before production deployment, additional security testing, regression testing, performance testing, scalability testing, automated testing, and deployment validation would be required.
 
-Future improvements include:
+### Future Improvements
 
-AI-assisted support
-Additional notification functionality
-Improved scalability
-Performance optimization
-Stronger security hardening
-Automated testing
-Monitoring and logging
-Production deployment
-Developer Role
+* AI-assisted support
+* Additional notification functionality
+* Improved scalability
+* Performance optimization
+* Stronger security hardening
+* Automated testing
+* Monitoring and logging
+* Production deployment
 
-Software Engineer / Full-Stack Developer
+## Developer Role
+
+**Software Engineer / Full-Stack Developer**
 
 Responsible for:
 
-System architecture and design
-Frontend development
-Backend development
-React and Vite development
-Node.js and Express development
-MongoDB database design and integration
-Authentication and authorization
-Role-based access control
-Ticket management workflows
-Real-time communication
-Socket.IO implementation
-Messaging system
-Notification system
-Dashboard and analytics
-UI/UX implementation
-System integration
-Functional testing
-Debugging and optimization
-Project Purpose
+* System architecture and design
+* Frontend development
+* Backend development
+* React and Vite development
+* Node.js and Express development
+* MongoDB database design and integration
+* Authentication and authorization
+* Role-based access control
+* Ticket management workflows
+* Real-time communication
+* Socket.IO implementation
+* Messaging system
+* Notification system
+* Dashboard and analytics
+* UI/UX implementation
+* System integration
+* Functional testing
+* Debugging and optimization
+
+## Project Purpose
 
 MollyTech Service Desk was independently developed as an engineering-focused project to understand and implement the workflows of a real-world IT service desk environment.
 
-Rather than building a basic CRUD application, the system was designed around actual support operations including ticket submission, administrative assignment, technician workflows, ticket resolution, user communication, notifications, and role-based access control.
+Rather than building a basic CRUD application, the system was designed around actual support operations, including ticket submission, administrative assignment, technician workflows, ticket resolution, user communication, notifications, and role-based access control.
 
 The project was also developed to strengthen practical experience in system architecture, full-stack development, database design, real-time communication, authentication, debugging, testing, and software engineering practices.
 
-The goal was not simply to create a functional application, but to challenge myself to approach the project from an engineering perspective by planning the system, designing its architecture, implementing its workflows, testing its functionality, identifying issues, and iterating on the system throughout development.
+The goal was not simply to create a functional application, but to approach the project from an engineering perspective by planning the system, designing its architecture, implementing its workflows, testing its functionality, identifying issues, and iterating on the system throughout development.
 
-Author
+## Author
 
-Ralph Michael M. Molina
+**Ralph Michael M. Molina**
 
-GitHub: Mollytovvv
+GitHub: [Mollytovvv](https://github.com/Mollytovvv)
