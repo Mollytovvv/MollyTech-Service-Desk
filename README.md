@@ -1,6 +1,6 @@
 # MollyTech Service Desk
 
-A full-stack IT service desk system developed to simulate a real-world technical support environment for managing support tickets, user requests, support operations, notifications, and real-time communication through a centralized platform.
+A full-stack IT service desk system developed as an engineering-focused implementation of a real-world technical support environment for managing support tickets, user requests, support operations, notifications, and real-time communication through a centralized platform.
 
 The system provides separate workflows for users, administrators, IT support personnel, and technicians, allowing technical concerns to be submitted, assigned, monitored, resolved, and communicated through a structured support workflow.
 
@@ -8,220 +8,264 @@ The system provides separate workflows for users, administrators, IT support per
 
 ### User Management
 
-* User registration
-* Administrator approval
-* Email verification
-* Role-based access
-* Account management
-* Password recovery
-* Password reset
-* Protected routes
+- User registration
+- Administrator approval
+- Email verification
+- Role-based access
+- Account management
+- Password recovery
+- Password reset
+- Protected routes
 
 ### Ticket Management
 
-* Create support tickets
-* Automatic ticket ID generation
-* Ticket search
-* Ticket filtering
-* Ticket categorization
-* Priority management
-* Ticket assignment
-* Ticket reassignment
-* Ticket status tracking
-* Ticket resolution
-* Ticket cancellation
-* Ticket archiving
-* Ticket records
+- Create support tickets
+- Automatic ticket ID generation
+- Ticket search
+- Ticket filtering
+- Ticket categorization
+- Priority management
+- Ticket assignment
+- Ticket reassignment
+- Ticket status tracking
+- Ticket resolution
+- Ticket cancellation
+- Ticket archiving
+- Ticket records
 
 ### Ticket Categories
 
-* Hardware
-* Software
-* Network
-* Account
-* Other
+- Hardware
+- Software
+- Network
+- Account
+- Other
 
 ### Priority Levels
 
-* Low
-* Medium
-* High
-* Urgent
+- Low
+- Medium
+- High
+- Urgent
 
 ### Support Operations
 
-* Administrator ticket assignment
-* Technician ticket management
-* IT Support ticket management
-* Ticket notes
-* Notes history
-* Assigned staff tracking
-* Support activity monitoring
-* Live operations feed
-* Ticket statistics
+- Administrator ticket assignment
+- Technician ticket management
+- IT Support ticket management
+- Ticket notes
+- Notes history
+- Assigned staff tracking
+- Support activity monitoring
+- Live operations feed
+- Ticket statistics
 
 ### Real-Time Messaging
 
-* Ticket-based conversations
-* Real-time message delivery
-* User-to-support communication
-* Message notifications
-* Unread message indicators
-* Typing indicators
-* Image attachments
-* File attachments
-* Conversation archiving
-* Continued communication after ticket resolution
+- Ticket-based conversations
+- Real-time message delivery
+- User-to-support communication
+- Message notifications
+- Unread message indicators
+- Typing indicators
+- Image attachments
+- File attachments
+- Conversation archiving
+- Continued communication after ticket resolution
 
 ### Notifications
 
-* New ticket notifications
-* Ticket assignment notifications
-* New message notifications
-* Ticket resolution notifications
-* Access request notifications
-* Announcement notifications
-* Real-time notification updates
-* Notification counters
+- New ticket notifications
+- Ticket assignment notifications
+- New message notifications
+- Ticket resolution notifications
+- Access request notifications
+- Announcement notifications
+- Real-time notification updates
+- Notification counters
 
 ### Dashboard & Analytics
 
 #### Administrator
 
-* Total users
-* Total tickets
-* Pending tickets
-* Resolved tickets
-* Live operations feed
-* Recently registered users
-* Ticket statistics
-* Monthly ticket analytics
+- Total users
+- Total tickets
+- Pending tickets
+- Resolved tickets
+- Live operations feed
+- Recently registered users
+- Ticket statistics
+- Monthly ticket analytics
 
 #### IT Support / Technician
 
-* Assigned tickets
-* Pending tickets
-* Resolved tickets
-* Live support operations
-* Ticket statistics
-* Recently assigned tickets
+- Assigned tickets
+- Pending tickets
+- Resolved tickets
+- Live support operations
+- Ticket statistics
+- Recently assigned tickets
 
 #### User
 
-* Total submitted tickets
-* Pending tickets
-* Resolved tickets
-* Messages
-* Recent tickets
-* Ticket priority and status
-* Quick actions
-* Announcements
+- Total submitted tickets
+- Pending tickets
+- Resolved tickets
+- Messages
+- Recent tickets
+- Ticket priority and status
+- Quick actions
+- Announcements
 
 ### Announcements
 
-* Create announcements
-* Edit announcements
-* Delete announcements
-* User announcement notifications
-* Centralized announcement management
+- Create announcements
+- Edit announcements
+- Delete announcements
+- User announcement notifications
+- Centralized announcement management
 
-## Technology Stack
+## System Workflow
 
-* React
-* Vite
-* JavaScript
-* HTML5
-* CSS3
-* Node.js
-* Express.js
-* Socket.IO
-* MongoDB
-* JWT
-* Git
+User
+  │
+  ▼
+Submit Support Ticket
+  │
+  ▼
+Administrator Reviews Ticket
+  │
+  ▼
+Ticket Assigned
+  │
+  ├── IT Support
+  │
+  └── Technician
+          │
+          ▼
+      Investigate / Respond
+          │
+          ▼
+       Resolve Ticket
+          │
+          ▼
+ User Receives Notification
+          │
+          ▼
+ Continued Communication
 
-## Database
+The workflow is designed to represent a structured IT support process where submitted concerns are reviewed, assigned to appropriate support personnel, monitored, communicated, and resolved.
 
-The application uses **MongoDB** as its NoSQL database.
+Technology Stack
+React
+Vite
+JavaScript
+HTML5
+CSS3
+Node.js
+Express.js
+Socket.IO
+MongoDB
+JWT
+Git
+Database
+
+The application uses MongoDB as its NoSQL database.
 
 Primary collections include:
 
-* `users`
-* `tickets`
-* `conversations`
-* `messages`
-* `notifications`
-* `announcements`
+users
+tickets
+conversations
+messages
+notifications
+announcements
 
 The database stores user accounts, support tickets, conversations, messages, notifications, announcements, and relationships between support records.
 
 MongoDB ObjectIds are used to associate users, tickets, conversations, messages, and other system records.
 
-## Authentication & Authorization
+Authentication & Authorization
 
 The system implements:
 
-* Email and password authentication
-* JWT-based authentication
-* Password hashing
-* Email verification
-* Password recovery
-* Password reset
-* Role-based authorization
-* Protected routes
-* Administrator approval for user accounts
+Email and password authentication
+JWT-based authentication
+Password hashing
+Email verification
+Password recovery
+Password reset
+Role-based authorization
+Protected routes
+Administrator approval for user accounts
 
 The system supports four roles:
 
-* User
-* Administrator
-* IT Support
-* Technician
+User
+Administrator
+IT Support
+Technician
 
 Each role has different permissions and access to system functionality.
 
-## Real-Time Communication
+Real-Time Communication
 
-**Socket.IO** is used to provide real-time functionality throughout the system.
+Socket.IO is used to provide real-time functionality throughout the system.
 
-Real-time features include:
+Real-time functionality includes:
 
-* Messaging
-* Typing indicators
-* Notifications
-* Ticket updates
-* Unread message counters
-* Support activity updates
+Messaging
+Typing indicators
+Notifications
+Unread message counters
+Support activity updates
 
 Users and support personnel can communicate without manually refreshing the application.
 
-## Requirements
-
-* Windows
-* Node.js
-* npm
-* MongoDB
-* Git
-* Modern Web Browser
-
-## Running the Project
-
-1. Clone the repository.
-2. Install the required dependencies.
-
-```bash
+Requirements
+Windows
+Node.js
+npm
+MongoDB
+Git
+Modern web browser
+Running the Project
+1. Clone the Repository
+git clone <repository-url>
+cd "MollyTech Service Desk"
+2. Install Backend Dependencies
+cd backend
 npm install
-```
+3. Install Frontend Dependencies
 
-3. Configure the application's environment variables.
-4. Configure the MongoDB connection.
-5. Start the backend server.
-6. Start the Vite development server.
+Open another terminal:
 
-> The project is currently configured for a local development environment and may require additional configuration depending on the user's machine.
+cd frontend
+npm install
+4. Configure Environment Variables
 
-## Project Structure
+Create the required environment configuration files based on .env.example.
 
-```text
+Configure the required application settings, including the MongoDB connection and authentication-related configuration.
+
+Do not commit .env files or other sensitive credentials to the repository.
+
+5. Start the Backend
+
+From the backend directory, run the project's configured development command.
+
+npm run dev
+6. Start the Frontend
+
+From the frontend directory, run:
+
+npm run dev
+
+The Vite development server will provide the local frontend address.
+
+The project is currently configured for a local development environment and may require additional configuration depending on the user's machine and environment.
+
+Project Structure
 MollyTech Service Desk/
 │
 ├── backend/
@@ -252,55 +296,69 @@ MollyTech Service Desk/
 ├── .env.example
 ├── .gitignore
 └── README.md
-```
+Project Status
 
-## Project Status
+Functional Full-Stack Portfolio Project
 
-**Functional Full-Stack Portfolio Project**
+The system is currently functional and has undergone extensive local development, manual testing, debugging, and feature validation.
 
-The system is currently functional and has undergone extensive local development and manual testing.
+The current version focuses on demonstrating:
 
-The current version focuses on demonstrating full-stack system development, role-based support workflows, real-time communication, ticket management, authentication, and database integration.
+Full-stack system development
+Role-based support workflows
+Real-time communication
+Ticket management
+Authentication and authorization
+Database integration
+Support operations
+Dashboard analytics
 
-Before production deployment, additional security testing, regression testing, performance testing, scalability testing, and deployment validation would be required.
+Before production deployment, additional security testing, regression testing, performance testing, scalability testing, automated testing, and deployment validation would be required.
 
-Future improvements include AI-assisted support, additional notification functionality, improved scalability, performance optimization, stronger security hardening, automated testing, monitoring, and production deployment.
+Future improvements include:
 
-## Developer Role
+AI-assisted support
+Additional notification functionality
+Improved scalability
+Performance optimization
+Stronger security hardening
+Automated testing
+Monitoring and logging
+Production deployment
+Developer Role
 
-**Software Engineer / Full-Stack Developer**
+Software Engineer / Full-Stack Developer
 
 Responsible for:
 
-* System architecture and design
-* Frontend development
-* Backend development
-* React and Vite development
-* Node.js and Express development
-* MongoDB database design and integration
-* Authentication and authorization
-* Role-based access control
-* Ticket management workflows
-* Real-time communication
-* Socket.IO implementation
-* Messaging system
-* Notification system
-* Dashboard and analytics
-* UI/UX implementation
-* System integration
-* Functional testing
-* Debugging and optimization
+System architecture and design
+Frontend development
+Backend development
+React and Vite development
+Node.js and Express development
+MongoDB database design and integration
+Authentication and authorization
+Role-based access control
+Ticket management workflows
+Real-time communication
+Socket.IO implementation
+Messaging system
+Notification system
+Dashboard and analytics
+UI/UX implementation
+System integration
+Functional testing
+Debugging and optimization
+Project Purpose
 
-## Project Purpose
+MollyTech Service Desk was independently developed as an engineering-focused project to understand and implement the workflows of a real-world IT service desk environment.
 
-MollyTech Service Desk was independently developed as an engineering-focused project to understand how real-world IT service desk systems operate.
+Rather than building a basic CRUD application, the system was designed around actual support operations including ticket submission, administrative assignment, technician workflows, ticket resolution, user communication, notifications, and role-based access control.
 
-The project was intentionally designed beyond a basic CRUD application to simulate actual support operations, including ticket submission, administrative assignment, technician workflows, ticket resolution, user communication, notifications, and role-based access.
+The project was also used to strengthen practical experience in system architecture, full-stack development, database design, real-time communication, authentication, debugging, testing, and software engineering practices.
 
-The project also provided practical experience in designing and developing a complete full-stack system using modern web technologies while applying software engineering principles throughout the development process.
+Author
 
-## Author
+Ralph Michael M. Molina
 
-**Ralph Michael M. Molina**
-
-GitHub: [Mollytovvv](https://github.com/Mollytovvv)
+GitHub: Mollytovvv
