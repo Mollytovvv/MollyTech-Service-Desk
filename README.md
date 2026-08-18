@@ -247,7 +247,7 @@ MollyTech Service Desk/
 ├── .gitignore
 └── README.md
 ```
-Project Status
+#Project Status
 
 Functional Full-Stack Portfolio Project
 
