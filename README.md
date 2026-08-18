@@ -188,7 +188,6 @@ Real-time features include:
 * Messaging
 * Typing indicators
 * Notifications
-* Ticket updates
 * Unread message counters
 * Support activity updates
 
@@ -207,11 +206,6 @@ Users and support personnel can communicate without manually refreshing the appl
 
 1. Clone the repository.
 2. Install the required dependencies.
-
-```bash
-npm install
-```
-
 3. Configure the application's environment variables.
 4. Configure the MongoDB connection.
 5. Start the backend server.
@@ -253,54 +247,62 @@ MollyTech Service Desk/
 ├── .gitignore
 └── README.md
 ```
+Project Status
 
-## Project Status
+Functional Full-Stack Portfolio Project
 
-**Functional Full-Stack Portfolio Project**
+The system's core functionality is implemented and functional and has undergone extensive local development and manual testing.
 
-The system is currently functional and has undergone extensive local development and manual testing.
+The current version focuses on demonstrating full-stack system development, role-based support workflows, real-time communication, ticket management, authentication, database integration, and support operations.
 
-The current version focuses on demonstrating full-stack system development, role-based support workflows, real-time communication, ticket management, authentication, and database integration.
+Before production deployment, additional security testing, regression testing, performance testing, scalability testing, automated testing, and deployment validation would be required.
 
-Before production deployment, additional security testing, regression testing, performance testing, scalability testing, and deployment validation would be required.
+Future improvements include:
 
-Future improvements include AI-assisted support, additional notification functionality, improved scalability, performance optimization, stronger security hardening, automated testing, monitoring, and production deployment.
+AI-assisted support
+Additional notification functionality
+Improved scalability
+Performance optimization
+Stronger security hardening
+Automated testing
+Monitoring and logging
+Production deployment
+Developer Role
 
-## Developer Role
-
-**Software Engineer / Full-Stack Developer**
+Software Engineer / Full-Stack Developer
 
 Responsible for:
 
-* System architecture and design
-* Frontend development
-* Backend development
-* React and Vite development
-* Node.js and Express development
-* MongoDB database design and integration
-* Authentication and authorization
-* Role-based access control
-* Ticket management workflows
-* Real-time communication
-* Socket.IO implementation
-* Messaging system
-* Notification system
-* Dashboard and analytics
-* UI/UX implementation
-* System integration
-* Functional testing
-* Debugging and optimization
-
-## Project Purpose
+System architecture and design
+Frontend development
+Backend development
+React and Vite development
+Node.js and Express development
+MongoDB database design and integration
+Authentication and authorization
+Role-based access control
+Ticket management workflows
+Real-time communication
+Socket.IO implementation
+Messaging system
+Notification system
+Dashboard and analytics
+UI/UX implementation
+System integration
+Functional testing
+Debugging and optimization
+Project Purpose
 
 MollyTech Service Desk was independently developed as an engineering-focused project to understand and implement the workflows of a real-world IT service desk environment.
 
 Rather than building a basic CRUD application, the system was designed around actual support operations including ticket submission, administrative assignment, technician workflows, ticket resolution, user communication, notifications, and role-based access control.
 
-The project was also used to strengthen practical experience in system architecture, full-stack development, database design, real-time communication, authentication, debugging, testing, and software engineering practices.
+The project was also developed to strengthen practical experience in system architecture, full-stack development, database design, real-time communication, authentication, debugging, testing, and software engineering practices.
 
-## Author
+The goal was not simply to create a functional application, but to challenge myself to approach the project from an engineering perspective by planning the system, designing its architecture, implementing its workflows, testing its functionality, identifying issues, and iterating on the system throughout development.
 
-**Ralph Michael M. Molina**
+Author
 
-GitHub: [Mollytovvv](https://github.com/Mollytovvv)
+Ralph Michael M. Molina
+
+GitHub: Mollytovvv
