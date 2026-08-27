@@ -8,7 +8,11 @@ const path = require("path");
 
 const transporter = nodemailer.createTransport({
 
-    service: "gmail",
+    host: "smtp.gmail.com",
+
+    port: 587,
+
+    secure: false,
 
     auth: {
 
@@ -18,8 +22,12 @@ const transporter = nodemailer.createTransport({
 
     },
 
+    family: 4,
+
     connectionTimeout: 10000,
+
     greetingTimeout: 10000,
+
     socketTimeout: 10000,
 
 });
