@@ -2,25 +2,18 @@ const nodemailer = require("nodemailer");
 const fs = require("fs");
 const path = require("path");
 
-
 // ===============================
 // GMAIL TRANSPORT
 // ===============================
 
 const transporter = nodemailer.createTransport({
-
     service: "gmail",
 
     auth: {
-
         user: process.env.EMAIL_USER,
-
         pass: process.env.EMAIL_PASS,
-
     },
-
 });
-
 
 // ===============================
 // LOAD EMAIL TEMPLATE
@@ -34,12 +27,10 @@ const loadTemplate = (templateName, replacements = {}) => {
         templateName
     );
 
-
     let template = fs.readFileSync(
         templatePath,
         "utf8"
     );
-
 
     Object.keys(replacements).forEach((key) => {
 
@@ -50,12 +41,8 @@ const loadTemplate = (templateName, replacements = {}) => {
 
     });
 
-
     return template;
-
 };
-
-
 
 // ===============================
 // GENERIC EMAIL SENDER
@@ -77,29 +64,29 @@ const sendEmail = async ({ to, subject, html }) => {
             html,
 
             attachments: [
-            {
-                filename: "mollytech_logo.jpg",
+                {
+                    filename: "mollytech_logo.jpg",
 
-                path: path.join(
-                    __dirname,
-                    "../../../frontend/src/assets/mollytech_logo.jpg"
-                ),
+                    path: path.join(
+                        __dirname,
+                        "../../../frontend/src/assets/mollytech_logo.jpg"
+                    ),
 
-                cid: "mollytechlogo",
+                    // MUST MATCH THE CID IN THE HTML TEMPLATE
+                    cid: "mollytechlogo@mollytech",
 
-                contentType: "image/jpeg",
+                    contentType: "image/jpeg",
 
-                contentDisposition: "inline",
-            },
+                    contentDisposition: "inline",
+                },
             ],
 
         });
 
-
         console.log(`📧 Email sent to ${to}`);
 
-
-    } catch (err) {
+    }
+    catch (err) {
 
         console.error(
             "EMAIL ERROR:",
@@ -112,8 +99,6 @@ const sendEmail = async ({ to, subject, html }) => {
 
 };
 
-
-
 // ===============================
 // ACCOUNT APPROVED EMAIL
 // ===============================
@@ -124,28 +109,22 @@ const sendApprovalEmail = async ({
     loginLink
 }) => {
 
-
-    console.log("APPROVAL EMAIL DATA:", {
-        email,
-        firstName,
-        loginLink
-    });
-
-
-    const html = loadTemplate(
-
-        "account.approved.html",
-
+    console.log(
+        "APPROVAL EMAIL DATA:",
         {
-
+            email,
             firstName,
-
             loginLink
-
         }
-
     );
 
+    const html = loadTemplate(
+        "account.approved.html",
+        {
+            firstName,
+            loginLink
+        }
+    );
 
     await sendEmail({
 
@@ -158,10 +137,7 @@ const sendApprovalEmail = async ({
 
     });
 
-
 };
-
-
 
 // ===============================
 // PASSWORD RESET EMAIL
@@ -172,19 +148,12 @@ const sendPasswordResetEmail = async ({
     resetLink
 }) => {
 
-
     const html = loadTemplate(
-
         "reset.password.html",
-
         {
-
             resetLink
-
         }
-
     );
-
 
     await sendEmail({
 
@@ -197,12 +166,12 @@ const sendPasswordResetEmail = async ({
 
     });
 
-
 };
 
 // ===============================
 // PASSWORD CHANGED EMAIL
 // ===============================
+
 const sendPasswordChangedEmail = async ({
     email,
     role
@@ -210,20 +179,22 @@ const sendPasswordChangedEmail = async ({
 
     const templateMap = {
 
-        admin: "admin.password.change.html",
+        admin:
+        "admin.password.change.html",
 
-        user: "user.password.change.html",
+        user:
+        "user.password.change.html",
 
-        itsupport: "itsupport.password.change.html",
+        itsupport:
+        "itsupport.password.change.html",
 
-        technician: "technician.password.change.html",
+        technician:
+        "technician.password.change.html",
 
     };
 
-
     const templateName =
         templateMap[role];
-
 
     if (!templateName) {
 
@@ -233,11 +204,9 @@ const sendPasswordChangedEmail = async ({
 
     }
 
-
     const html = loadTemplate(
         templateName
     );
-
 
     await sendEmail({
 
@@ -255,6 +224,7 @@ const sendPasswordChangedEmail = async ({
 // ===============================
 // TICKET RESOLVED EMAIL
 // ===============================
+
 const sendTicketResolvedEmail = async ({
     email,
     firstName,
@@ -262,26 +232,20 @@ const sendTicketResolvedEmail = async ({
     title,
 }) => {
 
+    const clientUrl =
+        process.env.CLIENT_URL ||
+        "http://localhost:5173";
 
     const html = loadTemplate(
-
         "ticket.resolved.html",
-
         {
-
             firstName,
-
             ticketId,
-
             title,
-
             loginLink:
-            "http://localhost:5173/login"
-
+            `${clientUrl}/login`
         }
-
     );
-
 
     await sendEmail({
 

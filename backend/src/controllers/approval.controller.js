@@ -64,20 +64,18 @@ const getPendingUsers = async (req, res) => {
 // ===============================
 // APPROVE USER
 // ===============================
-const approveUser = async(req,res)=>{
+const approveUser = async (req, res) => {
 
-    try{
+    try {
 
         const user = await User.findById(
             req.params.id
         );
 
-        if(!user){
+        if (!user) {
 
             return res.status(404).json({
-
-                message:"User not found"
-
+                message: "User not found"
             });
 
         }
@@ -86,25 +84,27 @@ const approveUser = async(req,res)=>{
         // VALIDATE ACCOUNT
         // ===============================
 
-        if(user.role !== "user"){
+        if (user.role !== "user") {
 
             return res.status(400).json({
-
-                message:"Only user registrations can be approved"
-
+                message:
+                "Only user registrations can be approved"
             });
 
         }
 
-        if(user.status === "approved"){
+        if (user.status === "approved") {
 
             return res.status(400).json({
-
-                message:"User is already approved"
-
+                message:
+                "User is already approved"
             });
 
         }
+
+        // ===============================
+        // APPROVE ACCOUNT
+        // ===============================
 
         user.status = "approved";
 
@@ -116,61 +116,93 @@ const approveUser = async(req,res)=>{
 
         await user.save();
 
-
         // ===============================
         // SEND ACCOUNT APPROVAL EMAIL
         // ===============================
 
-        await sendApprovalEmail({
+        let emailSent = false;
 
-            email:user.email,
+        try {
 
-            firstName:user.firstName,
+            const clientUrl =
+                process.env.CLIENT_URL ||
+                "http://localhost:5173";
 
-            loginLink:
-            process.env.CLIENT_URL || "http://localhost:5173"
+            await sendApprovalEmail({
 
-        });
+                email: user.email,
+
+                firstName: user.firstName,
+
+                loginLink: clientUrl
+
+            });
+
+            emailSent = true;
+
+        }
+        catch (emailError) {
+
+            console.error(
+                "APPROVAL EMAIL FAILED:",
+                emailError
+            );
+
+        }
+
+        // ===============================
+        // REALTIME ACCESS REQUEST UPDATE
+        // ===============================
 
         const io = req.app.get("io");
 
-        if(io){
+        if (io) {
 
             io.emit(
                 "accessRequestUpdated",
                 {
-
-                    action:"approved",
-
-                    userId:user._id
-
+                    action: "approved",
+                    userId: user._id
                 }
             );
 
         }
 
+        // ===============================
+        // RESPONSE
+        // ===============================
+
         res.json({
 
-            message:"User approved successfully",
+            message:
+            emailSent
+                ? "User approved successfully"
+                : "User approved successfully, but the approval email could not be sent",
 
-            user:{
+            emailSent,
 
-                id:user._id,
+            user: {
 
-                firstName:user.firstName,
+                id: user._id,
 
-                lastName:user.lastName,
+                firstName:
+                user.firstName,
 
-                email:user.email,
+                lastName:
+                user.lastName,
 
-                status:user.status
+                email:
+                user.email,
+
+                status:
+                user.status
 
             }
 
         });
 
     }
-    catch(err){
+    catch (err) {
 
         console.error(
             "Approve user error:",
@@ -179,7 +211,8 @@ const approveUser = async(req,res)=>{
 
         res.status(500).json({
 
-            message:"Failed to approve user"
+            message:
+            "Failed to approve user"
 
         });
 
