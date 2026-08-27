@@ -117,6 +117,24 @@ const approveUser = async (req, res) => {
         await user.save();
 
         // ===============================
+        // REALTIME ACCESS REQUEST UPDATE
+        // ===============================
+
+        const io = req.app.get("io");
+
+        if (io) {
+
+            io.emit(
+                "accessRequestUpdated",
+                {
+                    action: "approved",
+                    userId: user._id.toString()
+                }
+            );
+
+        }
+
+        // ===============================
         // SEND ACCOUNT APPROVAL EMAIL
         // ===============================
 
@@ -151,28 +169,10 @@ const approveUser = async (req, res) => {
         }
 
         // ===============================
-        // REALTIME ACCESS REQUEST UPDATE
-        // ===============================
-
-        const io = req.app.get("io");
-
-        if (io) {
-
-            io.emit(
-                "accessRequestUpdated",
-                {
-                    action: "approved",
-                    userId: user._id
-                }
-            );
-
-        }
-
-        // ===============================
         // RESPONSE
         // ===============================
 
-        res.json({
+        return res.status(200).json({
 
             message:
             emailSent
@@ -209,7 +209,7 @@ const approveUser = async (req, res) => {
             err
         );
 
-        res.status(500).json({
+        return res.status(500).json({
 
             message:
             "Failed to approve user"
@@ -295,7 +295,7 @@ const declineUser = async(req,res)=>{
 
                     action:"rejected",
 
-                    userId:user._id
+                    userId:user._id.toString()
 
                 }
             );

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import api from "../../api/axios";
 
 import { useAuth } from "../../context/AuthContext";
-import socket, { connectSocket } from "../../socket/socket";
+import socket from "../../socket/socket";
 
 import {
     FiUser,
@@ -89,47 +89,69 @@ export default function AccessRequests(){
     // =========================
     // REALTIME ACCESS REQUESTS
     // =========================
-    useEffect(()=>{
-
+    useEffect(() => {
 
         fetchRequests();
 
-
-
-        const handleNewRequest = (data)=>{
+        const handleNewRequest = (data) => {
 
             console.log(
                 "NEW ACCESS REQUEST RECEIVED:",
                 data
             );
 
-
             fetchRequests();
 
         };
 
+        const handleAccessRequestUpdated = (data) => {
 
+            console.log(
+                "ACCESS REQUEST UPDATED:",
+                data
+            );
+
+            if (
+                data?.action === "approved" ||
+                data?.action === "rejected"
+            ) {
+
+                setRequests((currentRequests) =>
+                    currentRequests.filter(
+                        (user) =>
+                            user._id !== data.userId
+                    )
+                );
+
+            }
+
+        };
 
         socket.on(
             "newAccessRequest",
             handleNewRequest
         );
 
+        socket.on(
+            "accessRequestUpdated",
+            handleAccessRequestUpdated
+        );
 
-
-        return()=>{
-
+        return () => {
 
             socket.off(
                 "newAccessRequest",
                 handleNewRequest
             );
 
+            socket.off(
+                "accessRequestUpdated",
+                handleAccessRequestUpdated
+            );
 
         };
 
-
-    },[]);
+    }, []);
 
     // =========================
     // APPROVE USER
@@ -166,8 +188,6 @@ export default function AccessRequests(){
                 );
 
             }
-
-            fetchRequests();
 
         }
         catch (err) {
@@ -543,9 +563,9 @@ export default function AccessRequests(){
 
                                 className="btn-confirm-resolve"
 
-                                onClick={()=>{
+                                onClick={async () => {
 
-                                    handleApprove(
+                                    await handleApprove(
                                         approveRequest._id
                                     );
 
@@ -665,9 +685,9 @@ export default function AccessRequests(){
 
                                 className="btn-confirm-resolve"
 
-                                onClick={()=>{
+                                onClick={async () => {
 
-                                    handleDecline(
+                                    await handleDecline(
                                         declineRequest._id
                                     );
 
