@@ -134,7 +134,10 @@ export default function AccessRequests(){
     // =========================
     // APPROVE USER
     // =========================
-    const handleApprove = async (id) => {
+    const handleApprove = async(id)=>{
+
+    console.log("APPROVE START:", id);
+
 
         try {
 
