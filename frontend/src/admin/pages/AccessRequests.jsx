@@ -134,36 +134,49 @@ export default function AccessRequests(){
     // =========================
     // APPROVE USER
     // =========================
+    const handleApprove = async (id) => {
 
-    const handleApprove = async(id)=>{
+        try {
 
-        try{
-
-            await api.patch(
+            const res = await api.patch(
                 `/approvals/${id}/approve`,
                 {},
                 {
-                    headers:{
-                        Authorization:`Bearer ${token}`
+                    headers: {
+                        Authorization: `Bearer ${token}`
                     }
                 }
             );
 
+            if (res.data.emailSent) {
 
-            showToast(
-                "success",
-                "Account approved successfully."
-            );
+                showToast(
+                    "success",
+                    "Account approved successfully. Approval email sent."
+                );
 
+            } else {
+
+                showToast(
+                    "warning",
+                    "Account approved, but the approval email could not be sent."
+                );
+
+            }
 
             fetchRequests();
 
-
         }
-        catch(err){
+        catch (err) {
+
+            console.log(
+                "APPROVE ERROR:",
+                err.response?.data || err
+            );
 
             showToast(
                 "error",
+                err.response?.data?.message ||
                 "Failed to approve account."
             );
 
