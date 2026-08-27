@@ -22,7 +22,7 @@ const connectDB = require("./src/config/db");
 
     cors: {
 
-      origin:"http://localhost:5173",
+      origin: process.env.CLIENT_URL,
 
       methods:[
         "GET",
@@ -187,7 +187,7 @@ const connectDB = require("./src/config/db");
 // ===============================
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: process.env.CLIENT_URL,
     credentials: true,
   })
 );

@@ -248,13 +248,15 @@ export default function UserMessages() {
           return conversation;
         }
 
-        return {
-          ...conversation,
-          lastMessage: data.lastMessage,
-          updatedAt: data.updatedAt,
-          adminUnread: data.adminUnread,
-          userUnread: data.userUnread,
-        };
+      return {
+        ...conversation,
+        lastMessage: data.lastMessage,
+        updatedAt: data.updatedAt,
+        unreadBy: data.unreadBy,
+        userUnread: data.unreadBy?.some(
+          (id) => id.toString() === user?._id?.toString()
+        ),
+      };
 
       });
 

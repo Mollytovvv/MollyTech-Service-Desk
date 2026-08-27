@@ -1078,10 +1078,13 @@ const tickets = await Ticket.find({
       return res.status(404).json({ message: "Ticket not found" });
     }
 
-    const currentUser = await User.findById(req.user.id);
+    const currentUser = await User.findById(
+      req.user._id || req.user.id
+    );
 
     const username = currentUser
-      ? `${currentUser.firstName} ${currentUser.lastName}`
+      ? `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim() ||
+        (currentUser.role === "admin" ? "Administrator" : "Support Staff")
       : "System";
 
     // 💬 ADD COMMENT
@@ -1486,13 +1489,21 @@ const archiveTickets = async (req, res) => {
         deletedByUser: false,
       }).sort({ createdAt: -1 });
 
+      const userTicketIds = tickets.map(
+        ticket => ticket._id
+      );
 
+      const conversations = await Conversation.find({
+        ticketId: { $in: userTicketIds }
+      }).select("_id");
+
+      const conversationIds = conversations.map(
+        conversation => conversation._id
+      );
 
       const messages = await Message.countDocuments({
-        sender: req.user.id
+        conversationId: { $in: conversationIds }
       });
-
-
 
       const stats = {
 

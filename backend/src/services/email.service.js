@@ -85,7 +85,7 @@ const sendEmail = async ({ to, subject, html }) => {
                     "../../../frontend/src/assets/mollytech_logo.jpg"
                 ),
 
-                cid: "mollytechlogo@mollytech",
+                cid: "mollytechlogo",
 
                 contentType: "image/jpeg",
 

@@ -33,16 +33,26 @@ export default function TicketCenter() {
   const { showToast } = useToast();
   const { token, user } = useAuth();
 
+  const isAdmin = user?.role === "admin";
+
+  const isStaff =
+    user?.role === "support" ||
+    user?.role === "it_support" ||
+    user?.role === "technician";
+
   // =========================
   // FETCH TICKETS
   // =========================
   useEffect(() => {
     if (!token) return;
 
-    fetchTickets();
-    fetchStaff();
+  fetchTickets();
 
-  }, [token]);
+  if (user?.role === "admin") {
+    fetchStaff();
+  }
+
+  }, [token, user]);
 
   useEffect(() => {
     if (!socket.connected) {
@@ -223,37 +233,39 @@ const handleReopen = async (id) => {
   const handleAssign = async () => {
     if (!selectedTicket?._id) return;
 
-  try {
-    setSaving(true);
+    try {
+      setSaving(true);
 
-    // =====================
-    // ASSIGN TICKET
-    // =====================
-    let updatedTicket = selectedTicket;
+      // =====================
+      // ASSIGN TICKET
+      // =====================
+      let updatedTicket = selectedTicket;
 
-    // Only assign if the selected staff changed
-    if (
-      assignValue !== (selectedTicket.assignedTo?._id || "")
-    ) {
-
-      const assignRes = await api.patch(
-        `/tickets/${selectedTicket._id}/assign`,
-        {
-          assignedTo: assignValue || null,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
+      // =====================
+      // ADMIN ONLY ASSIGNMENT
+      // =====================
+      if (
+        isAdmin &&
+        assignValue !== (selectedTicket.assignedTo?._id || "")
+      ) {
+        const assignRes = await api.patch(
+          `/tickets/${selectedTicket._id}/assign`,
+          {
+            assignedTo: assignValue || null,
           },
-        }
-      );
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-      updatedTicket = assignRes.data.ticket;
-    }
+        updatedTicket = assignRes.data.ticket;
+      }
 
-    // =====================
-    // ADD COMMENT
-    // =====================
+      // =====================
+      // ADD COMMENT
+      // =====================
     if (commentInput.trim()) {
       const commentRes = await api.post(
         `/tickets/${selectedTicket._id}/comment`,
@@ -817,25 +829,32 @@ const handleTicketCancelled = ({ ticketId }) => {
 
                 <div className="view-box">
                   <span className="label">Assigned To</span>
-                  <select
-                    value={assignValue}
-                    onChange={(e) => setAssignValue(e.target.value)}
-                  >
-                    <option value="">Unassigned</option>
 
-                    {staff.map((member) => (
-                      <option
-                        key={member._id}
-                        value={member._id}
-                      >
-                        {
-                        member.role === "support" || member.role === "it_support"
-                        ? "IT Support"
-                        : "Technician"
-                        }
-                      </option>
-                    ))}
-                  </select>
+                  {isAdmin ? (
+                    <select
+                      value={assignValue}
+                      onChange={(e) => setAssignValue(e.target.value)}
+                    >
+                      <option value="">Unassigned</option>
+
+                      {staff.map((member) => (
+                        <option
+                          key={member._id}
+                          value={member._id}
+                        >
+                          {member.role === "support" || member.role === "it_support"
+                            ? "IT Support"
+                            : "Technician"}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span>
+                      {selectedTicket.assignedTo
+                        ? formatAssignedTo(selectedTicket.assignedTo)
+                        : "Unassigned"}
+                    </span>
+                  )}
                 </div>
 
               </div>
