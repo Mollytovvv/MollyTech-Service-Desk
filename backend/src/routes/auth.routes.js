@@ -1,4 +1,5 @@
 const express = require("express");
+const rateLimit = require("express-rate-limit");
 const router = express.Router();
 
 const {
@@ -15,10 +16,24 @@ const {
   getUsers,
 } = require("../controllers/auth.controller");
 
+const registerLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 5,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        message: "Too many registration attempts. Please try again later."
+    }
+});
+
 // ===============================
 // 🧾 REGISTER
 // ===============================
-router.post("/register", register);
+router.post(
+    "/register",
+    registerLimiter,
+    register
+);
 
 // ===============================
 // 🔐 LOGIN

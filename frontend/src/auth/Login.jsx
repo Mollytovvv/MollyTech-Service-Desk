@@ -29,17 +29,20 @@ export default function Login() {
 
     const navigate = useNavigate();
 
-    const switchMode = (newMode)=>{
+    const switchMode = (newMode) => {
 
         setEmail("");
         setPassword("");
+        setShowPassword(false);
         setMode(newMode);
 
-    };    
+    };
 
     const handleLogin = async (e) => {
 
         e.preventDefault();
+
+        if (loading) return;
 
         setLoading(true);
 
@@ -47,7 +50,7 @@ export default function Login() {
 
             const res = await api.post("/auth/login", {
 
-                email,
+                email: email.trim().toLowerCase(),
                 password,
 
             });
@@ -60,19 +63,15 @@ export default function Login() {
 
             }
 
+            // AuthContext handles token/user persistence
             login(token, user);
 
-            localStorage.setItem("token", token);
+            // =========================
+            // ROLE-BASED REDIRECT
+            // =========================
 
-            localStorage.setItem("user", JSON.stringify(user));
-
-            if (user.role === "admin") {
-
-                navigate("/dashboard");
-
-            }
-
-            else if (
+            if (
+                user.role === "admin" ||
                 user.role === "support" ||
                 user.role === "technician"
             ) {
@@ -80,13 +79,11 @@ export default function Login() {
                 navigate("/dashboard");
 
             }
-
             else if (user.role === "user") {
 
                 navigate("/user/dashboard");
 
             }
-
             else {
 
                 navigate("/");
@@ -117,329 +114,311 @@ export default function Login() {
 
     };
 
-return (
+    return (
 
-    <div className="login-page">
+        <div className="login-page">
 
-        {/* =========================
-            LEFT PANEL
-        ========================= */}
+            {/* =========================
+                LEFT PANEL
+            ========================= */}
 
-        <section className="login-brand">
+            <section className="login-brand">
 
-            <div className="brand-content">
+                <div className="brand-content">
 
-            <div className="brand-header">
+                    <div className="brand-header">
 
-            <div className="login-logo">
+                        <div className="login-logo">
 
-                <img
-                    src={logo}
-                    alt="MollyTech Logo"
-                    className="brand-logo"
-                />
-
-            </div>
-
-                <div className="brand-title">
-
-                    <h1>
-
-                        MollyTech
-
-                    </h1>
-
-                    <h2>
-
-                        Service Desk System
-
-                    </h2>
-
-                </div>
-
-            </div>
-
-                <p className="brand-description">
-
-                    A centralized IT support platform designed to streamline
-                    ticket management, real-time communication, and support
-                    operations for organizations of any size.
-
-                </p>
-
-                <div className="brand-features">
-
-                    <div className="feature-item">
-
-                        <i className="fa-solid fa-ticket"></i>
-
-                        <span>
-
-                            Ticket Management
-
-                        </span>
-
-                    </div>
-
-                    <div className="feature-item">
-
-                        <i className="fa-solid fa-comments"></i>
-
-                        <span>
-
-                            Real-Time Messaging
-
-                        </span>
-
-                    </div>
-
-                    <div className="feature-item">
-
-                        <i className="fa-solid fa-shield-halved"></i>
-
-                        <span>
-
-                            Secure Role-Based Access
-
-                        </span>
-
-                    </div>
-
-                </div>
-
-            </div>
-
-        </section>
-
-
-        {/* =========================
-            RIGHT PANEL
-        ========================= */}
-
-        <section className="login-panel">
-
-                    <div className="login-card">
-
-            {
-                mode === "login" ? (
-
-                    <>
-                        <div className="login-header">
-
-                            <h3>
-
-                                Welcome Back
-
-                            </h3>
-
-                            <p>
-
-                                Sign in to continue to MollyTech Service Desk.
-
-                            </p>
+                            <img
+                                src={logo}
+                                alt="MollyTech Logo"
+                                className="brand-logo"
+                            />
 
                         </div>
 
-                        <form
-                            className="login-form"
-                            onSubmit={handleLogin}
-                        >
+                        <div className="brand-title">
 
-                            {/* EMAIL */}
+                            <h1>
+                                MollyTech
+                            </h1>
 
-                            <div className="login-field">
+                            <h2>
+                                Service Desk System
+                            </h2>
 
-                                <label>
+                        </div>
 
-                                    Email Address
+                    </div>
 
-                                </label>
+                    <p className="brand-description">
 
-                                <div className="login-input">
+                        A centralized IT support platform designed to streamline
+                        ticket management, real-time communication, and support
+                        operations for organizations of any size.
 
-                                    <FiMail />
+                    </p>
 
-                                    <input
+                    <div className="brand-features">
 
-                                        type="email"
+                        <div className="feature-item">
 
-                                        placeholder="Enter your email"
+                            <i className="fa-solid fa-ticket"></i>
 
-                                        value={email}
+                            <span>
+                                Ticket Management
+                            </span>
 
-                                        onChange={(e) =>
-                                            setEmail(e.target.value)
-                                        }
+                        </div>
 
-                                        required
+                        <div className="feature-item">
 
-                                    />
+                            <i className="fa-solid fa-comments"></i>
+
+                            <span>
+                                Real-Time Messaging
+                            </span>
+
+                        </div>
+
+                        <div className="feature-item">
+
+                            <i className="fa-solid fa-shield-halved"></i>
+
+                            <span>
+                                Secure Role-Based Access
+                            </span>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </section>
+
+            {/* =========================
+                RIGHT PANEL
+            ========================= */}
+
+            <section className="login-panel">
+
+                <div className="login-card">
+
+                    {
+                        mode === "login" ? (
+
+                            <>
+
+                                <div className="login-header">
+
+                                    <h3>
+                                        Welcome Back
+                                    </h3>
+
+                                    <p>
+                                        Sign in to continue to MollyTech Service Desk.
+                                    </p>
 
                                 </div>
 
-                            </div>
+                                <form
+                                    className="login-form"
+                                    onSubmit={handleLogin}
+                                >
 
-                            {/* PASSWORD */}
+                                    {/* EMAIL */}
 
-                            <div className="login-field">
+                                    <div className="login-field">
 
-                                <label>
+                                        <label>
+                                            Email Address
+                                        </label>
 
-                                    Password
+                                        <div className="login-input">
 
-                                </label>
+                                            <FiMail />
 
-                                <div className="login-input">
+                                            <input
 
-                                    <FiLock />
+                                                type="email"
 
-                                    <input
+                                                placeholder="Enter your email"
 
-                                        type={
-                                            showPassword
-                                                ? "text"
-                                                : "password"
-                                        }
+                                                value={email}
 
-                                        placeholder="Enter your password"
+                                                onChange={(e) =>
+                                                    setEmail(e.target.value)
+                                                }
 
-                                        value={password}
+                                                required
 
-                                        onChange={(e) =>
-                                            setPassword(e.target.value)
-                                        }
+                                            />
 
-                                        required
+                                        </div>
 
-                                    />
+                                    </div>
+
+                                    {/* PASSWORD */}
+
+                                    <div className="login-field">
+
+                                        <label>
+                                            Password
+                                        </label>
+
+                                        <div className="login-input">
+
+                                            <FiLock />
+
+                                            <input
+
+                                                type={
+                                                    showPassword
+                                                        ? "text"
+                                                        : "password"
+                                                }
+
+                                                placeholder="Enter your password"
+
+                                                value={password}
+
+                                                onChange={(e) =>
+                                                    setPassword(e.target.value)
+                                                }
+
+                                                required
+
+                                            />
+
+                                            <button
+
+                                                type="button"
+
+                                                className="password-toggle"
+
+                                                onClick={() =>
+                                                    setShowPassword(!showPassword)
+                                                }
+
+                                            >
+
+                                                {
+
+                                                    showPassword
+
+                                                        ?
+
+                                                        <FiEyeOff />
+
+                                                        :
+
+                                                        <FiEye />
+
+                                                }
+
+                                            </button>
+
+                                        </div>
+
+                                    </div>
 
                                     <button
 
-                                        type="button"
+                                        className="login-btn"
 
-                                        className="password-toggle"
+                                        type="submit"
 
-                                        onClick={() =>
-                                            setShowPassword(!showPassword)
-                                        }
+                                        disabled={loading}
 
                                     >
 
                                         {
 
-                                            showPassword
+                                            loading
 
                                                 ?
 
-                                                <FiEyeOff />
+                                                "Signing In..."
 
                                                 :
 
-                                                <FiEye />
+                                                "Sign In"
 
                                         }
 
                                     </button>
 
+                                    <div className="login-actions">
+
+                                        <button
+
+                                            type="button"
+
+                                            className="forgot-link"
+
+                                            onClick={() => switchMode("forgot")}
+
+                                        >
+
+                                            Forgot password?
+
+                                        </button>
+
+                                    </div>
+
+                                    <div className="register-prompt">
+
+                                        <span>
+                                            New to MollyTech?
+                                        </span>
+
+                                        <button
+
+                                            type="button"
+
+                                            onClick={() => switchMode("register")}
+
+                                        >
+
+                                            Create Account
+
+                                        </button>
+
+                                    </div>
+
+                                </form>
+
+                                <div className="login-footer">
+
+                                    © 2026 MollyTech Service Desk
+
                                 </div>
 
-                            </div>
+                            </>
 
-                            <button
+                        ) : mode === "register" ? (
 
-                                className="login-btn"
+                            <RegisterForm
+                                setMode={setMode}
+                            />
 
-                                type="submit"
+                        ) : (
 
-                                disabled={loading}
+                            <ForgotPasswordForm
+                                setMode={setMode}
+                            />
 
-                            >
+                        )
+                    }
 
-                                {
+                </div>
 
-                                    loading
+            </section>
 
-                                        ?
+        </div>
 
-                                        "Signing In..."
+    );
 
-                                        :
-
-                                        "Sign In"
-
-                                }
-
-                            </button>
-
-                            <div className="login-actions">
-
-                                <button
-
-                                    type="button"
-
-                                    className="forgot-link"
-
-                                    onClick={() => switchMode("forgot")}
-
-                                >
-
-                                    Forgot password?
-
-                                </button>
-
-                            </div>
-
-                            <div className="register-prompt">
-
-                                <span>
-
-                                    New to MollyTech?
-
-                                </span>
-
-                                <button
-
-                                    type="button"
-
-                                    onClick={() => switchMode("register")}
-
-                                >
-
-                                    Create Account
-
-                                </button>
-
-                            </div>
-
-                        </form>
-
-                        <div className="login-footer">
-
-                            © 2026 MollyTech Service Desk
-
-                        </div>
-
-                    </>
-
-                ) : mode === "register" ? (
-
-                    <RegisterForm
-                        setMode={setMode}
-                    />
-
-                ) : (
-
-                    <ForgotPasswordForm
-                        setMode={setMode}
-                    />
-
-                )
-            }
-
-            </div>
-
-        </section>
-
-    </div>
-);
 }

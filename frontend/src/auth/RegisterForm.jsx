@@ -2,6 +2,8 @@ import { useState } from "react";
 import api from "../api/axios";
 import ApprovalModal from "./ApprovalModal";
 
+import { Turnstile } from "@marsidev/react-turnstile";
+
 import {
     FiUser,
     FiMail,
@@ -48,6 +50,8 @@ export default function RegisterForm({setMode}){
 
     const [showApproval,setShowApproval] = useState(false);
 
+    const [turnstileToken,setTurnstileToken] = useState("");
+
     const { showToast } = useToast();
 
     // =========================
@@ -69,6 +73,23 @@ export default function RegisterForm({setMode}){
 
         }
 
+        if(password.length < 8){
+
+            return showToast(
+                "warning",
+                "Password must be at least 8 characters."
+            );
+
+        }
+
+    if (!turnstileToken) {
+
+        return showToast(
+            "warning",
+            "Please complete the security verification."
+        );
+
+    }
 
         setLoading(true);
 
@@ -81,11 +102,12 @@ export default function RegisterForm({setMode}){
             const res = await api.post(
                 "/auth/register",
                 {
-                    firstName,
-                    lastName,
-                    email,
+                    firstName: firstName.trim(),
+                    lastName: lastName.trim(),
+                    email: email.trim().toLowerCase(),
                     phone:`+63${phone.replace(/\s/g,"")}`,
-                    password
+                    password,
+                    turnstileToken
                 }
             );
 
@@ -585,9 +607,12 @@ export default function RegisterForm({setMode}){
 
                         </div>
 
-
-
-
+                        <Turnstile
+                            siteKey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+                            onSuccess={(token) => setTurnstileToken(token)}
+                            onExpire={() => setTurnstileToken("")}
+                            onError={() => setTurnstileToken("")}
+                        />
 
                         <button
 

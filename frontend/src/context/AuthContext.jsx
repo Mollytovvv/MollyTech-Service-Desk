@@ -1,162 +1,242 @@
-import { createContext, useContext, useState, useEffect } from "react";
 import {
-  connectSocket,
-  disconnectSocket,
+    createContext,
+    useContext,
+    useEffect,
+    useState
+} from "react";
+
+import {
+    connectSocket,
+    disconnectSocket
 } from "../socket/socket";
 
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
+
+
+// =========================
+// 🔐 AUTH PROVIDER
+// =========================
 
 export const AuthProvider = ({ children }) => {
 
 
-  // =========================
-  // LOAD TOKEN
-  // =========================
+    // =========================
+    // LOAD TOKEN
+    // =========================
 
-  const [token, setToken] = useState(() => {
+    const [token, setToken] = useState(() => {
 
-    return localStorage.getItem("token");
+        return localStorage.getItem("token");
 
-  });
-
-  // =========================
-  // LOAD USER
-  // =========================
-  const [user, setUser] = useState(() => {
-
-    const savedUser = localStorage.getItem("user");
+    });
 
 
-    if(savedUser && savedUser !== "undefined"){
+    // =========================
+    // LOAD USER
+    // =========================
 
-      try{
+    const [user, setUser] = useState(() => {
 
-        return JSON.parse(savedUser);
+        const savedUser =
+            localStorage.getItem("user");
 
-      }
-      catch(err){
 
-        console.log(
-          "USER LOAD ERROR:",
-          err
+        if (
+            !savedUser ||
+            savedUser === "undefined" ||
+            savedUser === "null"
+        ) {
+
+            return null;
+
+        }
+
+
+        try {
+
+            return JSON.parse(savedUser);
+
+        }
+
+        catch (err) {
+
+            console.error(
+                "AUTH USER LOAD ERROR:",
+                err
+            );
+
+            localStorage.removeItem("user");
+
+            return null;
+
+        }
+
+    });
+
+
+    // =========================
+    // AUTH READY
+    // =========================
+
+    const authReady = true;
+
+
+    // =========================
+    // SOCKET CONNECTION
+    // =========================
+
+    useEffect(() => {
+
+        if (!user?._id || !user?.role) {
+
+            disconnectSocket();
+
+            return;
+
+        }
+
+
+        connectSocket(
+            user._id,
+            user.role
         );
 
-        localStorage.removeItem("user");
 
-      }
+        return () => {
 
-    }
+            disconnectSocket();
 
+        };
 
-    return null;
-
-
-  });
-
-  const authReady = true;
-
-  // =========================
-  // SOCKET CONNECTION
-  // =========================
-  useEffect(()=>{
+    }, [user?._id, user?.role]);
 
 
-    if(user?._id){
+    // =========================
+    // 🔑 LOGIN
+    // =========================
 
-    connectSocket(
-      user._id,
-      user.role
-    );
+    const login = (newToken, newUser) => {
 
-    }
+        if (!newToken) {
+
+            console.error(
+                "AUTH LOGIN ERROR: Missing token."
+            );
+
+            return false;
+
+        }
 
 
-    return()=>{
+        if (!newUser || !newUser._id) {
 
-      disconnectSocket();
+            console.error(
+                "AUTH LOGIN ERROR: Invalid user."
+            );
+
+            return false;
+
+        }
+
+
+        // =========================
+        // SAVE AUTH DATA
+        // =========================
+
+        localStorage.setItem(
+            "token",
+            newToken
+        );
+
+
+        localStorage.setItem(
+            "user",
+            JSON.stringify(newUser)
+        );
+
+
+        // =========================
+        // UPDATE STATE
+        // =========================
+
+        setToken(newToken);
+
+        setUser(newUser);
+
+
+        return true;
 
     };
 
 
-  },[user]);
+    // =========================
+    // 🚪 LOGOUT
+    // =========================
 
-  // =========================
-  // LOGIN
-  // =========================
-  const login = (newToken,newUser)=>{
+    const logout = () => {
 
-    if(!newToken){
+        disconnectSocket();
 
-      console.log("No token provided");
 
-      return;
+        localStorage.removeItem("token");
 
-    }
+        localStorage.removeItem("user");
 
-    if(!newUser){
 
-      console.log("No user provided");
+        setToken(null);
 
-      return;
+        setUser(null);
 
-    }
+    };
 
-    localStorage.setItem(
-      "token",
-      newToken
+
+    // =========================
+    // CONTEXT
+    // =========================
+
+    return (
+
+        <AuthContext.Provider
+
+            value={{
+                token,
+                user,
+                login,
+                logout,
+                authReady
+            }}
+
+        >
+
+            {children}
+
+        </AuthContext.Provider>
+
     );
-
-
-    localStorage.setItem(
-      "user",
-      JSON.stringify(newUser)
-    );
-
-    setToken(newToken);
-
-    setUser(newUser);
-
-  };
-
-  // =========================
-  // LOGOUT
-  // =========================
-  const logout = ()=>{
-
-    localStorage.removeItem("token");
-
-    localStorage.removeItem("user");
-
-    setToken(null);
-
-    setUser(null);
-
-  };
-
-  return(
-
-    <AuthContext.Provider
-
-      value={{
-        token,
-        user,
-        login,
-        logout,
-        authReady
-      }}
-
-    >
-
-      {children}
-
-
-    </AuthContext.Provider>
-
-
-  );
-
 
 };
 
-export const useAuth = ()=>useContext(AuthContext);
+
+// =========================
+// 🧩 USE AUTH HOOK
+// =========================
+
+export const useAuth = () => {
+
+    const context =
+        useContext(AuthContext);
+
+
+    if (!context) {
+
+        throw new Error(
+            "useAuth must be used inside an AuthProvider"
+        );
+
+    }
+
+
+    return context;
+
+};

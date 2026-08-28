@@ -5,8 +5,8 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-
 const crypto = require("crypto");
+const axios = require("axios");
 
 const {
     sendPasswordResetEmail,
@@ -15,14 +15,13 @@ const {
 
 const Notification = require("../models/Notification");
 
+
 // ===============================
 // 🧾 REGISTER USER
 // ===============================
-const register = async (req,res)=>{
+const register = async (req, res) => {
 
-    console.log("REGISTER BODY:", req.body);
-
-    try{
+    try {
 
         const {
             firstName,
@@ -30,137 +29,286 @@ const register = async (req,res)=>{
             email,
             phone,
             password,
+            turnstileToken,
         } = req.body;
 
 
+        // ===============================
+        // REQUIRED FIELDS
+        // ===============================
 
-        if(
+        if (
             !firstName ||
             !lastName ||
             !email ||
             !phone ||
             !password
-        ){
+        ) {
 
             return res.status(400).json({
 
-                message:"All fields are required"
+                message: "All fields are required"
 
             });
 
         }
 
 
+        // ===============================
+        // 🛡️ VERIFY CLOUDFLARE TURNSTILE
+        // ===============================
+
+        if (!turnstileToken) {
+
+            return res.status(400).json({
+
+                message:
+                    "Security verification is required."
+
+            });
+
+        }
+
+
+        try {
+
+            const turnstileResponse = await axios.post(
+
+                "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+
+                new URLSearchParams({
+
+                    secret:
+                        process.env.TURNSTILE_SECRET_KEY,
+
+                    response:
+                        turnstileToken
+
+                }),
+
+                {
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/x-www-form-urlencoded"
+
+                    }
+
+                }
+
+            );
+
+
+            if (!turnstileResponse.data.success) {
+
+                console.log(
+                    "TURNSTILE VERIFICATION FAILED:",
+                    turnstileResponse.data
+                );
+
+
+                return res.status(403).json({
+
+                    message:
+                        "Security verification failed."
+
+                });
+
+            }
+
+        }
+
+        catch (turnstileError) {
+
+            console.error(
+                "TURNSTILE VERIFICATION ERROR:",
+                turnstileError
+            );
+
+
+            return res.status(500).json({
+
+                message:
+                    "Security verification could not be completed."
+
+            });
+
+        }
+
+
+        // ===============================
+        // 📧 NORMALIZE USER DATA
+        // ===============================
+
+        const normalizedFirstName =
+            firstName.trim();
+
+        const normalizedLastName =
+            lastName.trim();
+
+        const normalizedEmail =
+            email.trim().toLowerCase();
+
+
+        // ===============================
+        // 🔎 CHECK EXISTING USER
+        // ===============================
 
         const existingUser = await User.findOne({
-            email
+
+            email: normalizedEmail
+
         });
 
 
-
-        if(existingUser){
+        if (existingUser) {
 
             return res.status(400).json({
 
-                message:"Email already exists"
+                message: "Email already exists"
 
             });
 
         }
 
 
+        // ===============================
+        // 🔐 PASSWORD VALIDATION
+        // ===============================
 
-        const hashedPassword = await bcrypt.hash(
-            password,
-            10
-        );
+        if (password.length < 8) {
 
+            return res.status(400).json({
+
+                message:
+                    "Password must be at least 8 characters"
+
+            });
+
+        }
+
+
+        // ===============================
+        // 🔒 HASH PASSWORD
+        // ===============================
+
+        const hashedPassword =
+            await bcrypt.hash(
+                password,
+                10
+            );
+
+
+        // ===============================
+        // 👤 CREATE USER
+        // ===============================
 
         const user = await User.create({
 
-            firstName,
+            firstName:
+                normalizedFirstName,
 
-            lastName,
+            lastName:
+                normalizedLastName,
 
-            email,
+            email:
+                normalizedEmail,
 
             phone,
 
-            password:hashedPassword,
+            password:
+                hashedPassword,
 
-            role:"user",
+            role:
+                "user",
 
-            status:"pending",
+            status:
+                "pending",
 
         });
+
 
         // ===============================
         // CREATE ACCESS REQUEST NOTIFICATION
         // ===============================
 
         const admin = await User.findOne({
-            role:"admin"
+
+            role: "admin"
+
         });
 
 
-        if(admin){
+        if (admin) {
 
             const notification =
                 await Notification.create({
 
-                    recipient: admin._id,
+                    recipient:
+                        admin._id,
 
-                    sender: user._id,
+                    sender:
+                        user._id,
 
-                    type:"access_request",
+                    type:
+                        "access_request",
 
-                    title:"New Access Request",
+                    title:
+                        "New Access Request",
 
                     message:
-                    `${user.firstName} ${user.lastName} submitted an account registration request.`
+                        `${user.firstName} ${user.lastName} submitted an account registration request.`
 
                 });
 
-        // ===============================
-        // REALTIME NOTIFICATION EMIT
-        // ===============================
 
-        const populatedNotification =
-            await Notification.findById(
-                notification._id
-            )
-            .populate(
-                "sender",
-                "_id firstName lastName role"
-            );
+            // ===============================
+            // REALTIME NOTIFICATION EMIT
+            // ===============================
 
-
-        const io = req.app.get("io");
+            const populatedNotification =
+                await Notification.findById(
+                    notification._id
+                )
+                .populate(
+                    "sender",
+                    "_id firstName lastName role"
+                );
 
 
-        if(io){
-
-            io.to(admin._id.toString())
-            .emit(
-                "notificationCreated",
-                populatedNotification
-            );
+            const io =
+                req.app.get("io");
 
 
-            console.log(
-                "Admin notification sent:",
-                admin.email
-            );
+            if (io) {
+
+                io.to(
+                    admin._id.toString()
+                )
+                .emit(
+                    "notificationCreated",
+                    populatedNotification
+                );
+
+
+                console.log(
+                    "Admin notification sent:",
+                    admin.email
+                );
 
             }
 
         }
 
+
         // ===============================
         // REALTIME ACCESS REQUEST
         // ===============================
 
-        const io = req.app.get("io");
+        const io =
+            req.app.get("io");
+
 
         console.log(
             "SOCKET IO:",
@@ -168,63 +316,111 @@ const register = async (req,res)=>{
         );
 
 
-        if(io){
+        if (io) {
 
             io.to("admins").emit(
+
                 "newAccessRequest",
+
                 {
-                    userId:user._id,
-                    firstName:user.firstName,
-                    lastName:user.lastName,
-                    email:user.email
+
+                    userId:
+                        user._id,
+
+                    firstName:
+                        user.firstName,
+
+                    lastName:
+                        user.lastName,
+
+                    email:
+                        user.email
+
                 }
+
             );
 
-            io.to("admins").emit("accessRequestUpdated");
-            
-            io.emit("newUser", {
-                _id: user._id,
-                firstName: user.firstName,
-                lastName: user.lastName,
-                email: user.email,
-                phone: user.phone,
-                role: user.role,
-                status: user.status,
-                createdAt: user.createdAt
-            });
+
+            io.to("admins")
+                .emit(
+                    "accessRequestUpdated"
+                );
+
+
+            io.emit(
+
+                "newUser",
+
+                {
+
+                    _id:
+                        user._id,
+
+                    firstName:
+                        user.firstName,
+
+                    lastName:
+                        user.lastName,
+
+                    email:
+                        user.email,
+
+                    phone:
+                        user.phone,
+
+                    role:
+                        user.role,
+
+                    status:
+                        user.status,
+
+                    createdAt:
+                        user.createdAt
+
+                }
+
+            );
+
 
             console.log(
+
                 "New access request emitted:",
+
                 user.email
+
             );
 
         }
-
 
 
         // ===============================
         // SEND RESPONSE TO FRONTEND
         // ===============================
 
-        res.status(201).json({
+        return res.status(201).json({
 
-            message: "Registration submitted successfully. Please wait for administrator approval."
+            message:
+                "Registration submitted successfully. Please wait for administrator approval."
 
         });
 
 
+    }
 
-    }catch(err){
+    catch (err) {
 
         console.error(
+
             "REGISTER ERROR:",
             err
+
         );
 
 
-        res.status(500).json({
+        return res.status(500).json({
 
-            message:err.message
+            message:
+                err.message
 
         });
 
@@ -236,10 +432,9 @@ const register = async (req,res)=>{
 // ===============================
 // 🔐 LOGIN USER
 // ===============================
-const login = async(req,res)=>{
+const login = async (req, res) => {
 
-    try{
-
+    try {
 
         const {
             email,
@@ -247,125 +442,208 @@ const login = async(req,res)=>{
         } = req.body;
 
 
+        // ===============================
+        // REQUIRED FIELDS
+        // ===============================
 
-        const user = await User.findOne({
-            email
-        });
+        if (!email || !password) {
 
+            return res.status(400).json({
 
+                message:
+                    "Email and password are required"
 
-        if(!user){
-
-            return res.status(404).json({
-                message:"User not found"
             });
 
         }
+
+
+        // ===============================
+        // 📧 NORMALIZE EMAIL
+        // ===============================
+
+        const normalizedEmail =
+            email.trim().toLowerCase();
+
+
+        // ===============================
+        // 🔎 FIND USER
+        // ===============================
+
+        const user = await User.findOne({
+
+            email:
+                normalizedEmail
+
+        });
+
+
+        if (!user) {
+
+            return res.status(404).json({
+
+                message:
+                    "User not found"
+
+            });
+
+        }
+
 
         // ===============================
         // ACCOUNT APPROVAL CHECK
         // ===============================
 
-        if(
+        if (
             user.role === "user" &&
             user.status !== "approved"
-        ){
+        ) {
 
             return res.status(403).json({
 
                 message:
-                user.status === "rejected"
 
-                ?
+                    user.status === "rejected"
 
-                "Your account registration was declined."
+                        ?
 
-                :
+                        "Your account registration was declined."
 
-                "Your account is still waiting for administrator approval."
+                        :
+
+                        "Your account is still waiting for administrator approval."
 
             });
 
         }
 
-        const isMatch = await bcrypt.compare(
-            password,
-            user.password
-        );
+
+        // ===============================
+        // 🔐 VERIFY PASSWORD
+        // ===============================
+
+        const isMatch =
+            await bcrypt.compare(
+
+                password,
+                user.password
+
+            );
 
 
-
-        if(!isMatch){
+        if (!isMatch) {
 
             return res.status(401).json({
-                message:"Invalid email or password"
+
+                message:
+                    "Invalid email or password"
+
             });
 
         }
 
 
+        // ===============================
+        // 🎫 CREATE JWT
+        // ===============================
 
-        const token = jwt.sign(
+        const token =
+            jwt.sign(
 
-            {
-                id:user._id,
+                {
 
-                firstName:user.firstName || "",
+                    id:
+                        user._id,
 
-                lastName:user.lastName || "",
+                    firstName:
+                        user.firstName || "",
 
-                email:user.email,
+                    lastName:
+                        user.lastName || "",
 
-                role:user.role,
+                    email:
+                        user.email,
 
-                status:user.status
-            },
+                    role:
+                        user.role,
 
-            process.env.JWT_SECRET,
+                    status:
+                        user.status
 
-            {
-                expiresIn:"1d"
-            }
+                },
 
-        );
+                process.env.JWT_SECRET,
+
+                {
+
+                    expiresIn:
+                        "1d"
+
+                }
+
+            );
 
 
+        // ===============================
+        // SEND RESPONSE
+        // ===============================
 
-        res.json({
+        return res.json({
 
-            message:"Login successful",
+            message:
+                "Login successful",
 
             token,
 
-            user:{
-                _id:user._id,
+            user: {
 
-                firstName:user.firstName || "",
+                _id:
+                    user._id,
 
-                lastName:user.lastName || "",
+                firstName:
+                    user.firstName || "",
 
-                email:user.email,
+                lastName:
+                    user.lastName || "",
 
-                phone:user.phone || "",
+                email:
+                    user.email,
 
-                role:user.role,
+                phone:
+                    user.phone || "",
 
-                status:user.status
+                role:
+                    user.role,
+
+                status:
+                    user.status
 
             }
 
         });
 
 
-    }catch(err){
+    }
 
-        res.status(500).json({
-            message:err.message
+    catch (err) {
+
+        console.error(
+            "LOGIN ERROR:",
+            err
+        );
+
+
+        return res.status(500).json({
+
+            message:
+                err.message
+
         });
 
     }
 
 };
+
 
 // ===============================
 // 🔐 FORGOT PASSWORD
@@ -378,79 +656,134 @@ const forgotPassword = async (req, res) => {
             email
         } = req.body;
 
+
+        // ===============================
+        // REQUIRED FIELD
+        // ===============================
+
         if (!email) {
 
             return res.status(400).json({
 
-                message: "Email is required"
+                message:
+                    "Email is required"
 
             });
 
         }
 
+
+        // ===============================
+        // 📧 NORMALIZE EMAIL
+        // ===============================
+
+        const normalizedEmail =
+            email.trim().toLowerCase();
+
+
+        // ===============================
+        // 🔎 FIND USER
+        // ===============================
+
         const user = await User.findOne({
 
-            email
+            email:
+                normalizedEmail
 
         });
 
-        // Always return success to prevent email enumeration
+
+        // ===============================
+        // PREVENT EMAIL ENUMERATION
+        // ===============================
+
         if (!user) {
 
             return res.json({
 
                 message:
-                "If the email exists, a password reset link has been sent."
+                    "If the email exists, a password reset link has been sent."
 
             });
 
         }
 
-        const resetToken = crypto
-            .randomBytes(32)
-            .toString("hex");
 
-        user.passwordResetToken = resetToken;
+        // ===============================
+        // 🔑 GENERATE RESET TOKEN
+        // ===============================
+
+        const resetToken =
+            crypto
+                .randomBytes(32)
+                .toString("hex");
+
+
+        user.passwordResetToken =
+            resetToken;
+
 
         user.passwordResetExpires =
-            Date.now() + 60 * 60 * 1000;
+            Date.now() +
+            60 * 60 * 1000;
+
 
         await user.save();
+
+
+        // ===============================
+        // 🔗 CREATE RESET LINK
+        // ===============================
 
         const resetLink =
             `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
+
+        // ===============================
+        // 📧 SEND EMAIL
+        // ===============================
+
         await sendPasswordResetEmail({
 
-            email: user.email,
+            email:
+                user.email,
 
             resetLink
 
         });
 
-        res.json({
+
+        return res.json({
 
             message:
-            "If the email exists, a password reset link has been sent."
+                "If the email exists, a password reset link has been sent."
 
         });
 
-    } catch (err) {
+
+    }
+
+    catch (err) {
 
         console.error(
+
             "FORGOT PASSWORD ERROR:",
             err
+
         );
 
-        res.status(500).json({
 
-            message: err.message
+        return res.status(500).json({
+
+            message:
+                err.message
 
         });
 
     }
 
 };
+
 
 // ===============================
 // 🔑 RESET PASSWORD
@@ -463,10 +796,16 @@ const resetPassword = async (req, res) => {
             token
         } = req.params;
 
+
         const {
             password,
             confirmPassword
         } = req.body;
+
+
+        // ===============================
+        // REQUIRED FIELDS
+        // ===============================
 
         if (
             !password ||
@@ -475,199 +814,95 @@ const resetPassword = async (req, res) => {
 
             return res.status(400).json({
 
-                message: "All fields are required"
+                message:
+                    "All fields are required"
 
             });
 
         }
 
-        if (password !== confirmPassword) {
 
-            return res.status(400).json({
+        // ===============================
+        // PASSWORD MATCH
+        // ===============================
 
-                message: "Passwords do not match"
-
-            });
-
-        }
-
-        if (password.length < 8) {
+        if (
+            password !==
+            confirmPassword
+        ) {
 
             return res.status(400).json({
 
                 message:
-                "Password must be at least 8 characters"
+                    "Passwords do not match"
 
             });
 
         }
 
-        const user = await User.findOne({
 
-            passwordResetToken: token,
+        // ===============================
+        // PASSWORD LENGTH
+        // ===============================
 
-            passwordResetExpires: {
+        if (
+            password.length < 8
+        ) {
 
-                $gt: Date.now()
+            return res.status(400).json({
 
-            }
+                message:
+                    "Password must be at least 8 characters"
 
-        });
+            });
+
+        }
+
+
+        // ===============================
+        // 🔎 FIND VALID RESET TOKEN
+        // ===============================
+
+        const user =
+            await User.findOne({
+
+                passwordResetToken:
+                    token,
+
+                passwordResetExpires: {
+
+                    $gt:
+                        Date.now()
+
+                }
+
+            });
+
 
         if (!user) {
 
             return res.status(400).json({
 
                 message:
-                "Invalid or expired password reset link"
-
-            });
-
-        }
-
-        const isSamePassword = await bcrypt.compare(
-
-            password,
-
-            user.password
-
-        );
-
-        if (isSamePassword) {
-
-            return res.status(400).json({
-
-                message:
-                "New password must be different from your current password"
-
-            });
-
-        }
-
-        user.password = await bcrypt.hash(
-
-            password,
-
-            10
-
-        );
-
-        user.passwordResetToken = null;
-
-        user.passwordResetExpires = null;
-
-        await user.save();
-
-        res.json({
-
-            message:
-            "Password has been reset successfully"
-
-        });
-
-    } catch (err) {
-
-        console.error(
-            "RESET PASSWORD ERROR:",
-            err
-        );
-
-        res.status(500).json({
-
-            message: err.message
-
-        });
-
-    }
-
-};
-
-// ===============================
-// 🔑 CHANGE PASSWORD
-// ===============================
-const changePassword = async(req,res)=>{
-
-    try{
-
-
-        const {
-            currentPassword,
-            newPassword,
-            confirmPassword
-
-        } = req.body;
-
-
-
-        if(
-            !currentPassword ||
-            !newPassword ||
-            !confirmPassword
-        ){
-
-            return res.status(400).json({
-
-                message:"All fields are required"
+                    "Invalid or expired password reset link"
 
             });
 
         }
 
 
+        // ===============================
+        // 🔎 PREVENT SAME PASSWORD
+        // ===============================
 
-        if(newPassword !== confirmPassword){
+        const isSamePassword =
+            await bcrypt.compare(
 
-            return res.status(400).json({
+                password,
+                user.password
 
-                message:"New passwords do not match"
+            );
 
-            });
-
-        }
-
-
-
-        const user = await User.findById(
-            req.user.id
-        );
-
-
-
-        if(!user){
-
-            return res.status(404).json({
-
-                message:"User not found"
-
-            });
-
-        }
-
-
-
-        const isMatch = await bcrypt.compare(
-
-            currentPassword,
-            user.password
-
-        );
-
-
-
-        if(!isMatch){
-
-            return res.status(401).json({
-
-                message:"Current password is incorrect"
-
-            });
-
-        }
-
-        const isSamePassword = await bcrypt.compare(
-            newPassword,
-            user.password
-        );
 
         if (isSamePassword) {
 
@@ -680,7 +915,126 @@ const changePassword = async(req,res)=>{
 
         }
 
-        if (newPassword.length < 8) {
+
+        // ===============================
+        // 🔒 HASH NEW PASSWORD
+        // ===============================
+
+        user.password =
+            await bcrypt.hash(
+
+                password,
+                10
+
+            );
+
+
+        // ===============================
+        // 🧹 CLEAR RESET TOKEN
+        // ===============================
+
+        user.passwordResetToken =
+            null;
+
+        user.passwordResetExpires =
+            null;
+
+
+        await user.save();
+
+
+        return res.json({
+
+            message:
+                "Password has been reset successfully"
+
+        });
+
+
+    }
+
+    catch (err) {
+
+        console.error(
+
+            "RESET PASSWORD ERROR:",
+            err
+
+        );
+
+
+        return res.status(500).json({
+
+            message:
+                err.message
+
+        });
+
+    }
+
+};
+
+
+// ===============================
+// 🔑 CHANGE PASSWORD
+// ===============================
+const changePassword = async (req, res) => {
+
+    try {
+
+        const {
+            currentPassword,
+            newPassword,
+            confirmPassword
+        } = req.body;
+
+
+        // ===============================
+        // REQUIRED FIELDS
+        // ===============================
+
+        if (
+            !currentPassword ||
+            !newPassword ||
+            !confirmPassword
+        ) {
+
+            return res.status(400).json({
+
+                message:
+                    "All fields are required"
+
+            });
+
+        }
+
+
+        // ===============================
+        // PASSWORD MATCH
+        // ===============================
+
+        if (
+            newPassword !==
+            confirmPassword
+        ) {
+
+            return res.status(400).json({
+
+                message:
+                    "New passwords do not match"
+
+            });
+
+        }
+
+
+        // ===============================
+        // PASSWORD LENGTH
+        // ===============================
+
+        if (
+            newPassword.length < 8
+        ) {
 
             return res.status(400).json({
 
@@ -691,96 +1045,211 @@ const changePassword = async(req,res)=>{
 
         }
 
-        user.password = await bcrypt.hash(
-            newPassword,
-            10
-        );
+
+        // ===============================
+        // 🔎 FIND USER
+        // ===============================
+
+        const user =
+            await User.findById(
+
+                req.user.id
+
+            );
+
+
+        if (!user) {
+
+            return res.status(404).json({
+
+                message:
+                    "User not found"
+
+            });
+
+        }
+
+
+        // ===============================
+        // 🔐 VERIFY CURRENT PASSWORD
+        // ===============================
+
+        const isMatch =
+            await bcrypt.compare(
+
+                currentPassword,
+                user.password
+
+            );
+
+
+        if (!isMatch) {
+
+            return res.status(401).json({
+
+                message:
+                    "Current password is incorrect"
+
+            });
+
+        }
+
+
+        // ===============================
+        // 🔎 PREVENT SAME PASSWORD
+        // ===============================
+
+        const isSamePassword =
+            await bcrypt.compare(
+
+                newPassword,
+                user.password
+
+            );
+
+
+        if (isSamePassword) {
+
+            return res.status(400).json({
+
+                message:
+                    "New password must be different from your current password"
+
+            });
+
+        }
+
+
+        // ===============================
+        // 🔒 HASH NEW PASSWORD
+        // ===============================
+
+        user.password =
+            await bcrypt.hash(
+
+                newPassword,
+                10
+
+            );
 
 
         await user.save();
 
+
         // ===============================
         // 📧 PASSWORD CHANGE NOTIFICATION
         // ===============================
+
         try {
 
             await sendPasswordChangedEmail({
 
-                email: user.email,
+                email:
+                    user.email,
 
-                role: user.role
+                role:
+                    user.role
 
             });
 
-        } catch (emailError) {
+        }
+
+        catch (emailError) {
 
             console.error(
+
                 "PASSWORD CHANGE EMAIL ERROR:",
                 emailError
+
             );
 
         }
 
-        res.json({
 
-            message:"Password updated successfully"
+        return res.json({
+
+            message:
+                "Password updated successfully"
 
         });
 
 
+    }
 
-    }catch(err){
+    catch (err) {
 
-        res.status(500).json({
+        console.error(
 
-            message:err.message
+            "CHANGE PASSWORD ERROR:",
+            err
+
+        );
+
+
+        return res.status(500).json({
+
+            message:
+                err.message
 
         });
 
     }
 
 };
-
 
 
 // ===============================
 // 👥 GET ALL USERS
 // ===============================
-const getUsers = async(req,res)=>{
+const getUsers = async (req, res) => {
 
-    try{
+    try {
+
+        const users =
+            await User.find()
+
+                .select("-password")
+
+                .sort({
+
+                    createdAt:
+                        -1
+
+                });
 
 
-        const users = await User.find()
+        return res.json({
 
-        .select("-password")
+            count:
+                users.length,
 
-        .sort({
-            createdAt:-1
-        });
-
-
-
-        res.json({
-
-            count:users.length,
             users
 
         });
 
 
-    }catch(err){
+    }
 
-        res.status(500).json({
+    catch (err) {
 
-            message:err.message
+        console.error(
+
+            "GET USERS ERROR:",
+            err
+
+        );
+
+
+        return res.status(500).json({
+
+            message:
+                err.message
 
         });
 
     }
 
 };
-
 
 
 // ===============================
