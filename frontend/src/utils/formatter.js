@@ -59,7 +59,7 @@ export const formatAssignedTo = (assignedTo) => {
     admin: "Admin",
     it_support: "IT Support",
     technician: "Technician",
-    support: "Support",
+    support: "IT Support",
   };
 
 
